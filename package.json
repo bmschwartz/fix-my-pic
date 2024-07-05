@@ -1,0 +1,66 @@
+{
+  "name": "nextjs-starter",
+  "description": "A Next.js starter that includes all you need to build amazing projects",
+  "version": "1.0.0",
+  "private": true,
+  "author": "abel chang<cwuyiqing@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "starter",
+    "typescript"
+  ],
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "export": "next build && next export",
+    "lint": "eslint --ignore-path .gitignore --fix",
+    "compile": "hardhat compile && hardhat copy-artifacts",
+    "format": "prettier --ignore-path .gitignore \"pages/**/*.+(ts|js|tsx)\" --write",
+    "postinstall": "husky install"
+  },
+  "lint-staged": {
+    "./**/*.{ts,js,jsx,tsx}": [
+      "pnpm run lint",
+      "pnpm run format"
+    ]
+  },
+  "dependencies": {
+    "@nextui-org/react": "2.4.2",
+    "axios": "1.7.2",
+    "dotenv": "16.4.5",
+    "ethers": "6.13.1",
+    "framer-motion": "11.2.11",
+    "next": "14.2.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zksync-ethers": "6.9.0"
+  },
+  "devDependencies": {
+    "@matterlabs/hardhat-zksync": "1.1.0",
+    "@matterlabs/hardhat-zksync-deploy": "1.5.0",
+    "@matterlabs/hardhat-zksync-ethers": "1.1.0",
+    "@matterlabs/hardhat-zksync-solc": "1.2.0",
+    "@openzeppelin/contracts": "5.0.2",
+    "@openzeppelin/contracts-upgradeable": "5.0.2",
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@typescript-eslint/eslint-plugin": "7.13.0",
+    "@typescript-eslint/parser": "7.13.0",
+    "autoprefixer": "10.4.19",
+    "eslint": "9.5.0",
+    "eslint-config-alloy": "5.1.2",
+    "eslint-config-next": "14.2.4",
+    "fs-extra": "11.2.0",
+    "hardhat": "2.22.5",
+    "husky": "9.0.11",
+    "klaw": "4.1.0",
+    "lint-staged": "15.2.7",
+    "postcss": "8.4.38",
+    "prettier": "3.3.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5"
+  }
+}
