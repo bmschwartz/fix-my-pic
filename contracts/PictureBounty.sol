@@ -21,6 +21,7 @@ contract PictureBounty {
 
   constructor(string memory _title, string memory _description, string memory _imageId) payable {
     require(msg.value > 0, 'Initial reward must be greater than 0');
+
     owner = payable(msg.sender);
     title = _title;
     description = _description;

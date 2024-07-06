@@ -75,32 +75,32 @@ export const BountyProvider = ({ children }: BountyProviderProps) => {
     } = await axios.get('/artifacts/PictureBountyFactory.json')
 
     const factoryContract = new Contract(factoryAddress, bountyFactoryABI, signer)
-
     const rewardInWei = ethers.parseEther(reward)
 
+    console.log(bountyFactoryABI)
     console.log('DEBUG inputs: ', title, description, imageId, { value: rewardInWei })
     try {
       // const gasPrice = await provider.getGasPrice()
-      const tx = await factoryContract.createPictureBounty(title, description, imageId, {
-        value: rewardInWei,
-        // gasPrice: gasPrice * 10n,
-        // gasLimit: 1000000000,
-      })
+      const tx = await factoryContract.createPictureBounty.populateTransaction(
+        title,
+        description,
+        imageId,
+        {
+          value: rewardInWei,
+        }
+      )
 
-      console.log(`Transaction Hash: ${tx.hash}`)
+      const sentTx = await signer.sendTransaction(tx)
 
-      const receipt = await tx.wait()
+      console.log(`Transaction Hash: ${sentTx.hash}`)
+
+      const receipt = await sentTx.wait()
 
       if (receipt.status !== 1) {
         throw new Error('Failed to create bounty')
       }
 
-      const event = receipt.events.find((e: any) => e.event === 'PictureBountyCreated')
-      if (!event) {
-        throw new Error('Failed to get bounty address from event')
-      }
-
-      const bountyAddress = event.args.bountyAddress
+      const bountyAddress = receipt.hash
 
       console.log(`DEBUG _postCreateBounty: /api/bounty/${bountyAddress}`)
       const {

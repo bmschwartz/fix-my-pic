@@ -5,6 +5,1035 @@
       "contracts/PictureBounty.sol:PictureBounty": {
         "src": "contracts/PictureBounty.sol:4",
         "version": {
+          "withMetadata": "9b1abbc0a503bd85a8443df231831a8fe7c4ba766d6db113411a5e6c6c73ac22",
+          "withoutMetadata": "9b1abbc0a503bd85a8443df231831a8fe7c4ba766d6db113411a5e6c6c73ac22",
+          "linkedWithoutMetadata": "9b1abbc0a503bd85a8443df231831a8fe7c4ba766d6db113411a5e6c6c73ac22"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "537a279884c2052093194da9bc5d039a665413835abbe956759355a26f2f865d",
+          "withoutMetadata": "537a279884c2052093194da9bc5d039a665413835abbe956759355a26f2f865d",
+          "linkedWithoutMetadata": "537a279884c2052093194da9bc5d039a665413835abbe956759355a26f2f865d"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)157)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)157)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)157": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
+          "withMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "withoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "linkedWithoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "1f0de42b34be1f8079d6ade40561999295f6484fa47111765ee4e23b96639c01",
+          "withoutMetadata": "1f0de42b34be1f8079d6ade40561999295f6484fa47111765ee4e23b96639c01",
+          "linkedWithoutMetadata": "1f0de42b34be1f8079d6ade40561999295f6484fa47111765ee4e23b96639c01"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)157)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)157)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)157": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
+          "withMetadata": "ce24b0628baf963746fb75c34d1bba9682443d534ed53b4da03e2098d476bb8c",
+          "withoutMetadata": "ce24b0628baf963746fb75c34d1bba9682443d534ed53b4da03e2098d476bb8c",
+          "linkedWithoutMetadata": "ce24b0628baf963746fb75c34d1bba9682443d534ed53b4da03e2098d476bb8c"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "fa96e0ff067fa57f7e7a7769af2510b0135307f5162effa2f35d5e17a245686f",
+          "withoutMetadata": "fa96e0ff067fa57f7e7a7769af2510b0135307f5162effa2f35d5e17a245686f",
+          "linkedWithoutMetadata": "fa96e0ff067fa57f7e7a7769af2510b0135307f5162effa2f35d5e17a245686f"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)149)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)149)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)149": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
+          "withMetadata": "1748f04dc6182b15e893480f54cb455194c9fe5ed63e543ace8278a7093ed5dd",
+          "withoutMetadata": "1748f04dc6182b15e893480f54cb455194c9fe5ed63e543ace8278a7093ed5dd",
+          "linkedWithoutMetadata": "1748f04dc6182b15e893480f54cb455194c9fe5ed63e543ace8278a7093ed5dd"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "dcde105b5e16cd06fb20343be9a1e1d86f161125f8913ab177b903681c33a710",
+          "withoutMetadata": "dcde105b5e16cd06fb20343be9a1e1d86f161125f8913ab177b903681c33a710",
+          "linkedWithoutMetadata": "dcde105b5e16cd06fb20343be9a1e1d86f161125f8913ab177b903681c33a710"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)149)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)149)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)149": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
+          "withMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "withoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "linkedWithoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "ecd3bb4a82593f17ad7a988a80828ebf0463d7ff9779566b0fc61506c4ccfa64",
+          "withoutMetadata": "ecd3bb4a82593f17ad7a988a80828ebf0463d7ff9779566b0fc61506c4ccfa64",
+          "linkedWithoutMetadata": "ecd3bb4a82593f17ad7a988a80828ebf0463d7ff9779566b0fc61506c4ccfa64"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)157)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)157)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)157": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
+          "withMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "withoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "linkedWithoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "721a6b18bd014da91e365f9553ba035a38e42745180591e02f8641cc81bb2e39",
+          "withoutMetadata": "721a6b18bd014da91e365f9553ba035a38e42745180591e02f8641cc81bb2e39",
+          "linkedWithoutMetadata": "721a6b18bd014da91e365f9553ba035a38e42745180591e02f8641cc81bb2e39"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)157)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)157)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)157": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
+          "withMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "withoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
+          "linkedWithoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "(string,string,string)",
+          "createSubmission(string)",
+          "payReward(address)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "PictureBounty",
+            "src": "contracts/PictureBounty.sol:22"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address_payable",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:5"
+            },
+            {
+              "label": "title",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:7"
+            },
+            {
+              "label": "description",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:8"
+            },
+            {
+              "label": "imageId",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:9"
+            },
+            {
+              "label": "reward",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:10"
+            },
+            {
+              "label": "submissions",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_address,t_string_storage)",
+              "contract": "PictureBounty",
+              "src": "contracts/PictureBounty.sol:12"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_address_payable": {
+              "label": "address payable",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_string_storage)": {
+              "label": "mapping(address => string)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      },
+      "contracts/PictureBountyFactory.sol:PictureBountyFactory": {
+        "src": "contracts/PictureBountyFactory.sol:6",
+        "version": {
+          "withMetadata": "b6302462e68de489219376accd9d065ca23824e2954cdf4a2c77387c3852a8b9",
+          "withoutMetadata": "b6302462e68de489219376accd9d065ca23824e2954cdf4a2c77387c3852a8b9",
+          "linkedWithoutMetadata": "b6302462e68de489219376accd9d065ca23824e2954cdf4a2c77387c3852a8b9"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "createPictureBounty(string,string,string)",
+          "getPictureBounties()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "pictureBounties",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_contract(PictureBounty)157)dyn_storage",
+              "contract": "PictureBountyFactory",
+              "src": "contracts/PictureBountyFactory.sol:7"
+            }
+          ],
+          "types": {
+            "t_array(t_contract(PictureBounty)157)dyn_storage": {
+              "label": "contract PictureBounty[]",
+              "numberOfBytes": "32"
+            },
+            "t_contract(PictureBounty)157": {
+              "label": "contract PictureBounty",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.24"
+      }
+    },
+    {
+      "contracts/PictureBounty.sol:PictureBounty": {
+        "src": "contracts/PictureBounty.sol:4",
+        "version": {
           "withMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
           "withoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe",
           "linkedWithoutMetadata": "badaf66e5b04ba06d22f73617e013449226c8bb6e0b921b7832743f186adb6fe"
