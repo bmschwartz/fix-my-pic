@@ -69,6 +69,8 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
       throw new Error('Could not create the picture bounty factory!')
     }
 
+    console.log('Bounty factory address:', factoryAddress)
+
     await contract.removeAllListeners()
     console.log(`DEBUG before listeners: ${await contract.listenerCount()}`)
     await contract.addListener(ContractEvents.PictureBountyCreated, _pictureBountyCreatedHandler)

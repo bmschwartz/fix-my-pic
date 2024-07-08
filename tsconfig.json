@@ -1,12 +1,30 @@
 {
- "compilerOptions": {
-    "target": "es2018",
+  "compilerOptions": {
+    "target": "ES2020",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "resolveJsonModule": true
-  }, 
+    "resolveJsonModule": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+  },
   "exclude": [
     "node_modules"
   ],
@@ -14,8 +32,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "contracts/tests",
     "./contracts",
-    "hardhat.config.ts",
+    "hardhat.config.ts"
   ]
 }

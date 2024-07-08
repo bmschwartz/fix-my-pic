@@ -64,11 +64,11 @@ const config: any = {
     settings: {},
   },
   networks: {
-    zkSyncDocker: {
-      url: 'http://127.0.0.1:3050', // The testnet RPC URL of ZKsync Era network.
-      ethNetwork: 'http://127.0.0.1:8545', // The Ethereum Web3 RPC URL, or the identifier of the network (e.g. `mainnet` or `sepolia`)
-      zksync: true, // enables zksolc compiler
-    },
+    // zkSyncDocker: {
+    //   url: 'http://127.0.0.1:3050', // The testnet RPC URL of ZKsync Era network.
+    //   ethNetwork: 'http://127.0.0.1:8545', // The Ethereum Web3 RPC URL, or the identifier of the network (e.g. `mainnet` or `sepolia`)
+    //   zksync: true, // enables zksolc compiler
+    // },
     zkSyncInMemory: {
       url: 'http://127.0.0.1:8011',
       ethNetwork: 'localhost', // in-memory node doesn't support eth node; removing this line will cause an error
