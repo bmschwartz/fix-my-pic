@@ -6,13 +6,14 @@ import { task } from 'hardhat/config'
 import '@matterlabs/hardhat-zksync'
 import '@matterlabs/hardhat-zksync-solc'
 import '@matterlabs/hardhat-zksync-ethers'
+import '@nomicfoundation/hardhat-chai-matchers'
 
 task(
   'copy-artifacts',
   'Copies ABI files to the frontend folder',
   async (taskArgs: any, hre: HardhatRuntimeEnvironment) => {
     // Define source and destination directories
-    const artifactsDir = path.join(__dirname, './contracts/artifacts-zk/contracts')
+    const artifactsDir = path.join(__dirname, './contracts/artifacts-zk')
     const frontendDir = path.join(__dirname, './public/artifacts')
 
     // Ensure the destination directory exists
@@ -23,7 +24,12 @@ task(
 
     // Function to filter JSON files excluding .dbg.json files
     const filterJsonFiles = (filePath: string) => {
-      return filePath.endsWith('.json') && !filePath.endsWith('.dbg.json')
+      return (
+        filePath.endsWith('.json') &&
+        !filePath.endsWith('.dbg.json') &&
+        !filePath.includes('build-info') &&
+        !filePath.includes('@openzeppelin')
+      )
     }
 
     // Traverse the directory recursively to find all relevant JSON files
@@ -47,13 +53,15 @@ task(
 )
 
 const config: any = {
-  defaultNetwork: 'zkSyncDocker',
+  defaultNetwork: 'zkSyncInMemory',
   solidity: '0.8.24',
   paths: {
-    root: './contracts',
-    sources: './',
-    tests: './tests',
-    artifacts: './artifacts',
+    sources: './contracts',
+    tests: './contracts/tests',
+    artifacts: './artifacts/contracts',
+  },
+  zksolc: {
+    settings: {},
   },
   networks: {
     zkSyncDocker: {
@@ -68,13 +76,6 @@ const config: any = {
     },
     hardhat: {
       zksync: true,
-    },
-  },
-  zksolc: {
-    version: 'latest',
-    settings: {
-      // find all available options in the official documentation
-      // https://era.zksync.io/docs/tools/hardhat/hardhat-zksync-solc.html#configuration
     },
   },
 }
