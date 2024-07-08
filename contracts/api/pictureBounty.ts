@@ -72,7 +72,6 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     await contract.removeAllListeners()
     console.log(`DEBUG before listeners: ${await contract.listenerCount()}`)
     await contract.addListener(ContractEvents.PictureBountyCreated, _pictureBountyCreatedHandler)
-    await contract.addListener('CreatePictureBounty', _createPictureBountyHandler)
     console.log(`DEBUG after listeners: ${await contract.listenerCount()}`)
 
     return contract

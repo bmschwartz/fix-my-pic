@@ -18,7 +18,8 @@
     "lint": "eslint --ignore-path .gitignore --fix",
     "compile": "hardhat compile && hardhat copy-artifacts",
     "format": "prettier --ignore-path .gitignore \"pages/**/*.+(ts|js|tsx)\" --write",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "test": "NODE_ENV=test hardhat test"
   },
   "lint-staged": {
     "./**/*.{ts,js,jsx,tsx}": [
@@ -31,6 +32,8 @@
     "@nomiclabs/hardhat-ethers": "2.2.3",
     "@nomiclabs/hardhat-waffle": "2.0.6",
     "@types/chai": "4.3.16",
+    "@types/fs-extra": "11.0.4",
+    "@types/klaw": "3.0.6",
     "@types/mocha": "10.0.7",
     "axios": "1.7.2",
     "dotenv": "16.4.5",

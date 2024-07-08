@@ -38,7 +38,4 @@ contract PictureBountyFactory {
     }
     return bountyAddresses;
   }
-
-  // Fallback function to receive Ether
-  receive() external payable {}
 }

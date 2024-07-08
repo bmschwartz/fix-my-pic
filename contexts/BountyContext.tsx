@@ -34,6 +34,8 @@ const factoryAddress = process.env.NEXT_PUBLIC_BOUNTY_FACTORY_ADDRESS
 
 if (!factoryAddress || factoryAddress === '') {
   throw new Error('Factory contract address is not set or is empty')
+} else {
+  console.log('DEBUG factoryAddress', factoryAddress)
 }
 
 export const BountyContext = createContext<BountyContextType | undefined>(undefined)
@@ -58,7 +60,6 @@ export const BountyProvider = ({ children }: BountyProviderProps) => {
   const createBounty = async (bountyData: CreateBountyProps): Promise<Bounty> => {
     const bounty = await _postCreateBounty(bountyData)
 
-    // Optimistic update
     setBounties([...bounties, bounty])
 
     return bounty
@@ -74,33 +75,32 @@ export const BountyProvider = ({ children }: BountyProviderProps) => {
       data: { abi: bountyFactoryABI },
     } = await axios.get('/artifacts/PictureBountyFactory.json')
 
+    console.log('DEBUG abi', bountyFactoryABI)
+
     const factoryContract = new Contract(factoryAddress, bountyFactoryABI, signer)
     const rewardInWei = ethers.parseEther(reward)
 
-    console.log(bountyFactoryABI)
     console.log('DEBUG inputs: ', title, description, imageId, { value: rewardInWei })
+
+    console.log(
+      'FUNCTIONS',
+      factoryContract.interface.forEachFunction((f) => console.log(f))
+    )
     try {
       // const gasPrice = await provider.getGasPrice()
-      const tx = await factoryContract.createPictureBounty.populateTransaction(
-        title,
-        description,
-        imageId,
-        {
-          value: rewardInWei,
-        }
-      )
+      const tx = await factoryContract.createPictureBounty(title, description, imageId)
+      const receipt = tx.wait()
+      // const sentTx = await signer.sendTransaction(tx)
 
-      const sentTx = await signer.sendTransaction(tx)
+      // console.log(`Transaction Hash: ${sentTx.hash}`)
 
-      console.log(`Transaction Hash: ${sentTx.hash}`)
+      // const receipt = await sentTx.wait()
 
-      const receipt = await sentTx.wait()
+      // if (receipt.status !== 1) {
+      //   throw new Error('Failed to create bounty')
+      // }
 
-      if (receipt.status !== 1) {
-        throw new Error('Failed to create bounty')
-      }
-
-      const bountyAddress = receipt.hash
+      const bountyAddress = tx.hash
 
       console.log(`DEBUG _postCreateBounty: /api/bounty/${bountyAddress}`)
       const {
