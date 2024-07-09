@@ -1,7 +1,8 @@
-import hre from 'hardhat'
+import fs from 'fs'
+import path from 'path'
+
 import { Addressable, ethers } from 'ethers'
-import { Contract } from 'zksync-ethers'
-import { deployContract, getProvider } from '../utils'
+import { Contract, Provider } from 'zksync-ethers'
 import { Bounty, BountyStatus } from '@/types/bounty'
 import { ContractEvents } from '../events'
 
@@ -20,7 +21,20 @@ export interface PictureBountyApi {
   getPictureBounties(params: GetPictureBountiesParams): Promise<Bounty[]>
 }
 
+const ABI_FOLDER: string[] = [process.cwd(), 'public', 'artifacts']
+
+export const getContractABI = (contractName: string) => {
+  const filePath = path.join(...ABI_FOLDER, `${contractName}.json`)
+  const jsonData = fs.readFileSync(filePath, 'utf8')
+  const data = JSON.parse(jsonData)
+  return data.abi
+}
+
 const BOUNTY_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_BOUNTY_FACTORY_ADDRESS || ''
+
+if (!BOUNTY_FACTORY_ADDRESS) {
+  process.exit('No bounty factory address provided')
+}
 
 async function createPictureBountyApi(initialFactoryAddress: string): Promise<PictureBountyApi> {
   let factoryContract: Contract
@@ -28,59 +42,34 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   let factoryABI: string[] = []
   let bountyABI: string[] = []
   let bounties: Record<string, Bounty> = {}
-
-  const _getFactoryABI = async (): Promise<string[]> => {
-    const contractArtifact = await hre.artifacts.readArtifact('PictureBountyFactory')
-    return contractArtifact.abi
-  }
-
-  const _getBountyABI = async (): Promise<string[]> => {
-    const contractArtifact = await hre.artifacts.readArtifact('PictureBounty')
-    return contractArtifact.abi
-  }
+  const provider = new Provider('http://127.0.0.1:8011')
 
   const _pictureBountyCreatedHandler = async (address: string) => {
-    console.log(`DEBUG pictureBountyCreatedHandler ${address}`)
     await getPictureBounty({ address, refetch: true })
   }
 
-  const _createPictureBountyHandler = async (title: string, reward: number) => {
-    console.log(`DEBUG got event createPictureBounty`, title, reward)
-  }
-
-  const _initFactoryContract = async (): Promise<Contract> => {
+  const _initFactoryContract = async (): Promise<void> => {
     if (factoryContract) {
-      return factoryContract
+      return
     }
 
-    if (!factoryAddress) {
-      const contractArtifactName = 'PictureBountyFactory'
-      const constructorArguments: unknown[] = []
-      const pictureBountyFactory = await deployContract(contractArtifactName, constructorArguments)
+    bountyABI = await getContractABI('PictureBounty')
+    factoryABI = await getContractABI('PictureBountyFactory')
 
-      factoryAddress = pictureBountyFactory.target
-    }
+    factoryContract = new Contract(factoryAddress, factoryABI, provider)
 
-    factoryABI = await _getFactoryABI()
-    bountyABI = await _getBountyABI()
-    const contract = new Contract(factoryAddress, factoryABI, getProvider())
-
-    if (!contract) {
+    if (!factoryContract) {
       throw new Error('Could not create the picture bounty factory!')
     }
 
-    console.log('Bounty factory address:', factoryAddress)
-
-    await contract.removeAllListeners()
-    console.log(`DEBUG before listeners: ${await contract.listenerCount()}`)
-    await contract.addListener(ContractEvents.PictureBountyCreated, _pictureBountyCreatedHandler)
-    console.log(`DEBUG after listeners: ${await contract.listenerCount()}`)
-
-    return contract
+    await factoryContract.addListener(
+      ContractEvents.PictureBountyCreated,
+      _pictureBountyCreatedHandler
+    )
   }
 
   const _fetchBountyContract = async (address: string): Promise<Bounty> => {
-    const bountyContract = new ethers.Contract(address, bountyABI, getProvider())
+    const bountyContract = new ethers.Contract(address, bountyABI, provider)
     const title = await bountyContract.title()
     const description = await bountyContract.description()
     const imageId = await bountyContract.imageId()
@@ -119,16 +108,14 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   const getPictureBounty = async (params: GetPictureBountyParams): Promise<Bounty> => {
     const { address, refetch } = params
 
-    if (refetch) {
-      console.log(`DEBUG getPictureBounty refetching ${address}`)
+    if (refetch || !(address in bounties)) {
       bounties[address] = await _fetchBountyContract(address)
-    } else {
-      console.log(`DEBUG getPictureBounty without refetching ${address}`)
     }
+
     return bounties[address]
   }
 
-  factoryContract = await _initFactoryContract()
+  await _initFactoryContract()
   bounties = await _fetchAllPictureBounties()
 
   return {

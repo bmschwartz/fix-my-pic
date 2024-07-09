@@ -1,10 +1,10 @@
 import React, { ReactNode, createContext, useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
-import { ethers } from 'ethers'
+import { ContractTransactionReceipt, ethers } from 'ethers'
 import { BrowserProvider, Contract } from 'zksync-ethers'
 
 import { useWallet } from '@/hooks/useWallet'
-import { Bounty, BountyStatus } from '@/types/bounty'
+import { Bounty } from '@/types/bounty'
 
 export interface BountyContextType {
   bounties: Bounty[]
@@ -34,8 +34,6 @@ const factoryAddress = process.env.NEXT_PUBLIC_BOUNTY_FACTORY_ADDRESS
 
 if (!factoryAddress || factoryAddress === '') {
   throw new Error('Factory contract address is not set or is empty')
-} else {
-  console.log('DEBUG factoryAddress', factoryAddress)
 }
 
 export const BountyContext = createContext<BountyContextType | undefined>(undefined)
@@ -60,7 +58,7 @@ export const BountyProvider = ({ children }: BountyProviderProps) => {
   const createBounty = async (bountyData: CreateBountyProps): Promise<Bounty> => {
     const bounty = await _postCreateBounty(bountyData)
 
-    setBounties([...bounties, bounty])
+    setBounties([...bounties, bounty].filter(Boolean))
 
     return bounty
   }
@@ -75,56 +73,30 @@ export const BountyProvider = ({ children }: BountyProviderProps) => {
       data: { abi: bountyFactoryABI },
     } = await axios.get('/artifacts/PictureBountyFactory.json')
 
-    console.log('DEBUG abi', bountyFactoryABI)
-
     const factoryContract = new Contract(factoryAddress, bountyFactoryABI, signer)
     const rewardInWei = ethers.parseEther(reward)
 
-    console.log('DEBUG inputs: ', title, description, imageId, { value: rewardInWei })
-
-    console.log(
-      'FUNCTIONS',
-      factoryContract.interface.forEachFunction((f) => console.log(f))
-    )
     try {
-      // const gasPrice = await provider.getGasPrice()
-      const tx = await factoryContract.createPictureBounty(title, description, imageId)
-      const receipt = tx.wait()
-      // const sentTx = await signer.sendTransaction(tx)
+      const tx = await factoryContract.createPictureBounty(title, description, imageId, {
+        value: rewardInWei,
+      })
+      const receipt: ContractTransactionReceipt = await tx.wait()
 
-      // console.log(`Transaction Hash: ${sentTx.hash}`)
+      if (receipt.status !== 1) {
+        throw new Error('Failed to create bounty')
+      }
 
-      // const receipt = await sentTx.wait()
+      const bountyAddress = receipt.contractAddress
 
-      // if (receipt.status !== 1) {
-      //   throw new Error('Failed to create bounty')
-      // }
-
-      const bountyAddress = tx.hash
-
-      console.log(`DEBUG _postCreateBounty: /api/bounty/${bountyAddress}`)
       const {
         data: { bounty },
-      }: { data: { bounty: Bounty } } = await axios.get(`/api/bounty/${bountyAddress}`)
-      console.log(`DEBUG _postCreateBounty: got bounty ${bounty.address}`)
+      } = await axios.get(`/api/bounty/${bountyAddress}`)
+
       return bounty
     } catch (error) {
       console.error('Unable to create the bounty:', error)
       throw error
     }
-
-    // const newBounty: Bounty = {
-    //   address: tx.hash,
-    //   title,
-    //   description,
-    //   imageId,
-    //   reward,
-    //   status: BountyStatus.NEW,
-    // }
-
-    // console.log(`DEBUG created tx for bounty ${newBounty}`)
-
-    // return newBounty
   }
 
   const _getBounties = async (): Promise<Bounty[]> => {

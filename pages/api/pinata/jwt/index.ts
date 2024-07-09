@@ -38,7 +38,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { JWT } = json
       res.send(JWT)
     } catch (e) {
-      console.log(e)
       res.status(500).send('Server Error')
     }
   }
