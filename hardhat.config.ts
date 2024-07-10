@@ -13,7 +13,7 @@ task(
   'Copies ABI files to the frontend folder',
   async (taskArgs: any, hre: HardhatRuntimeEnvironment) => {
     // Define source and destination directories
-    const artifactsDir = path.join(__dirname, './contracts/artifacts-zk')
+    const artifactsDir = path.join(__dirname, './artifacts-zk')
     const frontendDir = path.join(__dirname, './public/artifacts')
 
     // Ensure the destination directory exists
@@ -58,7 +58,7 @@ const config: any = {
   paths: {
     sources: './contracts',
     tests: './contracts/tests',
-    artifacts: './artifacts/contracts',
+    artifacts: './artifacts',
   },
   zksolc: {
     settings: {},

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.0;
 
+import './BountySubmission.sol';
+
 contract PictureBounty {
   address payable public owner;
 
@@ -9,15 +11,15 @@ contract PictureBounty {
   string public imageId;
   uint256 public reward;
 
-  // mapping(address => string) public submissions;
+  BountySubmission[] public submissions;
 
-  // event SubmissionCreated(string _title, address _submitter);
   event RewardPaid(address _winner, uint256 _reward);
+  event SubmissionCreated(address _bountyAddress, address _submissionAddress);
 
-  // modifier onlyOwner() {
-  //   require(msg.sender == owner, 'Only owner can call this function');
-  //   _;
-  // }
+  modifier onlyOwner() {
+    require(msg.sender == owner, 'Only owner can call this function');
+    _;
+  }
 
   constructor(string memory _title, string memory _description, string memory _imageId) payable {
     require(msg.value > 0, 'Initial reward must be greater than 0');
@@ -29,10 +31,12 @@ contract PictureBounty {
     reward = msg.value;
   }
 
-  // function createSubmission(string memory _imageId) public {
-  //   submissions[msg.sender] = _imageId;
-  //   emit SubmissionCreated(title, msg.sender);
-  // }
+  function createSubmission(string memory _description, string memory _imageId) public {
+    BountySubmission submission = new BountySubmission(_description, _imageId);
+    submissions.push(submission);
+
+    emit SubmissionCreated(address(this), address(submission));
+  }
 
   // function payReward(address _winner) public onlyOwner {
   //   require(bytes(submissions[_winner]).length != 0, 'No submission from this address');
