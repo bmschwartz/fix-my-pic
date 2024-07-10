@@ -3,9 +3,11 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react'
 import { TextField, Button, Box } from '@mui/material'
 import { useBounty } from '@/hooks/useBounty'
+import { useImageStore } from '@/hooks/useImageStore'
 
 export const NewBountyForm: React.FC = () => {
   const { createBounty } = useBounty()
+  const { uploadImage } = useImageStore()
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [reward, setReward] = useState<string>('')
@@ -13,8 +15,15 @@ export const NewBountyForm: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const newBounty = { title, description, reward: Number(reward), imageId: '1' }
+
+    if ([file, title, description, reward].includes(null)) {
+      return
+    }
+
+    const imageId = await uploadImage(file!)
+    const newBounty = { title, description, reward: Number(reward), imageId }
     await createBounty(newBounty)
+
     setTitle('')
     setDescription('')
     setReward('')
