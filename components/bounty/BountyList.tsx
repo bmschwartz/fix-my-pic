@@ -6,18 +6,11 @@ import { Grid, Card, CardMedia, CardContent, Typography, Container } from '@mui/
 import { Bounty } from '@/types/bounty'
 import { useBounty } from '@/hooks/useBounty'
 
-const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_PINATA_GATEWAY || ''
-
-if (!IMAGE_URL_ROOT) {
-  throw new Error('IMAGE_URL_ROOT not set!')
-}
-
 const BountyCard = ({ bounty }: { bounty: Bounty }) => (
   <Card>
     <CardMedia
       component="img"
       src={`https://ipfs.io/ipfs/${bounty.imageId}`}
-      // src={`${IMAGE_URL_ROOT}/${bounty.imageId}`}
       alt={bounty.title}
       style={{ height: '66%' }}
     />
