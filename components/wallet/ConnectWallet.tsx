@@ -1,24 +1,41 @@
+import React from 'react'
 import { useWallet } from '@/hooks/useWallet'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
-import styles from './ConnectWallet.module.css'
+import { Button, Typography, Grid, Paper, Avatar } from '@mui/material'
 
 export const ConnectWallet = () => {
   const { wallets, connectWallet } = useWallet()
+
   return (
     <>
-      <h2 className={styles.userAccount}>Please select a wallet</h2>
-      <div className={styles.walletList}>
+      <Grid container spacing={2}>
         {Object.keys(wallets).length > 0 ? (
           Object.values(wallets).map((provider: EIP6963ProviderDetail) => (
-            <button key={provider.info.uuid} onClick={() => connectWallet(provider.info.rdns)}>
-              <img src={provider.info.icon} alt={provider.info.name} />
-              <div>{provider.info.name}</div>
-            </button>
+            <Grid item xs={12} sm={6} md={4} key={provider.info.uuid}>
+              <Paper elevation={3} style={{ padding: '16px', textAlign: 'center' }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() => connectWallet(provider.info.rdns)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                >
+                  <Avatar
+                    src={provider.info.icon}
+                    alt={provider.info.name}
+                    style={{ marginBottom: '8px' }}
+                  />
+                  <Typography variant="h6">{provider.info.name}</Typography>
+                </Button>
+              </Paper>
+            </Grid>
           ))
         ) : (
-          <div>there are no Announced Providers</div>
+          <Grid item xs={12}>
+            <Typography variant="body1">There are no Announced Providers</Typography>
+          </Grid>
         )}
-      </div>
+      </Grid>
     </>
   )
 }

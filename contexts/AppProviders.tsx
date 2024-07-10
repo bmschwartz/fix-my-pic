@@ -25,7 +25,7 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
       <div>
         <FullScreenLoader />
       </div>
-    ) // or any loading indicator
+    )
   }
 
   return (

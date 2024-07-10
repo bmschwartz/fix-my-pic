@@ -166,7 +166,6 @@ let pictureBountyApiPromise: Promise<PictureBountyApi> | null = null
 
 const getPictureBountyApi = async (): Promise<PictureBountyApi> => {
   if (!pictureBountyApiPromise) {
-    console.log('\n\nDEBUG creating bounty api \n\n')
     pictureBountyApiPromise = createPictureBountyApi(BOUNTY_FACTORY_ADDRESS)
   }
   return pictureBountyApiPromise

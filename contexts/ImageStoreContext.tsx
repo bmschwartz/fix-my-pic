@@ -28,7 +28,6 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
       })
 
       const json = await res.json()
-      console.log('DEBUG uploadImage', json)
       return json.IpfsHash
     } catch (e) {
       throw new Error(`Could not upload image file ${e}`)

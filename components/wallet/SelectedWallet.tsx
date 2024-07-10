@@ -1,18 +1,21 @@
+import React from 'react'
 import { useWallet } from '@/hooks/useWallet'
-import styles from './SelectedWallet.module.css'
 import { ConnectWallet } from './ConnectWallet'
+import { Button, Typography, Box } from '@mui/material'
 
 export const SelectedWallet = () => {
   const { selectedWallet, selectedAccount, disconnectWallet } = useWallet()
 
   return (
-    <div className={styles.container}>
+    <Box>
       {!selectedAccount && <ConnectWallet />}
       {selectedAccount && selectedWallet && (
-        <>
-          <button onClick={disconnectWallet}>Disconnect {selectedWallet.info.name}</button>
-        </>
+        <Box textAlign="center" mt={2}>
+          <Button variant="contained" color="secondary" onClick={disconnectWallet}>
+            Disconnect {selectedWallet.info.name}
+          </Button>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }
