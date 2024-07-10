@@ -1,5 +1,6 @@
 import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 import { BrowserProvider, Contract, Provider } from 'zksync-ethers'
+
 import { Bounty, BountyStatus } from '@/types/bounty'
 import { ContractEvents } from '@/types/events'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
@@ -29,6 +30,12 @@ interface GetPictureBountiesParams {
   }
 }
 
+export interface PictureBountyApi {
+  createPictureBounty(params: CreatePictureBountyParams): Promise<Bounty>
+  getPictureBounty(params: GetPictureBountyParams): Promise<Bounty>
+  getPictureBounties(params?: GetPictureBountiesParams): Bounty[]
+}
+
 const BOUNTY_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
 const BOUNTY_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_BOUNTY_FACTORY_ADDRESS || ''
 
@@ -39,11 +46,6 @@ if (!BOUNTY_FACTORY_ADDRESS) {
   process.exit('No bounty factory address provided')
 }
 
-interface PictureBountyApi {
-  createPictureBounty(params: CreatePictureBountyParams): Promise<Bounty>
-  getPictureBounty(params: GetPictureBountyParams): Promise<Bounty>
-  getPictureBounties(params?: GetPictureBountiesParams): Bounty[]
-}
 async function createPictureBountyApi(initialFactoryAddress: string): Promise<PictureBountyApi> {
   let factoryContract: Contract
   let factoryAddress: string | Addressable = initialFactoryAddress

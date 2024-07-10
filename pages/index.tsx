@@ -1,4 +1,4 @@
-import { BountyList } from '@/components/bounty'
+import { BountyList, NewBountyForm } from '@/components/bounty'
 import { SelectedWallet } from '@/components/wallet'
 
 export default function Home() {
@@ -6,6 +6,7 @@ export default function Home() {
     <div className="ml-5 mt-10">
       <SelectedWallet />
       <BountyList />
+      <NewBountyForm />
     </div>
   )
 }

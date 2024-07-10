@@ -1,17 +1,19 @@
-import React, { ReactNode, createContext, useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, createContext, useEffect, useState } from 'react'
 
 import { useWallet } from '@/hooks/useWallet'
 import { Bounty } from '@/types/bounty'
-import { getPictureBountyApi } from '@/utils/bountyApi'
+import { PictureBountyApi } from '@/utils/pictureBountyApi'
 
 export interface BountyContextType {
   createBounty: (bountyData: CreateBountyProps) => Promise<Bounty>
   getPictureBounties: () => Promise<Bounty[]>
   getPictureBounty: (address: string) => Promise<Bounty | undefined>
+  bounties: Bounty[]
 }
 
 interface BountyProviderProps {
   children: ReactNode
+  pictureBountyApi: PictureBountyApi
 }
 
 interface CreateBountyProps {
@@ -33,37 +35,30 @@ if (!providerRpcUrl || providerRpcUrl === '') {
 
 export const BountyContext = createContext<BountyContextType | undefined>(undefined)
 
-export const BountyProvider = ({ children }: BountyProviderProps) => {
+export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderProps) => {
   const { selectedAccount, selectedWallet } = useWallet()
   const [bounties, setBounties] = useState<Bounty[]>([])
 
   useEffect(() => {
-    async function fetchBounties() {
-      const { getPictureBounties } = await getPictureBountyApi()
-      setBounties(getPictureBounties())
-    }
-    fetchBounties()
+    setBounties(pictureBountyApi.getPictureBounties())
   }, [])
 
   const getPictureBounty = async (address: string): Promise<Bounty | undefined> => {
-    const { getPictureBounty } = await getPictureBountyApi()
-    return getPictureBounty({ address })
+    return pictureBountyApi.getPictureBounty({ address })
   }
 
   const getPictureBounties = async (): Promise<Bounty[]> => {
-    const { getPictureBounties } = await getPictureBountyApi()
-    return getPictureBounties()
+    return pictureBountyApi.getPictureBounties()
   }
 
   const createBounty = async (bountyData: CreateBountyProps): Promise<Bounty> => {
     if (!selectedWallet || !selectedAccount) {
       throw new Error('Wallet and account needed to create a bounty!')
     }
-    const { createPictureBounty } = await getPictureBountyApi()
 
     const { title, description, imageId, reward } = bountyData
 
-    const bounty = await createPictureBounty({
+    const bounty = await pictureBountyApi.createPictureBounty({
       wallet: selectedWallet,
       address: selectedAccount,
       bountyData: { title, description, imageId, reward },
@@ -75,7 +70,9 @@ export const BountyProvider = ({ children }: BountyProviderProps) => {
   }
 
   return (
-    <BountyContext.Provider value={{ createBounty, getPictureBounty, getPictureBounties }}>
+    <BountyContext.Provider
+      value={{ createBounty, getPictureBounty, getPictureBounties, bounties }}
+    >
       {children}
     </BountyContext.Provider>
   )

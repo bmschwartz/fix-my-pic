@@ -14,7 +14,6 @@ export const BountyList = () => {
             <tr className="bg-gray-100 text-left">
               <th className="px-6 py-3 border-b border-gray-200">Title</th>
               <th className="px-6 py-3 border-b border-gray-200">Reward</th>
-              <th className="px-6 py-3 border-b border-gray-200">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -23,7 +22,6 @@ export const BountyList = () => {
                 <tr key={bounty.address}>
                   <td className="px-6 py-4 border-b border-gray-200">{bounty.title}</td>
                   <td className="px-6 py-4 border-b border-gray-200">{bounty.reward}</td>
-                  <td className="px-6 py-4 border-b border-gray-200">{bounty.status}</td>
                 </tr>
               ))}
           </tbody>
