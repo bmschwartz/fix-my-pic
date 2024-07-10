@@ -1,12 +1,13 @@
 import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 import { BrowserProvider, Contract, Provider } from 'zksync-ethers'
 
-import { Bounty, BountyStatus } from '@/types/bounty'
+import { Bounty, BountyState } from '@/types/bounty'
 import { ContractEvents } from '@/types/events'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 import PictureBountySchema from '@/public/artifacts/PictureBounty.json'
 import PictureBountyFactorySchema from '@/public/artifacts/PictureBountyFactory.json'
 import { convertUsdToEth } from './currency'
+import { BountySubmission } from '@/types/submission'
 
 interface CreatePictureBountyParams {
   wallet: EIP6963ProviderDetail
@@ -26,8 +27,12 @@ interface GetPictureBountyParams {
 
 interface GetPictureBountiesParams {
   filters?: {
-    status: BountyStatus
+    status: BountyState
   }
+}
+
+interface GetSubmissionsParams {
+  bountyAddress: string
 }
 
 export interface PictureBountyApi {
@@ -79,11 +84,17 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const description = await bountyContract.description()
     const imageId = await bountyContract.imageId()
     const reward = await bountyContract.reward()
+    const state = await bountyContract.getState()
+    const submissions = await bountyContract.submissions()
+
+    console.log('DEBUG submissions', submissions)
     return {
       address,
       title,
       description,
       imageId,
+      state,
+      submissions,
       reward: Number(ethers.formatEther(reward)),
     }
   }
@@ -142,14 +153,20 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     return Object.values(bounties)
   }
 
-  const getPictureBounty = async (params: GetPictureBountyParams): Promise<Bounty> => {
-    const { address, refetch } = params
-
+  const getPictureBounty = async ({
+    address,
+    refetch,
+  }: GetPictureBountyParams): Promise<Bounty> => {
     if (refetch || !(address in bounties)) {
       bounties[address] = await _fetchBountyContract(address)
     }
 
     return bounties[address]
+  }
+  const getSubmissions = async ({
+    bountyAddress,
+  }: GetSubmissionsParams): Promise<BountySubmission[]> => {
+    return bounties[bountyAddress].submissions
   }
 
   await _initFactoryContract()

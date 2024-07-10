@@ -4,13 +4,17 @@ pragma solidity ^0.8.0;
 import './BountySubmission.sol';
 
 contract PictureBounty {
+  enum State {
+    NEW
+  }
+
   address payable public owner;
 
   string public title;
   string public description;
   string public imageId;
   uint256 public reward;
-
+  State public currentState;
   BountySubmission[] public submissions;
 
   event RewardPaid(address _winner, uint256 _reward);
@@ -29,6 +33,7 @@ contract PictureBounty {
     description = _description;
     imageId = _imageId;
     reward = msg.value;
+    currentState = State.NEW;
   }
 
   function createSubmission(string memory _description, string memory _imageId) public {
@@ -36,6 +41,10 @@ contract PictureBounty {
     submissions.push(submission);
 
     emit SubmissionCreated(address(this), address(submission));
+  }
+
+  function setState(State _state) public {
+    currentState = _state;
   }
 
   // function payReward(address _winner) public onlyOwner {
