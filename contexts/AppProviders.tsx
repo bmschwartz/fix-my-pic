@@ -1,8 +1,7 @@
 import React, { ReactNode } from 'react'
-import { NextUIProvider } from '@nextui-org/react'
 import { ImageStoreProvider } from './ImageStoreContext'
-import { BountyProvider } from './BountyContext'
 import { WalletProvider } from './WalletProvider'
+import { BountyProvider } from './BountyContext'
 
 interface AppProvidersProps {
   children: ReactNode
@@ -10,13 +9,11 @@ interface AppProvidersProps {
 
 const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
-    <NextUIProvider>
-      <WalletProvider>
-        <ImageStoreProvider>
-          <BountyProvider>{children}</BountyProvider>
-        </ImageStoreProvider>
-      </WalletProvider>
-    </NextUIProvider>
+    <WalletProvider>
+      <ImageStoreProvider>
+        <BountyProvider>{children}</BountyProvider>
+      </ImageStoreProvider>
+    </WalletProvider>
   )
 }
 

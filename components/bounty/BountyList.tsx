@@ -1,17 +1,13 @@
 'use client'
 
-import { useBounty } from '@/hooks/useBounty'
 import { Bounty } from '@/types/bounty'
+import { useBounty } from '@/hooks/useBounty'
 
-interface BountyListProps {
-  className: string
-}
-
-export const BountyList = ({ className }: BountyListProps) => {
+export const BountyList = () => {
   const { bounties } = useBounty()
 
   return (
-    <div className={className}>
+    <div>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200">
           <thead>

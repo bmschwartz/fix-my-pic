@@ -1,11 +1,11 @@
-import { BountyHomeContainer } from '@/components/bounty'
+import { BountyList } from '@/components/bounty'
 import { SelectedWallet } from '@/components/wallet'
 
 export default function Home() {
   return (
     <div className="ml-5 mt-10">
       <SelectedWallet />
-      <BountyHomeContainer />
+      <BountyList />
     </div>
   )
 }

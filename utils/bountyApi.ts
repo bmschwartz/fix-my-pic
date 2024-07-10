@@ -1,48 +1,54 @@
-import fs from 'fs'
-import path from 'path'
-
-import { Addressable, ethers } from 'ethers'
-import { Contract, Provider } from 'zksync-ethers'
+import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
+import { BrowserProvider, Contract, Provider } from 'zksync-ethers'
 import { Bounty, BountyStatus } from '@/types/bounty'
-import { ContractEvents } from '../events'
+import { ContractEvents } from '@/types/events'
+import { EIP6963ProviderDetail } from '@/types/eip6963'
+import PictureBountySchema from '@/public/artifacts/PictureBounty.json'
+import PictureBountyFactorySchema from '@/public/artifacts/PictureBountyFactory.json'
+import { convertUsdToEth } from './currency'
+
+interface CreatePictureBountyParams {
+  wallet: EIP6963ProviderDetail
+  address: string
+  bountyData: {
+    title: string
+    description: string
+    imageId: string
+    reward: number
+  }
+}
 
 interface GetPictureBountyParams {
   address: string
   refetch?: boolean
 }
+
 interface GetPictureBountiesParams {
   filters?: {
     status: BountyStatus
   }
 }
 
-export interface PictureBountyApi {
-  getPictureBounty(params: GetPictureBountyParams): Promise<Bounty>
-  getPictureBounties(params: GetPictureBountiesParams): Promise<Bounty[]>
-}
-
-const ABI_FOLDER: string[] = [process.cwd(), 'public', 'artifacts']
-
-export const getContractABI = (contractName: string) => {
-  const filePath = path.join(...ABI_FOLDER, `${contractName}.json`)
-  const jsonData = fs.readFileSync(filePath, 'utf8')
-  const data = JSON.parse(jsonData)
-  return data.abi
-}
-
+const BOUNTY_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
 const BOUNTY_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_BOUNTY_FACTORY_ADDRESS || ''
 
+if (!BOUNTY_RPC_URL) {
+  process.exit('No RPC URL provided')
+}
 if (!BOUNTY_FACTORY_ADDRESS) {
   process.exit('No bounty factory address provided')
 }
 
+interface PictureBountyApi {
+  createPictureBounty(params: CreatePictureBountyParams): Promise<Bounty>
+  getPictureBounty(params: GetPictureBountyParams): Promise<Bounty>
+  getPictureBounties(params?: GetPictureBountiesParams): Bounty[]
+}
 async function createPictureBountyApi(initialFactoryAddress: string): Promise<PictureBountyApi> {
   let factoryContract: Contract
   let factoryAddress: string | Addressable = initialFactoryAddress
-  let factoryABI: string[] = []
-  let bountyABI: string[] = []
   let bounties: Record<string, Bounty> = {}
-  const provider = new Provider('http://127.0.0.1:8011')
+  const provider = new Provider(BOUNTY_RPC_URL)
 
   const _pictureBountyCreatedHandler = async (address: string) => {
     await getPictureBounty({ address, refetch: true })
@@ -53,10 +59,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
       return
     }
 
-    bountyABI = await getContractABI('PictureBounty')
-    factoryABI = await getContractABI('PictureBountyFactory')
-
-    factoryContract = new Contract(factoryAddress, factoryABI, provider)
+    factoryContract = new Contract(factoryAddress, PictureBountyFactorySchema.abi, provider)
 
     if (!factoryContract) {
       throw new Error('Could not create the picture bounty factory!')
@@ -69,7 +72,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   }
 
   const _fetchBountyContract = async (address: string): Promise<Bounty> => {
-    const bountyContract = new ethers.Contract(address, bountyABI, provider)
+    const bountyContract = new ethers.Contract(address, PictureBountySchema.abi, provider)
     const title = await bountyContract.title()
     const description = await bountyContract.description()
     const imageId = await bountyContract.imageId()
@@ -101,7 +104,39 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     }, {})
   }
 
-  const getPictureBounties = async (params: GetPictureBountiesParams): Promise<Bounty[]> => {
+  const createPictureBounty = async (params: CreatePictureBountyParams): Promise<Bounty> => {
+    const {
+      address: walletAddress,
+      wallet,
+      bountyData: { title, description, imageId, reward },
+    } = params
+
+    const provider = new BrowserProvider(wallet.provider)
+    const signer = await provider.getSigner(walletAddress)
+
+    const bountyFactory = new Contract(factoryAddress, PictureBountyFactorySchema.abi, signer)
+
+    const rewardEth = await convertUsdToEth(reward)
+    const rewardInWei = ethers.parseEther(rewardEth)
+
+    try {
+      const tx = await bountyFactory.createPictureBounty(title, description, imageId, {
+        value: rewardInWei,
+      })
+      const receipt: ContractTransactionReceipt = await tx.wait()
+
+      if (receipt.status !== 1 || !receipt.contractAddress) {
+        throw new Error('Failed to create bounty')
+      }
+
+      return await getPictureBounty({ address: receipt.contractAddress, refetch: true })
+    } catch (error) {
+      console.error('Unable to create the bounty:', error)
+      throw error
+    }
+  }
+
+  const getPictureBounties = (params?: GetPictureBountiesParams): Bounty[] => {
     return Object.values(bounties)
   }
 
@@ -119,6 +154,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   bounties = await _fetchAllPictureBounties()
 
   return {
+    createPictureBounty,
     getPictureBounty,
     getPictureBounties,
   }
@@ -128,6 +164,7 @@ let pictureBountyApiPromise: Promise<PictureBountyApi> | null = null
 
 const getPictureBountyApi = async (): Promise<PictureBountyApi> => {
   if (!pictureBountyApiPromise) {
+    console.log('\n\nDEBUG creating bounty api \n\n')
     pictureBountyApiPromise = createPictureBountyApi(BOUNTY_FACTORY_ADDRESS)
   }
   return pictureBountyApiPromise

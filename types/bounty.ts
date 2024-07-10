@@ -1,3 +1,5 @@
+export type BountyAddress = string
+
 export enum BountyStatus {
   NEW,
   FUNDED,
@@ -9,8 +11,6 @@ export interface Bounty {
   title: string
   description: string
   imageId: string
-  reward?: number
+  reward: number
   creatorWallet?: string
-  refundWallet?: string
-  status?: BountyStatus
 }

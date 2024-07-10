@@ -1,1 +1,2 @@
-export * from './BountyHomeContainer'
+export * from './BountyList'
+export * from './NewBountyForm'
