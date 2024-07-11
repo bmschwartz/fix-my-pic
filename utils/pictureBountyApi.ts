@@ -34,6 +34,16 @@ interface GetPictureBountiesParams {
   }
 }
 
+interface CreateSubmissionsParams {
+  wallet: EIP6963ProviderDetail
+  address: string
+  submissionData: {
+    bountyAddress: string
+    description: string
+    imageId: string
+  }
+}
+
 interface GetSubmissionsParams {
   bountyAddress: string
 }
@@ -58,6 +68,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   let factoryContract: Contract
   let factoryAddress: string | Addressable = initialFactoryAddress
   let bounties: Record<string, Bounty> = {}
+  let submissions: Record<string, BountySubmission> = {}
   const provider = new Provider(BOUNTY_RPC_URL)
 
   const _pictureBountyCreatedHandler = async (address: string) => {
@@ -187,10 +198,40 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
 
     return bounties[address]
   }
+
+  const createSubmission = async ({
+    wallet,
+    address: walletAddress,
+    submissionData: { bountyAddress, imageId, description },
+  }: CreateSubmissionsParams): Promise<BountySubmission> => {
+    const provider = new BrowserProvider(wallet.provider)
+    const signer = await provider.getSigner(walletAddress)
+
+    const bountyContract = new Contract(factoryAddress, PictureBountySchema.abi, signer)
+
+    try {
+      const tx = await bountyContract.createSubmission(description, imageId)
+      const receipt: ContractTransactionReceipt = await tx.wait()
+
+      if (receipt.status !== 1 || !receipt.contractAddress) {
+        throw new Error(`Failed to create submission on bounty ${bountyAddress}`)
+      }
+
+      return await getSubmission({ address: receipt.contractAddress, refetch: true })
+    } catch (error) {
+      console.error('Unable to create the bounty:', error)
+      throw error
+    }
+  }
+
   const getSubmissions = async ({
     bountyAddress,
   }: GetSubmissionsParams): Promise<BountySubmission[]> => {
     return bounties[bountyAddress].submissions
+  }
+
+  const getSubmission = async (submissionAddress: string): Promise<BountySubmission> => {
+    return await _fetchBountySubmissionContract(submissionAddress)
   }
 
   await _initFactoryContract()

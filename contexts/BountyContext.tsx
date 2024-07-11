@@ -3,11 +3,13 @@ import React, { ReactNode, createContext, useEffect, useState } from 'react'
 import { useWallet } from '@/hooks/useWallet'
 import { Bounty } from '@/types/bounty'
 import { PictureBountyApi } from '@/utils/pictureBountyApi'
+import { BountySubmission } from '@/types/submission'
 
 export interface BountyContextType {
   createBounty: (bountyData: CreateBountyProps) => Promise<Bounty>
   getPictureBounties: () => Promise<Bounty[]>
   getPictureBounty: (address: string) => Promise<Bounty | undefined>
+  createSubmission: (submissionData: CreateSubmissionProps) => Promise<BountySubmission>
   bounties: Bounty[]
 }
 
@@ -20,6 +22,11 @@ interface CreateBountyProps {
   title: string
   description: string
   reward: number
+  imageId: string
+}
+
+interface CreateSubmissionProps {
+  description: string
   imageId: string
 }
 
@@ -69,9 +76,21 @@ export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderPro
     return bounty
   }
 
+  const createSubmission = async (
+    submissionData: CreateSubmissionProps
+  ): Promise<BountySubmission> => {
+    if (!selectedWallet || !selectedAccount) {
+      throw new Error('Wallet and account needed to create a bounty!')
+    }
+
+    const { description, imageId } = submissionData
+
+    const submission = await pictureBountyApi.createPictureBounty
+  }
+
   return (
     <BountyContext.Provider
-      value={{ createBounty, getPictureBounty, getPictureBounties, bounties }}
+      value={{ createBounty, getPictureBounty, getPictureBounties, createSubmission, bounties }}
     >
       {children}
     </BountyContext.Provider>
