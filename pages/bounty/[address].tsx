@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Container, Grid, Typography, Box, Button, Paper } from '@mui/material'
+import { Container, Box, Button } from '@mui/material'
 
 import { Bounty } from '@/types/bounty'
 import { useBounty } from '@/hooks/useBounty'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
-import { BountySubmissionList } from '@/components/bounty/BountySubmissionList'
+import { BountyDetailInfo } from '@/components/bounty/BountyDetailInfo'
+import { BountySubmissionContainer } from '@/components/bounty/BountySubmissionContainer'
 
 const BountyDetailPage: React.FC = () => {
   const router = useRouter()
@@ -29,13 +30,6 @@ const BountyDetailPage: React.FC = () => {
     )
   }
 
-  const handleDownload = () => {
-    const link = document.createElement('a')
-    link.href = `https://ipfs.io/ipfs/${bounty.imageId}`
-    link.download = `${bounty.title}.jpg`
-    link.click()
-  }
-
   return (
     <Container>
       <Box mt={4} mb={4}>
@@ -44,45 +38,10 @@ const BountyDetailPage: React.FC = () => {
         </Button>
       </Box>
       <Box mt={4} mb={4}>
-        <Paper elevation={3} style={{ padding: '16px' }}>
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item xs={12}>
-              <img
-                src={`https://ipfs.io/ipfs/${bounty.imageId}`}
-                alt={bounty.title}
-                style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h4" gutterBottom>
-                {bounty.title}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                {bounty.description}
-              </Typography>
-              <Typography variant="h6">Reward: {bounty.reward}</Typography>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleDownload}
-                style={{ marginTop: '16px' }}
-              >
-                Download Image
-              </Button>
-            </Grid>
-          </Grid>
-        </Paper>
+        <BountyDetailInfo bounty={bounty} />
       </Box>
       <Box mt={4}>
-        <Paper elevation={3} style={{ padding: '16px' }}>
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Typography variant="h5">Submissions</Typography>
-            <Button variant="contained" color="primary">
-              Submit Picture
-            </Button>
-          </Grid>
-          <BountySubmissionList bounty={bounty} />
-        </Paper>
+        <BountySubmissionContainer bounty={bounty} />
       </Box>
     </Container>
   )

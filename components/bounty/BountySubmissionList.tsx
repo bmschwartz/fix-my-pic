@@ -1,11 +1,8 @@
 import React from 'react'
 import { Grid, Card, CardMedia, CardContent, Typography } from '@mui/material'
 import { BountySubmission } from '@/types/submission'
-import { Bounty } from '@/types/bounty'
 
-export const BountySubmissionList = ({ bounty }: { bounty: Bounty }) => {
-  const { submissions } = bounty
-
+export const BountySubmissionList = ({ submissions }: { submissions: BountySubmission[] }) => {
   return (
     <Grid container spacing={3} mt={2}>
       {submissions.map((submission: BountySubmission) => (
@@ -17,9 +14,6 @@ export const BountySubmissionList = ({ bounty }: { bounty: Bounty }) => {
               style={{ height: '200px' }}
             />
             <CardContent>
-              {/* <Typography variant="h6" gutterBottom>
-                {submission.title}
-              </Typography> */}
               <Typography variant="body2">{submission.description}</Typography>
             </CardContent>
           </Card>
