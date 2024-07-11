@@ -8,15 +8,17 @@ export default function NewBountyPage() {
   return (
     <Container
       sx={{
-        marginTop: 4, // Adds a top margin to the Container
-        marginBottom: 4, // Adds a bottom margin to the Container
-        paddingLeft: 2, // Adds left padding to the Container
-        paddingRight: 2, // Adds right padding to the Container
+        marginTop: 4,
+        marginBottom: 4,
+        paddingLeft: 2,
+        paddingRight: 2,
       }}
     >
-      <Button variant="outlined" onClick={() => router.back()}>
-        Back
-      </Button>
+      <Box mt={4} mb={4}>
+        <Button variant="contained" color="primary" onClick={() => router.back()}>
+          Back
+        </Button>
+      </Box>
       <Box
         sx={{
           maxWidth: '600px',

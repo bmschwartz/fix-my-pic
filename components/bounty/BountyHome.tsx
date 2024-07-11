@@ -14,7 +14,7 @@ export const BountyHome: React.FC = () => {
       <SelectedWallet />
       {selectedWallet && selectedAccount && (
         <Box mt={2} textAlign="center">
-          <Button variant="outlined" color="primary" onClick={() => router.push('/new')}>
+          <Button variant="contained" color="primary" onClick={() => router.push('/new')}>
             New Picture Bounty
           </Button>
         </Box>
