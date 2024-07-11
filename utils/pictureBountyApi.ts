@@ -1,13 +1,16 @@
-import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 import { BrowserProvider, Contract, Provider } from 'zksync-ethers'
+import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 
-import { Bounty, BountyState } from '@/types/bounty'
 import { ContractEvents } from '@/types/events'
+import { Bounty, BountyState } from '@/types/bounty'
+import { BountySubmission } from '@/types/submission'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 import PictureBountySchema from '@/public/artifacts/PictureBounty.json'
+import BountySubmissionSchema from '@/public/artifacts/BountySubmission.json'
 import PictureBountyFactorySchema from '@/public/artifacts/PictureBountyFactory.json'
+
 import { convertUsdToEth } from './currency'
-import { BountySubmission } from '@/types/submission'
+import { batchTasksAsync } from './batch'
 
 interface CreatePictureBountyParams {
   wallet: EIP6963ProviderDetail
@@ -84,10 +87,14 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const description = await bountyContract.description()
     const imageId = await bountyContract.imageId()
     const reward = await bountyContract.reward()
-    const state = await bountyContract.getState()
-    const submissions = await bountyContract.submissions()
-
+    const state = await bountyContract.currentState()
+    const submissionAddresses = await bountyContract.getSubmissions()
+    submissionAddresses.forEach((element: any) => {
+      console.log('DEBUG address', element, typeof element)
+    })
+    const submissions = await _fetchBountySubmissions(submissionAddresses)
     console.log('DEBUG submissions', submissions)
+
     return {
       address,
       title,
@@ -101,20 +108,37 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
 
   const _fetchAllPictureBounties = async (): Promise<Record<string, Bounty>> => {
     const bountyAddresses = await factoryContract.getPictureBounties()
-    const batchSize = 50 // Adjust based on rate limits
-    let bountyContracts: Bounty[] = []
-
-    for (let i = 0; i < bountyAddresses.length; i += batchSize) {
-      const batch = bountyAddresses.slice(i, i + batchSize)
-      const batchBounties = await Promise.all(batch.map(_fetchBountyContract))
-      bountyContracts = bountyContracts.concat(batchBounties)
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // 1 second delay
-    }
+    let bountyContracts: Bounty[] = await batchTasksAsync<Bounty>({
+      batchSize: 50,
+      tasks: bountyAddresses,
+      mapFunction: _fetchBountyContract,
+    })
 
     return bountyContracts.reduce((acc: { [key: string]: Bounty }, obj: Bounty) => {
       acc[obj.address] = obj
       return acc
     }, {})
+  }
+
+  const _fetchBountySubmissions = async (addresses: string[]): Promise<BountySubmission[]> => {
+    return batchTasksAsync<BountySubmission>({
+      tasks: addresses,
+      mapFunction: _fetchBountySubmissionContract,
+    })
+  }
+
+  const _fetchBountySubmissionContract = async (address: string): Promise<BountySubmission> => {
+    const submissionContract = new ethers.Contract(address, BountySubmissionSchema.abi, provider)
+    const description = await submissionContract.description()
+    const imageId = await submissionContract.imageId()
+    const isWinner = await submissionContract.isWinner()
+
+    return {
+      address,
+      description,
+      imageId,
+      isWinner,
+    }
   }
 
   const createPictureBounty = async (params: CreatePictureBountyParams): Promise<Bounty> => {

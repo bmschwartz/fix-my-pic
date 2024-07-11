@@ -47,6 +47,14 @@ contract PictureBounty {
     currentState = _state;
   }
 
+  function getSubmissions() public view returns (address[] memory) {
+    address[] memory submissionAddresses = new address[](submissions.length);
+    for (uint i = 0; i < submissions.length; i++) {
+      submissionAddresses[i] = address(submissions[i]);
+    }
+    return submissionAddresses;
+  }
+
   // function payReward(address _winner) public onlyOwner {
   //   require(bytes(submissions[_winner]).length != 0, 'No submission from this address');
   //   require(address(this).balance >= reward, 'Insufficient contract balance');
