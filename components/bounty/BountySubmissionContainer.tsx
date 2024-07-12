@@ -9,7 +9,7 @@ export const BountySubmissionContainer = ({ bounty }: { bounty: Bounty }) => {
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Submissions</Typography>
         <Link href={`/submission/new?bountyAddress=${bounty.address}`} passHref>
-          <Button component="a" variant="contained" color="primary">
+          <Button variant="contained" color="primary">
             Submit Edit
           </Button>
         </Link>
