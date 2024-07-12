@@ -5,14 +5,13 @@ import { ChangeEvent, FormEvent, useState } from 'react'
 
 interface NewSubmissionFormProps {
   onCreated?: () => void
+  bountyAddress: string
 }
 
-export default function NewSubmissionForm({ onCreated }: NewSubmissionFormProps) {
+export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmissionFormProps) {
   const { createSubmission } = useBounty()
   const { uploadImage } = useImageStore()
-  const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
-  const [reward, setReward] = useState<string>('')
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
@@ -20,25 +19,22 @@ export default function NewSubmissionForm({ onCreated }: NewSubmissionFormProps)
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if ([file, title, description, reward].includes(null)) {
+    if ([file, description].includes(null)) {
       return
     }
 
     setLoading(true)
 
     const imageId = await uploadImage(file!)
-    const newBounty = { title, description, reward: Number(reward), imageId }
     try {
-      await createBounty(newBounty)
+      await createSubmission({ bountyAddress, description, imageId })
     } catch (e) {
       console.error(e)
       return
     }
     setLoading(false)
 
-    setTitle('')
     setDescription('')
-    setReward('')
     setFile(null)
     setPreview(null)
 
@@ -60,15 +56,6 @@ export default function NewSubmissionForm({ onCreated }: NewSubmissionFormProps)
       sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
     >
       <TextField
-        label="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        variant="outlined"
-        fullWidth
-        required
-        disabled={loading}
-      />
-      <TextField
         label="Description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -78,17 +65,6 @@ export default function NewSubmissionForm({ onCreated }: NewSubmissionFormProps)
         rows={4}
         required
         disabled={loading}
-      />
-      <TextField
-        label="Reward (USD)"
-        value={reward}
-        onChange={(e) => setReward(e.target.value)}
-        variant="outlined"
-        fullWidth
-        required
-        type="number"
-        disabled={loading}
-        InputProps={{ inputProps: { min: 0, step: '0.01' } }}
       />
       <Button variant="contained" component="label" disabled={loading}>
         Upload Image
@@ -100,7 +76,7 @@ export default function NewSubmissionForm({ onCreated }: NewSubmissionFormProps)
         </Box>
       )}
       <Button type="submit" variant="contained" color="primary" disabled={loading}>
-        Create Bounty
+        Create Submission
       </Button>
     </Box>
   )

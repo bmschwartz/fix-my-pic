@@ -26,6 +26,7 @@ interface CreateBountyProps {
 }
 
 interface CreateSubmissionProps {
+  bountyAddress: string
   description: string
   imageId: string
 }
@@ -76,16 +77,26 @@ export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderPro
     return bounty
   }
 
-  const createSubmission = async (
-    submissionData: CreateSubmissionProps
-  ): Promise<BountySubmission> => {
+  const createSubmission = async ({
+    description,
+    bountyAddress,
+    imageId,
+  }: CreateSubmissionProps): Promise<BountySubmission> => {
     if (!selectedWallet || !selectedAccount) {
       throw new Error('Wallet and account needed to create a bounty!')
     }
 
-    const { description, imageId } = submissionData
+    const submission = await pictureBountyApi.createSubmission({
+      wallet: selectedWallet,
+      address: selectedAccount,
+      submissionData: {
+        bountyAddress,
+        description,
+        imageId,
+      },
+    })
 
-    const submission = await pictureBountyApi.createPictureBounty
+    return submission
   }
 
   return (

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/router'
+import Link from 'next/link'
 import {
   Grid,
   Card,
@@ -19,36 +19,32 @@ import { Bounty } from '@/types/bounty'
 import { useBounty } from '@/hooks/useBounty'
 
 const BountyCard = ({ bounty }: { bounty: Bounty }) => {
-  const router = useRouter()
-
-  const handleNavigate = () => {
-    router.push(`/bounty/${bounty.address}`)
-  }
-
   return (
-    <Paper elevation={3} style={{ margin: '16px', cursor: 'pointer' }} onClick={handleNavigate}>
-      <Card>
-        <CardMedia
-          component="img"
-          src={`https://ipfs.io/ipfs/${bounty.imageId}`}
-          alt={bounty.title}
-          style={{ height: '200px' }}
-        />
-        <CardContent
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-        >
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              {bounty.title}
-            </Typography>
-            <Typography variant="body2">Reward: {bounty.reward}</Typography>
-          </Box>
-          <IconButton size="large">
-            <ChevronRightIcon />
-          </IconButton>
-        </CardContent>
-      </Card>
-    </Paper>
+    <Link href={`/bounty/${bounty.address}`} passHref>
+      <Paper elevation={3} style={{ margin: '16px', cursor: 'pointer' }}>
+        <Card>
+          <CardMedia
+            component="img"
+            src={`https://ipfs.io/ipfs/${bounty.imageId}`}
+            alt={bounty.title}
+            style={{ height: '200px' }}
+          />
+          <CardContent
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                {bounty.title}
+              </Typography>
+              <Typography variant="body2">Reward: {bounty.reward}</Typography>
+            </Box>
+            <IconButton size="large">
+              <ChevronRightIcon />
+            </IconButton>
+          </CardContent>
+        </Card>
+      </Paper>
+    </Link>
   )
 }
 

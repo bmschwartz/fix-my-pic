@@ -46,12 +46,22 @@ interface CreateSubmissionsParams {
 
 interface GetSubmissionsParams {
   bountyAddress: string
+  refetch: boolean
+}
+
+interface GetSubmissionParams {
+  address: string
+  refetch: boolean
 }
 
 export interface PictureBountyApi {
   createPictureBounty(params: CreatePictureBountyParams): Promise<Bounty>
   getPictureBounty(params: GetPictureBountyParams): Promise<Bounty>
   getPictureBounties(params?: GetPictureBountiesParams): Bounty[]
+
+  createSubmission(params: CreateSubmissionsParams): Promise<BountySubmission>
+  getSubmission(params: GetSubmissionParams): Promise<BountySubmission>
+  getSubmissions(params: GetSubmissionsParams): Promise<BountySubmission[]>
 }
 
 const BOUNTY_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
@@ -100,9 +110,6 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const reward = await bountyContract.reward()
     const state = await bountyContract.currentState()
     const submissionAddresses = await bountyContract.getSubmissions()
-    submissionAddresses.forEach((element: any) => {
-      console.log('DEBUG address', element, typeof element)
-    })
     const submissions = await _fetchBountySubmissions(submissionAddresses)
     console.log('DEBUG submissions', submissions)
 
@@ -132,13 +139,19 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   }
 
   const _fetchBountySubmissions = async (addresses: string[]): Promise<BountySubmission[]> => {
-    return batchTasksAsync<BountySubmission>({
+    const bountySubmissions = await batchTasksAsync<BountySubmission>({
       tasks: addresses,
-      mapFunction: _fetchBountySubmissionContract,
+      mapFunction: _fetchSubmissionContractData,
     })
+
+    bountySubmissions.forEach((submission: BountySubmission) => {
+      submissions[submission.address] = submission
+    })
+
+    return bountySubmissions
   }
 
-  const _fetchBountySubmissionContract = async (address: string): Promise<BountySubmission> => {
+  const _fetchSubmissionContractData = async (address: string): Promise<BountySubmission> => {
     const submissionContract = new ethers.Contract(address, BountySubmissionSchema.abi, provider)
     const description = await submissionContract.description()
     const imageId = await submissionContract.imageId()
@@ -226,12 +239,20 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
 
   const getSubmissions = async ({
     bountyAddress,
+    refetch = false,
   }: GetSubmissionsParams): Promise<BountySubmission[]> => {
-    return bounties[bountyAddress].submissions
+    const bounty = await getPictureBounty({ address: bountyAddress, refetch })
+    return bounty.submissions
   }
 
-  const getSubmission = async (submissionAddress: string): Promise<BountySubmission> => {
-    return await _fetchBountySubmissionContract(submissionAddress)
+  const getSubmission = async ({
+    address,
+    refetch = false,
+  }: GetSubmissionParams): Promise<BountySubmission> => {
+    if (refetch) {
+      submissions[address] = await _fetchSubmissionContractData(address)
+    }
+    return submissions[address]
   }
 
   await _initFactoryContract()
@@ -241,6 +262,9 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     createPictureBounty,
     getPictureBounty,
     getPictureBounties,
+    createSubmission,
+    getSubmission,
+    getSubmissions,
   }
 }
 

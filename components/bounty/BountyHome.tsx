@@ -1,12 +1,11 @@
 import React from 'react'
-import { useRouter } from 'next/router'
 import { Button, Box } from '@mui/material'
 import { useWallet } from '@/hooks/useWallet'
 import { SelectedWallet } from '@/components/wallet'
 import { BountyList } from './BountyList'
+import Link from 'next/link'
 
 export const BountyHome: React.FC = () => {
-  const router = useRouter()
   const { selectedWallet, selectedAccount } = useWallet()
 
   return (
@@ -14,9 +13,11 @@ export const BountyHome: React.FC = () => {
       <SelectedWallet />
       {selectedWallet && selectedAccount && (
         <Box mt={2} textAlign="center">
-          <Button variant="contained" color="primary" onClick={() => router.push('/bounty/new')}>
-            New Picture Bounty
-          </Button>
+          <Link href="/bounty/new" passHref>
+            <Button variant="contained" color="primary">
+              New Picture Bounty
+            </Button>
+          </Link>
         </Box>
       )}
       <Box mt={2}>
