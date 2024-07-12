@@ -40,7 +40,7 @@ const BountyDetailPage: React.FC = () => {
       <Box mt={4} mb={4}>
         <BountyDetailInfo bounty={bounty} />
       </Box>
-      <Box mt={4}>
+      <Box mt={4} mb={4}>
         <BountySubmissionContainer bounty={bounty} />
       </Box>
     </Container>

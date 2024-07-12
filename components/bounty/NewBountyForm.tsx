@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, ChangeEvent, FormEvent } from 'react'
-import { TextField, Button, Box } from '@mui/material'
+import { TextField, Button, Box, Backdrop, CircularProgress } from '@mui/material'
 import { useBounty } from '@/hooks/useBounty'
 import { useImageStore } from '@/hooks/useImageStore'
 
@@ -59,7 +59,7 @@ export const NewBountyForm: React.FC<NewBountyFormProps> = ({ onCreated }: NewBo
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      sx={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 2 }}
     >
       <TextField
         label="Title"
@@ -104,6 +104,9 @@ export const NewBountyForm: React.FC<NewBountyFormProps> = ({ onCreated }: NewBo
       <Button type="submit" variant="contained" color="primary" disabled={loading}>
         Create Bounty
       </Button>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   )
 }

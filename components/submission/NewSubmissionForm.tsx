@@ -1,6 +1,6 @@
 import { useBounty } from '@/hooks/useBounty'
 import { useImageStore } from '@/hooks/useImageStore'
-import { Box, Button, TextField } from '@mui/material'
+import { Backdrop, Box, Button, CircularProgress, TextField } from '@mui/material'
 import { ChangeEvent, FormEvent, useState } from 'react'
 
 interface NewSubmissionFormProps {
@@ -19,13 +19,13 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if ([file, description].includes(null)) {
+    if (!file || !description) {
       return
     }
 
     setLoading(true)
 
-    const imageId = await uploadImage(file!)
+    const imageId = await uploadImage(file)
     try {
       await createSubmission({ bountyAddress, description, imageId })
     } catch (e) {
@@ -78,6 +78,9 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
       <Button type="submit" variant="contained" color="primary" disabled={loading}>
         Create Submission
       </Button>
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   )
 }
