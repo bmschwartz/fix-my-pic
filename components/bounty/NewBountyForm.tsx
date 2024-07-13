@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, ChangeEvent, FormEvent } from 'react'
+import React, { useState, FormEvent } from 'react'
 import { TextField, Button, Box, Backdrop, CircularProgress } from '@mui/material'
 import { useBounty } from '@/hooks/useBounty'
 import { useImageStore } from '@/hooks/useImageStore'
+import { DropzoneArea } from 'mui-file-dropzone'
 
 interface NewBountyFormProps {
   onCreated?: () => void
@@ -47,11 +48,14 @@ export const NewBountyForm: React.FC<NewBountyFormProps> = ({ onCreated }: NewBo
     onCreated?.()
   }
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0]
+  const handleFileChange = (files: File[]) => {
+    if (files && files.length > 0) {
+      const file = files[0]
       setFile(file)
       setPreview(URL.createObjectURL(file))
+    } else {
+      setFile(null)
+      setPreview(null)
     }
   }
 
@@ -92,10 +96,13 @@ export const NewBountyForm: React.FC<NewBountyFormProps> = ({ onCreated }: NewBo
         disabled={loading}
         InputProps={{ inputProps: { min: 0, step: '0.01' } }}
       />
-      <Button variant="contained" component="label" disabled={loading}>
-        Upload Image
-        <input type="file" hidden onChange={handleFileChange} />
-      </Button>
+      <DropzoneArea
+        acceptedFiles={['image/*']}
+        fileObjects={[]}
+        dropzoneText={'Drag and drop an image here or click'}
+        onChange={handleFileChange}
+        showPreviewsInDropzone
+      />
       {preview && (
         <Box mt={2} sx={{ textAlign: 'center' }}>
           <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />

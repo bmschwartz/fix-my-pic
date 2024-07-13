@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { ImageStoreProvider } from './ImageStoreContext'
 import { WalletProvider } from './WalletProvider'
 import { BountyProvider } from './BountyContext'
+import { SubmissionProvider } from './SubmissionContext'
 import { getPictureBountyApi, PictureBountyApi } from '@/utils/pictureBountyApi'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
 
@@ -31,7 +32,9 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <WalletProvider>
       <ImageStoreProvider>
-        <BountyProvider pictureBountyApi={pictureBountyApi}>{children}</BountyProvider>
+        <BountyProvider pictureBountyApi={pictureBountyApi}>
+          <SubmissionProvider pictureBountyApi={pictureBountyApi}>{children}</SubmissionProvider>
+        </BountyProvider>
       </ImageStoreProvider>
     </WalletProvider>
   )

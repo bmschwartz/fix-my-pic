@@ -1,7 +1,10 @@
-import { useBounty } from '@/hooks/useBounty'
+'use client'
+
 import { useImageStore } from '@/hooks/useImageStore'
+import { useSubmissions } from '@/hooks/useSubmissions'
 import { Backdrop, Box, Button, CircularProgress, TextField } from '@mui/material'
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { DropzoneArea } from 'mui-file-dropzone'
+import { FormEvent, useState } from 'react'
 
 interface NewSubmissionFormProps {
   onCreated?: () => void
@@ -9,7 +12,7 @@ interface NewSubmissionFormProps {
 }
 
 export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmissionFormProps) {
-  const { createSubmission } = useBounty()
+  const { createSubmission } = useSubmissions()
   const { uploadImage } = useImageStore()
   const [description, setDescription] = useState<string>('')
   const [file, setFile] = useState<File | null>(null)
@@ -41,11 +44,14 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
     onCreated?.()
   }
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0]
+  const handleFileChange = (files: File[]) => {
+    if (files && files.length > 0) {
+      const file = files[0]
       setFile(file)
       setPreview(URL.createObjectURL(file))
+    } else {
+      setFile(null)
+      setPreview(null)
     }
   }
 
@@ -66,10 +72,13 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
         required
         disabled={loading}
       />
-      <Button variant="contained" component="label" disabled={loading}>
-        Upload Image
-        <input type="file" hidden onChange={handleFileChange} />
-      </Button>
+      <DropzoneArea
+        acceptedFiles={['image/*']}
+        fileObjects={[]}
+        dropzoneText={'Drag and drop an image here or click'}
+        onChange={handleFileChange}
+        showPreviewsInDropzone
+      />
       {preview && (
         <Box mt={2} sx={{ textAlign: 'center' }}>
           <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />

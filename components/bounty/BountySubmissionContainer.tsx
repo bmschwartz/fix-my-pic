@@ -2,8 +2,11 @@ import { Button, Card, CardContent, CardMedia, Grid, Paper, Typography } from '@
 import { Bounty } from '@/types/bounty'
 import { BountySubmission } from '@/types/submission'
 import Link from 'next/link'
+import { useSubmissions } from '@/hooks/useSubmissions'
 
 export const BountySubmissionContainer = ({ bounty }: { bounty: Bounty }) => {
+  const { submissions } = useSubmissions()
+
   return (
     <Paper elevation={3} style={{ padding: '16px' }}>
       <Grid container justifyContent="space-between" alignItems="center">
@@ -15,7 +18,7 @@ export const BountySubmissionContainer = ({ bounty }: { bounty: Bounty }) => {
         </Link>
       </Grid>
       <Grid container spacing={3} mt={2}>
-        {bounty.submissions.map((submission: BountySubmission) => (
+        {submissions[bounty.address].map((submission: BountySubmission) => (
           <Grid item xs={12} sm={6} md={4} key={submission.address}>
             <Card>
               <CardMedia
