@@ -111,7 +111,6 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const state = await bountyContract.currentState()
     const submissionAddresses = await bountyContract.getSubmissions()
     const submissions = await _fetchBountySubmissions(submissionAddresses)
-    console.log('DEBUG submissions', submissions)
 
     return {
       address,
@@ -220,22 +219,12 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const provider = new BrowserProvider(wallet.provider)
     const signer = await provider.getSigner(walletAddress)
 
-    console.log(
-      'DEBUG ',
-      wallet.info.name,
-      walletAddress,
-      bountyAddress,
-      typeof imageId,
-      description
-    )
-
     try {
       const bountyContract = new Contract(bountyAddress, PictureBountySchema.abi, signer)
       const tx = await bountyContract.createSubmission(description, imageId)
       const receipt: ContractTransactionReceipt = await tx.wait()
 
       if (receipt.status !== 1 || !receipt.contractAddress) {
-        console.log('Receipt ', receipt)
         throw new Error(`Failed to create submission on bounty ${bountyAddress}`)
       }
 

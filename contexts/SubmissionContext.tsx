@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useEffect, useState } from 'react'
+import React, { ReactNode, createContext, useCallback, useEffect, useState } from 'react'
 
 import { useWallet } from '@/hooks/useWallet'
 import { PictureBountyApi } from '@/utils/pictureBountyApi'
@@ -6,7 +6,7 @@ import { BountySubmission } from '@/types/submission'
 import { Bounty } from '@/types/bounty'
 
 export interface SubmissionContextType {
-  submissions: Record<string, BountySubmission[]>
+  fetchSubmissions: (bountyAddress: string) => Promise<BountySubmission[]>
   createSubmission: (submissionData: CreateSubmissionProps) => Promise<BountySubmission>
 }
 
@@ -41,6 +41,14 @@ export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionPro
     _initSubmissions()
   }, [])
 
+  const fetchSubmissions = useCallback(async (bountyAddress: string) => {
+    try {
+      return await pictureBountyApi.getSubmissions({ bountyAddress, refetch: true })
+    } catch (err: any) {
+      throw new Error(err.message)
+    }
+  }, [])
+
   const createSubmission = async ({
     description,
     bountyAddress,
@@ -62,19 +70,24 @@ export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionPro
 
     const bountySubmissions = await pictureBountyApi.getSubmissions({
       bountyAddress,
-      refetch: false,
+      refetch: true,
     })
 
     setSubmissions((current: Record<string, BountySubmission[]>) => ({
       ...current,
-      bountyAddress: bountySubmissions,
+      [bountyAddress]: bountySubmissions,
     }))
+
+    console.log('DEBUG submissions', {
+      ...submissions,
+      [bountyAddress]: bountySubmissions,
+    })
 
     return submission
   }
 
   return (
-    <SubmissionContext.Provider value={{ submissions, createSubmission }}>
+    <SubmissionContext.Provider value={{ fetchSubmissions, createSubmission }}>
       {children}
     </SubmissionContext.Provider>
   )
