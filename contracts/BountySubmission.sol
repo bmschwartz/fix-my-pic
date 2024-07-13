@@ -15,6 +15,11 @@ contract BountySubmission {
     isWinner = false;
   }
 
-  // // Fallback function to receive Ether
+  // Fallback function to receive Ether
   receive() external payable {}
+
+  function setWinner(bool _isWinner) public {
+    require(msg.sender == owner, 'Only the PictureBounty contract can set the winner status');
+    isWinner = _isWinner;
+  }
 }

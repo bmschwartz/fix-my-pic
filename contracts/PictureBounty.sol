@@ -5,7 +5,9 @@ import './BountySubmission.sol';
 
 contract PictureBounty {
   enum State {
-    NEW
+    ACTIVE,
+    COMPLETED,
+    CANCELLED
   }
 
   address payable public owner;
@@ -19,6 +21,7 @@ contract PictureBounty {
 
   event RewardPaid(address _winner, uint256 _reward);
   event SubmissionCreated(address _bountyAddress, address _submissionAddress);
+  event BountyCancelled(address _bountyAddress, uint256 _refund);
 
   modifier onlyOwner() {
     require(msg.sender == owner, 'Only owner can call this function');
@@ -33,17 +36,18 @@ contract PictureBounty {
     description = _description;
     imageId = _imageId;
     reward = msg.value;
-    currentState = State.NEW;
+    currentState = State.ACTIVE;
   }
 
   function createSubmission(string memory _description, string memory _imageId) public {
+    require(currentState == State.ACTIVE, 'Submissions are not being accepted');
     BountySubmission submission = new BountySubmission(_description, _imageId);
     submissions.push(submission);
 
     emit SubmissionCreated(address(this), address(submission));
   }
 
-  function setState(State _state) public {
+  function setState(State _state) public onlyOwner {
     currentState = _state;
   }
 
@@ -55,16 +59,35 @@ contract PictureBounty {
     return submissionAddresses;
   }
 
-  // function payReward(address _winner) public onlyOwner {
-  //   require(bytes(submissions[_winner]).length != 0, 'No submission from this address');
-  //   require(address(this).balance >= reward, 'Insufficient contract balance');
+  function payOutReward(address _submissionAddress) public onlyOwner {
+    require(currentState == State.ACTIVE, 'Bounty is not active');
+    BountySubmission submission = BountySubmission(payable(_submissionAddress));
+    require(!submission.isWinner(), 'Submission has already been rewarded');
 
-  //   (bool success, ) = _winner.call{ value: reward }('');
-  //   require(success, 'Reward payment failed');
+    (bool success, ) = submission.owner().call{ value: reward }('');
+    require(success, 'Transfer failed.');
 
-  //   emit RewardPaid(_winner, reward);
-  // }
+    submission.setWinner(true);
 
-  // // Fallback function to receive Ether
-  receive() external payable {}
+    emit RewardPaid(submission.owner(), reward);
+
+    // Update state to COMPLETED
+    currentState = State.COMPLETED;
+
+    // Reset reward to 0 as it has been paid out
+    reward = 0;
+  }
+
+  function cancelBounty() public onlyOwner {
+    require(currentState == State.ACTIVE, 'Bounty cannot be cancelled in its current state');
+
+    uint256 refundAmount = reward;
+    reward = 0;
+    currentState = State.CANCELLED;
+
+    (bool success, ) = owner.call{ value: refundAmount }('');
+    require(success, 'Refund transfer failed.');
+
+    emit BountyCancelled(address(this), refundAmount);
+  }
 }
