@@ -36,7 +36,7 @@ if (!providerRpcUrl || providerRpcUrl === '') {
 export const BountyContext = createContext<BountyContextType | undefined>(undefined)
 
 export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderProps) => {
-  const { selectedAccount, selectedWallet } = useWallet()
+  const { selectedAccount: account, selectedWallet: wallet } = useWallet()
   const [bounties, setBounties] = useState<Bounty[]>([])
 
   useEffect(() => {
@@ -51,14 +51,22 @@ export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderPro
     return pictureBountyApi.getPictureBounties()
   }
 
-  const createBounty = async (bountyData: CreateBountyProps): Promise<Bounty> => {
-    const { title, description, imageId, reward } = bountyData
-
+  const createBounty = async ({
+    title,
+    description,
+    imageId,
+    reward,
+  }: CreateBountyProps): Promise<Bounty> => {
+    if (!wallet || !account) {
+      throw new Error('Wallet and account needed to create a bounty!')
+    }
     const bounty = await pictureBountyApi.createPictureBounty({
       title,
       description,
       imageId,
       reward,
+      wallet,
+      account,
     })
 
     setBounties([...bounties, bounty].filter(Boolean))

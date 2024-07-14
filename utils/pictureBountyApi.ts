@@ -10,13 +10,15 @@ import PictureBountyFactorySchema from '@/public/artifacts/PictureBountyFactory.
 
 import { convertUsdToEth } from './currency'
 import { batchTasksAsync } from './batch'
-import { useWallet } from '@/hooks/useWallet'
+import { EIP6963ProviderDetail } from '@/types/eip6963'
 
 interface CreatePictureBountyParams {
   title: string
   description: string
   imageId: string
   reward: number
+  wallet: EIP6963ProviderDetail
+  account: string
 }
 
 interface GetPictureBountyParams {
@@ -34,6 +36,8 @@ interface CreateSubmissionsParams {
   bountyAddress: string
   description: string
   imageId: string
+  wallet: EIP6963ProviderDetail
+  account: string
 }
 
 interface GetSubmissionsParams {
@@ -49,6 +53,8 @@ interface GetSubmissionParams {
 interface PayOutRewardParams {
   bountyAddress: string
   submissionAddress: string
+  wallet: EIP6963ProviderDetail
+  account: string
 }
 
 export interface PictureBountyApi {
@@ -74,23 +80,15 @@ if (!BOUNTY_FACTORY_ADDRESS) {
 }
 
 async function createPictureBountyApi(initialFactoryAddress: string): Promise<PictureBountyApi> {
-  const { selectedAccount, selectedWallet } = useWallet()
-
   let factoryContract: Contract
   let factoryAddress: string | Addressable = initialFactoryAddress
   let bounties: Record<string, Bounty> = {}
   let submissions: Record<string, BountySubmission> = {}
   const provider = new Provider(BOUNTY_RPC_URL)
 
-  const _requireWalletAndAccount = (): void => {
-    if (!selectedWallet || !selectedAccount) {
-      throw new Error('Wallet and account needed to create a bounty!')
-    }
-  }
-
-  const _getSigner = (): Promise<Signer> => {
-    const provider = new BrowserProvider(selectedWallet!.provider)
-    return provider.getSigner(selectedAccount!)
+  const _getSigner = (wallet: EIP6963ProviderDetail, account: string): Promise<Signer> => {
+    const provider = new BrowserProvider(wallet.provider)
+    return provider.getSigner(account)
   }
 
   const _pictureBountyCreatedHandler = async (address: string) => {
@@ -179,14 +177,12 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
   }
 
   const createPictureBounty = async (params: CreatePictureBountyParams): Promise<Bounty> => {
-    _requireWalletAndAccount()
-
-    const { title, description, imageId, reward } = params
+    const { title, description, imageId, reward, wallet, account } = params
 
     const bountyFactory = new Contract(
       factoryAddress,
       PictureBountyFactorySchema.abi,
-      await _getSigner()
+      await _getSigner(wallet, account)
     )
 
     const rewardEth = await convertUsdToEth(reward)
@@ -204,7 +200,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
 
       return await getPictureBounty({ address: receipt.contractAddress, refetch: true })
     } catch (error) {
-      console.error('Unable to create the bounty:', error)
+      console.error('Unable to create the bounty:', error, typeof error)
       throw error
     }
   }
@@ -228,14 +224,14 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     bountyAddress,
     imageId,
     description,
+    wallet,
+    account,
   }: CreateSubmissionsParams): Promise<BountySubmission> => {
-    _requireWalletAndAccount()
-
     try {
       const bountyContract = new Contract(
         bountyAddress,
         PictureBountySchema.abi,
-        await _getSigner()
+        await _getSigner(wallet, account)
       )
       const tx = await bountyContract.createSubmission(description, imageId)
       const receipt: ContractTransactionReceipt = await tx.wait()
@@ -269,25 +265,35 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     return submissions[address]
   }
 
-  const payOutReward = async (params: PayOutRewardParams): Promise<void> => {
-    _requireWalletAndAccount()
-
-    const { bountyAddress, submissionAddress } = params
-
+  const payOutReward = async ({
+    bountyAddress,
+    submissionAddress,
+    wallet,
+    account,
+  }: PayOutRewardParams): Promise<void> => {
     const bounty = await getPictureBounty({ address: bountyAddress, refetch: true })
-    if (bounty.owner !== selectedAccount) {
+    const submission = await getSubmission({ address: submissionAddress, refetch: true })
+
+    if (bounty.owner !== account) {
       throw new Error('You are not the owner of this bounty!')
     }
     if (bounty.state !== BountyState.ACTIVE) {
       throw new Error('This bounty is not active')
     }
+    if (submission.isWinner) {
+      throw new Error('This submission is already the winner!')
+    }
 
-    const bountyContract = new Contract(bountyAddress, PictureBountySchema.abi, await _getSigner())
+    const bountyContract = new Contract(
+      bountyAddress,
+      PictureBountySchema.abi,
+      await _getSigner(wallet, account)
+    )
     const tx = await bountyContract.payOutReward(submissionAddress)
     const receipt: ContractTransactionReceipt = await tx.wait()
     console.log('Receipt', receipt)
     if (receipt.status !== 1 || !receipt.contractAddress) {
-      throw new Error(`Failed to create submission on bounty ${bountyAddress}`)
+      throw new Error(`Failed to pay out reward on bounty ${bountyAddress}`)
     }
   }
 

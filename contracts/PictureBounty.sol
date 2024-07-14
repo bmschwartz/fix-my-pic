@@ -41,7 +41,7 @@ contract PictureBounty {
 
   function createSubmission(string memory _description, string memory _imageId) public {
     require(currentState == State.ACTIVE, 'Submissions are not being accepted');
-    BountySubmission submission = new BountySubmission(_description, _imageId);
+    BountySubmission submission = new BountySubmission(_description, _imageId, address(owner));
     submissions.push(submission);
 
     emit SubmissionCreated(address(this), address(submission));

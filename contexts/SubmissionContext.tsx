@@ -24,7 +24,7 @@ interface CreateSubmissionProps {
 export const SubmissionContext = createContext<SubmissionContextType | undefined>(undefined)
 
 export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionProviderProps) => {
-  const { selectedAccount, selectedWallet } = useWallet()
+  const { selectedAccount: account, selectedWallet: wallet } = useWallet()
   const [submissions, setSubmissions] = useState<Record<string, BountySubmission[]>>({})
 
   useEffect(() => {
@@ -54,18 +54,16 @@ export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionPro
     bountyAddress,
     imageId,
   }: CreateSubmissionProps): Promise<BountySubmission> => {
-    if (!selectedWallet || !selectedAccount) {
-      throw new Error('Wallet and account needed to create a bounty!')
+    if (!wallet || !account) {
+      throw new Error('Wallet and account needed to create a submission!')
     }
 
     const submission = await pictureBountyApi.createSubmission({
-      wallet: selectedWallet,
-      address: selectedAccount,
-      submissionData: {
-        bountyAddress,
-        description,
-        imageId,
-      },
+      wallet,
+      account,
+      bountyAddress,
+      description,
+      imageId,
     })
 
     const bountySubmissions = await pictureBountyApi.getSubmissions({
@@ -77,11 +75,6 @@ export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionPro
       ...current,
       [bountyAddress]: bountySubmissions,
     }))
-
-    console.log('DEBUG submissions', {
-      ...submissions,
-      [bountyAddress]: bountySubmissions,
-    })
 
     return submission
   }
