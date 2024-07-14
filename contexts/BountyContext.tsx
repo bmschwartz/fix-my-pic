@@ -52,16 +52,13 @@ export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderPro
   }
 
   const createBounty = async (bountyData: CreateBountyProps): Promise<Bounty> => {
-    if (!selectedWallet || !selectedAccount) {
-      throw new Error('Wallet and account needed to create a bounty!')
-    }
-
     const { title, description, imageId, reward } = bountyData
 
     const bounty = await pictureBountyApi.createPictureBounty({
-      wallet: selectedWallet,
-      address: selectedAccount,
-      bountyData: { title, description, imageId, reward },
+      title,
+      description,
+      imageId,
+      reward,
     })
 
     setBounties([...bounties, bounty].filter(Boolean))

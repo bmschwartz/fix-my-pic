@@ -1,13 +1,13 @@
 import { BountySubmission } from './submission'
 
 export enum BountyState {
-  NEW,
-  FUNDED,
-  ACCEPTING_SUBMISSIONS,
-  PAID_OUT,
+  ACTIVE,
+  COMPLETED,
+  CANCELLED,
 }
 
 export interface Bounty {
+  owner: string
   address: string
   title: string
   description: string
