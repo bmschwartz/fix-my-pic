@@ -85,6 +85,6 @@ describe('PictureBountyFactory', function () {
 
     await expect(tx)
       .to.emit(bountyFactory, 'PictureBountyCreated')
-      .withArgs(bountyAddress, 'A title', 'Desc', 'some-id', rewardInWei)
+      .withArgs(addr1, bountyAddress, 'A title', 'Desc', 'some-id', rewardInWei)
   })
 })
