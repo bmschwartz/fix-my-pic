@@ -23,4 +23,6 @@ contract BountySubmission {
   function setWinner() public onlyPictureBounty {
     isWinner = true;
   }
+
+  receive() external payable {}
 }

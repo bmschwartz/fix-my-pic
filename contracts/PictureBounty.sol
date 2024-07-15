@@ -72,7 +72,7 @@ contract PictureBounty {
   function payOutReward(address _submissionAddress) public onlyOwner {
     require(currentState == State.ACTIVE, 'Bounty is not active');
 
-    BountySubmission submission = BountySubmission(_submissionAddress);
+    BountySubmission submission = BountySubmission(payable(_submissionAddress));
     require(!submission.isWinner(), 'Submission has already been rewarded');
 
     // Update state before transferring funds to prevent reentrancy attacks
