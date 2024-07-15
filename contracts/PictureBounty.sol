@@ -28,10 +28,16 @@ contract PictureBounty {
     _;
   }
 
-  constructor(string memory _title, string memory _description, string memory _imageId) payable {
+  constructor(
+    string memory _title,
+    string memory _description,
+    string memory _imageId,
+    address _owner
+  ) payable {
     require(msg.value > 0, 'Initial reward must be greater than 0');
+    require(_owner != address(0), 'Owner address cannot be zero');
 
-    owner = payable(msg.sender);
+    owner = payable(_owner);
     title = _title;
     description = _description;
     imageId = _imageId;
@@ -39,9 +45,13 @@ contract PictureBounty {
     currentState = State.ACTIVE;
   }
 
-  function createSubmission(string memory _description, string memory _imageId) public {
+  function createSubmission(
+    address _submitter,
+    string memory _description,
+    string memory _imageId
+  ) public {
     require(currentState == State.ACTIVE, 'Submissions are not being accepted');
-    BountySubmission submission = new BountySubmission(_description, _imageId, address(owner));
+    BountySubmission submission = new BountySubmission(_submitter, _description, _imageId);
     submissions.push(submission);
 
     emit SubmissionCreated(address(this), address(submission));
@@ -61,21 +71,20 @@ contract PictureBounty {
 
   function payOutReward(address _submissionAddress) public onlyOwner {
     require(currentState == State.ACTIVE, 'Bounty is not active');
-    BountySubmission submission = BountySubmission(payable(_submissionAddress));
+
+    BountySubmission submission = BountySubmission(_submissionAddress);
     require(!submission.isWinner(), 'Submission has already been rewarded');
 
-    (bool success, ) = submission.owner().call{ value: reward }('');
+    // Update state before transferring funds to prevent reentrancy attacks
+    currentState = State.COMPLETED;
+    reward = 0;
+
+    (bool success, ) = submission.submitter().call{ value: reward }('');
     require(success, 'Transfer failed.');
 
-    submission.setWinner(true);
+    submission.setWinner(); // Mark the submission as a winner
 
-    emit RewardPaid(submission.owner(), reward);
-
-    // Update state to COMPLETED
-    currentState = State.COMPLETED;
-
-    // Reset reward to 0 as it has been paid out
-    reward = 0;
+    emit RewardPaid(submission.submitter(), reward);
   }
 
   function cancelBounty() public onlyOwner {

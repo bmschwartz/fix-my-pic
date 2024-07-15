@@ -8,6 +8,7 @@ export interface BountyContextType {
   createBounty: (bountyData: CreateBountyProps) => Promise<Bounty>
   getPictureBounties: () => Promise<Bounty[]>
   getPictureBounty: (address: string) => Promise<Bounty | undefined>
+  payOutReward: (bountyAddress: string, submissionAddress: string) => Promise<void>
   bounties: Bounty[]
 }
 
@@ -74,9 +75,23 @@ export const BountyProvider = ({ children, pictureBountyApi }: BountyProviderPro
     return bounty
   }
 
+  const payOutReward = async (bountyAddress: string, submissionAddress: string): Promise<void> => {
+    if (!wallet || !account) {
+      throw new Error('Wallet and account needed to create a bounty!')
+    }
+
+    console.log('DEBUG account', account)
+    await pictureBountyApi.payOutReward({
+      wallet,
+      account,
+      bountyAddress,
+      submissionAddress,
+    })
+  }
+
   return (
     <BountyContext.Provider
-      value={{ createBounty, getPictureBounty, getPictureBounties, bounties }}
+      value={{ createBounty, getPictureBounty, getPictureBounties, payOutReward, bounties }}
     >
       {children}
     </BountyContext.Provider>

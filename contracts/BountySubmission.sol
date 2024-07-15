@@ -2,26 +2,25 @@
 pragma solidity ^0.8.0;
 
 contract BountySubmission {
-  address payable public owner;
-
   bool public isWinner;
   string public imageId;
   string public description;
-  address public bountyOwner;
+  address public pictureBounty;
+  address payable public submitter;
 
-  constructor(string memory _description, string memory _imageId, address _bountyOwner) {
-    owner = payable(msg.sender);
+  constructor(address _submitter, string memory _description, string memory _imageId) {
+    submitter = payable(_submitter);
     description = _description;
     imageId = _imageId;
-    isWinner = false;
-    bountyOwner = _bountyOwner;
+    pictureBounty = msg.sender; // Directly set pictureBounty to the address of the contract that created this submission
   }
 
-  // Fallback function to receive Ether
-  receive() external payable {}
+  modifier onlyPictureBounty() {
+    require(msg.sender == pictureBounty, 'Only the PictureBounty contract can call this function');
+    _;
+  }
 
-  function setWinner(bool _isWinner) public {
-    require(msg.sender == bountyOwner, 'Only the PictureBounty owner can set the winner status');
-    isWinner = _isWinner;
+  function setWinner() public onlyPictureBounty {
+    isWinner = true;
   }
 }

@@ -167,12 +167,14 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const description = await submissionContract.description()
     const imageId = await submissionContract.imageId()
     const isWinner = await submissionContract.isWinner()
+    const owner = await submissionContract.owner()
 
     return {
+      owner,
       address,
-      description,
       imageId,
       isWinner,
+      description,
     }
   }
 
@@ -274,10 +276,12 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const bounty = await getPictureBounty({ address: bountyAddress, refetch: true })
     const submission = await getSubmission({ address: submissionAddress, refetch: true })
 
-    if (bounty.owner !== account) {
+    console.log('DEBUG bounty', bounty.state)
+
+    if (bounty.owner.toLowerCase() !== account.toLowerCase()) {
       throw new Error('You are not the owner of this bounty!')
     }
-    if (bounty.state !== BountyState.ACTIVE) {
+    if (Number(bounty.state) !== BountyState.ACTIVE) {
       throw new Error('This bounty is not active')
     }
     if (submission.isWinner) {

@@ -6,7 +6,7 @@ import { Bounty } from '@/types/bounty'
 import { useBounty } from '@/hooks/useBounty'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
 import { BountyDetailInfo } from '@/components/bounty/BountyDetailInfo'
-import { BountySubmissionContainer } from '@/components/bounty/BountySubmissionContainer'
+import { SubmissionList } from '@/components/submission/SubmissionList'
 
 const BountyDetailPage: React.FC = () => {
   const router = useRouter()
@@ -41,7 +41,7 @@ const BountyDetailPage: React.FC = () => {
         <BountyDetailInfo bounty={bounty} />
       </Box>
       <Box mt={4} mb={4}>
-        <BountySubmissionContainer bounty={bounty} />
+        <SubmissionList bounty={bounty} />
       </Box>
     </Container>
   )

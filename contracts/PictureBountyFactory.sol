@@ -7,6 +7,7 @@ contract PictureBountyFactory {
   PictureBounty[] public pictureBounties;
 
   event PictureBountyCreated(
+    address indexed creator,
     address bountyAddress,
     string title,
     string description,
@@ -24,11 +25,19 @@ contract PictureBountyFactory {
     PictureBounty pictureBounty = (new PictureBounty){ value: msg.value }(
       title,
       description,
-      imageId
+      imageId,
+      msg.sender
     );
     pictureBounties.push(pictureBounty);
 
-    emit PictureBountyCreated(address(pictureBounty), title, description, imageId, msg.value);
+    emit PictureBountyCreated(
+      msg.sender,
+      address(pictureBounty),
+      title,
+      description,
+      imageId,
+      msg.value
+    );
   }
 
   function getPictureBounties() public view returns (address[] memory) {
