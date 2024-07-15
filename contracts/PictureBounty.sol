@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import './BountySubmission.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
-contract PictureBounty {
+contract PictureBounty is ReentrancyGuard {
   enum State {
     ACTIVE,
     COMPLETED,
@@ -69,7 +70,7 @@ contract PictureBounty {
     return submissionAddresses;
   }
 
-  function payOutReward(address _submissionAddress) public onlyOwner {
+  function payOutReward(address _submissionAddress) public onlyOwner nonReentrant {
     require(currentState == State.ACTIVE, 'Bounty is not active');
 
     BountySubmission submission = BountySubmission(payable(_submissionAddress));
@@ -77,17 +78,18 @@ contract PictureBounty {
 
     // Update state before transferring funds to prevent reentrancy attacks
     currentState = State.COMPLETED;
+    uint256 rewardAmount = reward;
     reward = 0;
 
-    (bool success, ) = submission.submitter().call{ value: reward }('');
+    (bool success, ) = submission.submitter().call{ value: rewardAmount }('');
     require(success, 'Transfer failed.');
 
     submission.setWinner(); // Mark the submission as a winner
 
-    emit RewardPaid(submission.submitter(), reward);
+    emit RewardPaid(submission.submitter(), rewardAmount);
   }
 
-  function cancelBounty() public onlyOwner {
+  function cancelBounty() public onlyOwner nonReentrant {
     require(currentState == State.ACTIVE, 'Bounty cannot be cancelled in its current state');
 
     uint256 refundAmount = reward;
