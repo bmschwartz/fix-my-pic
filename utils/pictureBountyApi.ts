@@ -235,7 +235,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
         PictureBountySchema.abi,
         await _getSigner(wallet, account)
       )
-      const tx = await bountyContract.createSubmission(description, imageId)
+      const tx = await bountyContract.createSubmission(account, description, imageId)
       const receipt: ContractTransactionReceipt = await tx.wait()
 
       if (receipt.status !== 1 || !receipt.contractAddress) {
