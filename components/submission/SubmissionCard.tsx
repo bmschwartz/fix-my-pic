@@ -6,15 +6,16 @@ import { ChooseWinnerConfirmation } from './ChooseWinnerConfirmation'
 interface SubmissionCardProps {
   submission: BountySubmission
   displayChooseWinner: boolean
-  onChooseWinner: (address: string) => Promise<void>
+
   onClick: () => void
+  onChooseWinner: (address: string) => Promise<void>
 }
 
 const SubmissionCard = ({
   submission,
   displayChooseWinner,
-  onChooseWinner,
   onClick,
+  onChooseWinner,
 }: SubmissionCardProps) => {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
