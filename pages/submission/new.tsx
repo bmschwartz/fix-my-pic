@@ -6,6 +6,10 @@ export default function NewSubmissionPage() {
   const router = useRouter()
   const bountyAddress = router.query.bountyAddress as string
 
+  const onSubmissionCreated = () => {
+    router.push(`/bounty/${bountyAddress}`)
+  }
+
   return (
     <Container
       sx={{
@@ -31,7 +35,7 @@ export default function NewSubmissionPage() {
           backgroundColor: 'background.paper',
         }}
       >
-        <NewSubmissionForm bountyAddress={bountyAddress} onCreated={() => router.back()} />
+        <NewSubmissionForm bountyAddress={bountyAddress} onCreated={onSubmissionCreated} />
       </Box>
     </Container>
   )

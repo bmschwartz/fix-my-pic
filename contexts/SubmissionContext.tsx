@@ -6,7 +6,7 @@ import { BountySubmission } from '@/types/submission'
 import { Bounty } from '@/types/bounty'
 
 export interface SubmissionContextType {
-  fetchSubmissions: (bountyAddress: string) => Promise<BountySubmission[]>
+  getBountySubmissions: (bountyAddress: string) => Promise<BountySubmission[]>
   createSubmission: (submissionData: CreateSubmissionProps) => Promise<BountySubmission>
 }
 
@@ -41,13 +41,33 @@ export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionPro
     _initSubmissions()
   }, [])
 
-  const fetchSubmissions = useCallback(async (bountyAddress: string) => {
-    try {
-      return await pictureBountyApi.getSubmissions({ bountyAddress, refetch: true })
-    } catch (err: any) {
-      throw new Error(err.message)
-    }
-  }, [])
+  const _refreshSubmissions = async (bountyAddress: string) => {
+    const bountySubmissions = await pictureBountyApi.getSubmissions({
+      bountyAddress,
+      refetch: true,
+    })
+
+    setSubmissions((current: Record<string, BountySubmission[]>) => ({
+      ...current,
+      [bountyAddress]: bountySubmissions,
+    }))
+
+    return bountySubmissions
+  }
+
+  const getBountySubmissions = useCallback(
+    async (bountyAddress: string) => {
+      if (!submissions[bountyAddress]) {
+        try {
+          return _refreshSubmissions(bountyAddress)
+        } catch (e) {
+          console.error(e)
+        }
+      }
+      return submissions[bountyAddress] || []
+    },
+    [submissions]
+  )
 
   const createSubmission = async ({
     description,
@@ -66,21 +86,13 @@ export const SubmissionProvider = ({ children, pictureBountyApi }: SubmissionPro
       imageId,
     })
 
-    const bountySubmissions = await pictureBountyApi.getSubmissions({
-      bountyAddress,
-      refetch: true,
-    })
-
-    setSubmissions((current: Record<string, BountySubmission[]>) => ({
-      ...current,
-      [bountyAddress]: bountySubmissions,
-    }))
+    await _refreshSubmissions(bountyAddress)
 
     return submission
   }
 
   return (
-    <SubmissionContext.Provider value={{ fetchSubmissions, createSubmission }}>
+    <SubmissionContext.Provider value={{ getBountySubmissions, createSubmission }}>
       {children}
     </SubmissionContext.Provider>
   )

@@ -9,7 +9,7 @@ import { useBounty } from '@/hooks/useBounty'
 import { useWallet } from '@/hooks/useWallet'
 
 export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
-  const { fetchSubmissions } = useSubmissions()
+  const { getBountySubmissions } = useSubmissions()
   const { selectedWallet, selectedAccount } = useWallet()
   const { payOutReward } = useBounty()
   const [submissions, setSubmissions] = useState<BountySubmission[]>([])
@@ -17,13 +17,14 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
   const isBountyOwner = selectedAccount?.toLowerCase() == bounty.owner.toLowerCase()
   const isActiveBounty = Number(bounty.state) === BountyState.ACTIVE
   const displayChooseWinner = isBountyOwner && isActiveBounty
+  const displaySubmitEdit = selectedWallet && selectedAccount && isActiveBounty
 
   useEffect(() => {
     const getSubmissions = async () => {
       setLoading(true)
 
       try {
-        const data = await fetchSubmissions(bounty.address)
+        const data = await getBountySubmissions(bounty.address)
         setSubmissions(data)
       } catch (err) {
         console.error('Error fetching submissions', err)
@@ -33,7 +34,7 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
     }
 
     getSubmissions()
-  }, [bounty.address, fetchSubmissions])
+  }, [bounty.address, getBountySubmissions])
 
   const onChooseWinner = useCallback(async (submissionAddress: string): Promise<void> => {
     await payOutReward(bounty.address, submissionAddress)
@@ -43,7 +44,7 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
     <Paper elevation={3} style={{ padding: '16px' }}>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Submissions</Typography>
-        {selectedWallet && selectedAccount && (
+        {displaySubmitEdit && (
           <Link href={`/submission/new?bountyAddress=${bounty.address}`} passHref>
             <Button variant="contained" color="primary">
               Submit Edit
