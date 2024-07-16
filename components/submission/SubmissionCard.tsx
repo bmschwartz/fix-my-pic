@@ -7,17 +7,20 @@ interface SubmissionCardProps {
   submission: BountySubmission
   displayChooseWinner: boolean
   onChooseWinner: (address: string) => Promise<void>
+  onClick: () => void
 }
 
 const SubmissionCard = ({
   submission,
   displayChooseWinner,
   onChooseWinner,
+  onClick,
 }: SubmissionCardProps) => {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (e: React.MouseEvent) => {
+    e.stopPropagation()
     setOpen(true)
   }
 
@@ -35,7 +38,7 @@ const SubmissionCard = ({
   return (
     <>
       <Grid item xs={12} sm={6} md={4} key={submission.address}>
-        <Card>
+        <Card onClick={onClick} sx={{ cursor: 'pointer' }}>
           <CardMedia
             component="img"
             src={`https://ipfs.io/ipfs/${submission.imageId}`}
