@@ -156,6 +156,10 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
           <Grid item xs={12} mt={5} mb={5} style={{ textAlign: 'center' }}>
             <CircularProgress />
           </Grid>
+        ) : submissions.length === 0 ? (
+          <Grid item xs={12} mt={5} mb={5} style={{ textAlign: 'center' }}>
+            <Typography variant="h6">No edits have been submitted yet</Typography>
+          </Grid>
         ) : (
           submissions.map((submission: BountySubmission, index: number) => (
             <SubmissionCard

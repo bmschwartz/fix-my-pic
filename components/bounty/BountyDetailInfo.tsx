@@ -1,7 +1,11 @@
+import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 import { Bounty } from '@/types/bounty'
-import { Button, Grid, Paper, Typography } from '@mui/material'
+import { rewardDisplayString } from '@/utils/bounty'
+import { Button, CircularProgress, Grid, Paper, Typography } from '@mui/material'
 
 export const BountyDetailInfo = ({ bounty }: { bounty: Bounty }) => {
+  const { ethToUsdRate } = useEthUsdRate()
+
   const handleDownload = () => {
     const link = document.createElement('a')
     link.href = `https://ipfs.io/ipfs/${bounty.imageId}`
@@ -26,7 +30,14 @@ export const BountyDetailInfo = ({ bounty }: { bounty: Bounty }) => {
           <Typography variant="body1" paragraph>
             {bounty.description}
           </Typography>
-          <Typography variant="h6">Reward: {bounty.reward}</Typography>
+          <Typography variant="h6">
+            Reward:{' '}
+            {ethToUsdRate ? (
+              rewardDisplayString(bounty, ethToUsdRate)
+            ) : (
+              <CircularProgress size={20} />
+            )}
+          </Typography>
           <Button
             variant="contained"
             color="secondary"

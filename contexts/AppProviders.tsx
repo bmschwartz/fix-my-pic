@@ -1,10 +1,13 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { ImageStoreProvider } from './ImageStoreContext'
-import { WalletProvider } from './WalletProvider'
-import { BountyProvider } from './BountyContext'
-import { SubmissionProvider } from './SubmissionContext'
+
 import { getPictureBountyApi, PictureBountyApi } from '@/utils/pictureBountyApi'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
+
+import { BountyProvider } from './BountyContext'
+import { WalletProvider } from './WalletProvider'
+import { EthUsdRateProvider } from './EthRateProvider'
+import { SubmissionProvider } from './SubmissionContext'
+import { ImageStoreProvider } from './ImageStoreContext'
 
 interface AppProvidersProps {
   children: ReactNode
@@ -30,13 +33,15 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   }
 
   return (
-    <WalletProvider>
-      <ImageStoreProvider>
-        <BountyProvider pictureBountyApi={pictureBountyApi}>
-          <SubmissionProvider pictureBountyApi={pictureBountyApi}>{children}</SubmissionProvider>
-        </BountyProvider>
-      </ImageStoreProvider>
-    </WalletProvider>
+    <EthUsdRateProvider>
+      <WalletProvider>
+        <ImageStoreProvider>
+          <BountyProvider pictureBountyApi={pictureBountyApi}>
+            <SubmissionProvider pictureBountyApi={pictureBountyApi}>{children}</SubmissionProvider>
+          </BountyProvider>
+        </ImageStoreProvider>
+      </WalletProvider>
+    </EthUsdRateProvider>
   )
 }
 

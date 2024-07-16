@@ -1,9 +1,8 @@
 import React from 'react'
+import Link from 'next/link'
 import { Button, Box } from '@mui/material'
 import { useWallet } from '@/hooks/useWallet'
-import { SelectedWallet } from '@/components/wallet'
 import { BountyList } from './BountyList'
-import Link from 'next/link'
 
 export const BountyHome: React.FC = () => {
   const { selectedWallet, selectedAccount } = useWallet()

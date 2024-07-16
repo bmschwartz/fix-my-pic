@@ -8,7 +8,7 @@ import PictureBountySchema from '@/public/artifacts/PictureBounty.json'
 import BountySubmissionSchema from '@/public/artifacts/BountySubmission.json'
 import PictureBountyFactorySchema from '@/public/artifacts/PictureBountyFactory.json'
 
-import { convertUsdToEth } from './currency'
+import { convertUsdToEthWithoutRate } from './currency'
 import { batchTasksAsync } from './batch'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 
@@ -187,7 +187,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
       await _getSigner(wallet, account)
     )
 
-    const rewardEth = await convertUsdToEth(reward)
+    const rewardEth = await convertUsdToEthWithoutRate(reward)
     const rewardInWei = ethers.parseEther(rewardEth)
 
     try {
