@@ -167,10 +167,10 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     const description = await submissionContract.description()
     const imageId = await submissionContract.imageId()
     const isWinner = await submissionContract.isWinner()
-    const owner = await submissionContract.owner()
+    const submitter = await submissionContract.submitter()
 
     return {
-      owner,
+      submitter,
       address,
       imageId,
       isWinner,
@@ -200,7 +200,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
         throw new Error('Failed to create bounty')
       }
 
-      return await getPictureBounty({ address: receipt.contractAddress, refetch: true })
+      return getPictureBounty({ address: receipt.contractAddress, refetch: true })
     } catch (error) {
       console.error('Unable to create the bounty:', error, typeof error)
       throw error
@@ -295,8 +295,7 @@ async function createPictureBountyApi(initialFactoryAddress: string): Promise<Pi
     )
     const tx = await bountyContract.payOutReward(submissionAddress)
     const receipt: ContractTransactionReceipt = await tx.wait()
-    console.log('Receipt', receipt)
-    if (receipt.status !== 1 || !receipt.contractAddress) {
+    if (receipt.status !== 1) {
       throw new Error(`Failed to pay out reward on bounty ${bountyAddress}`)
     }
   }

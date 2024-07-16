@@ -1,14 +1,5 @@
-import {
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  Grid,
-  Paper,
-  Typography,
-} from '@mui/material'
-import { Bounty } from '@/types/bounty'
+import { Button, CircularProgress, Grid, Paper, Typography } from '@mui/material'
+import { Bounty, BountyState } from '@/types/bounty'
 import { BountySubmission } from '@/types/submission'
 import Link from 'next/link'
 import { useSubmissions } from '@/hooks/useSubmissions'
@@ -19,11 +10,13 @@ import { useWallet } from '@/hooks/useWallet'
 
 export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
   const { fetchSubmissions } = useSubmissions()
-  const { selectedAccount } = useWallet()
+  const { selectedWallet, selectedAccount } = useWallet()
   const { payOutReward } = useBounty()
   const [submissions, setSubmissions] = useState<BountySubmission[]>([])
   const [loading, setLoading] = useState(true)
   const isBountyOwner = selectedAccount?.toLowerCase() == bounty.owner.toLowerCase()
+  const isActiveBounty = Number(bounty.state) === BountyState.ACTIVE
+  const displayChooseWinner = isBountyOwner && isActiveBounty
 
   useEffect(() => {
     const getSubmissions = async () => {
@@ -50,11 +43,13 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
     <Paper elevation={3} style={{ padding: '16px' }}>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Submissions</Typography>
-        <Link href={`/submission/new?bountyAddress=${bounty.address}`} passHref>
-          <Button variant="contained" color="primary">
-            Submit Edit
-          </Button>
-        </Link>
+        {selectedWallet && selectedAccount && (
+          <Link href={`/submission/new?bountyAddress=${bounty.address}`} passHref>
+            <Button variant="contained" color="primary">
+              Submit Edit
+            </Button>
+          </Link>
+        )}
       </Grid>
       <Grid container spacing={3} mt={2}>
         {loading ? (
@@ -66,7 +61,7 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
             <SubmissionCard
               key={submission.address}
               submission={submission}
-              isBountyOwner={isBountyOwner}
+              displayChooseWinner={displayChooseWinner}
               onChooseWinner={onChooseWinner}
             />
           ))

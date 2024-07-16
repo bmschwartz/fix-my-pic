@@ -1,7 +1,7 @@
 import React from 'react'
 import { useWallet } from '@/hooks/useWallet'
 import { ConnectWallet } from './ConnectWallet'
-import { Button, Typography, Box } from '@mui/material'
+import { Button, Box } from '@mui/material'
 
 export const SelectedWallet = () => {
   const { selectedWallet, selectedAccount, disconnectWallet } = useWallet()

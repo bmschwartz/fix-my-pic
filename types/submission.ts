@@ -1,5 +1,5 @@
 export interface BountySubmission {
-  owner: string
+  submitter: string
   address: string
   description: string
   imageId: string

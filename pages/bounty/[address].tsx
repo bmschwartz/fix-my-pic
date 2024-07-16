@@ -7,6 +7,7 @@ import { useBounty } from '@/hooks/useBounty'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
 import { BountyDetailInfo } from '@/components/bounty/BountyDetailInfo'
 import { SubmissionList } from '@/components/submission/SubmissionList'
+import { SelectedWallet } from '@/components/wallet'
 
 const BountyDetailPage: React.FC = () => {
   const router = useRouter()
@@ -32,6 +33,7 @@ const BountyDetailPage: React.FC = () => {
 
   return (
     <Container>
+      <SelectedWallet />
       <Box mt={4} mb={4}>
         <Button variant="contained" color="primary" onClick={() => router.back()}>
           Back

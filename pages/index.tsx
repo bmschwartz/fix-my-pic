@@ -1,9 +1,14 @@
 import { BountyHome } from '@/components/bounty'
+import { SelectedWallet } from '@/components/wallet'
+import { Box, Container } from '@mui/material'
 
 export default function Home() {
   return (
-    <div>
-      <BountyHome />
-    </div>
+    <Container>
+      <SelectedWallet />
+      <Box mt={4} mb={4}>
+        <BountyHome />
+      </Box>
+    </Container>
   )
 }

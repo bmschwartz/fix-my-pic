@@ -17,6 +17,7 @@ contract PictureBounty is ReentrancyGuard {
   string public description;
   string public imageId;
   uint256 public reward;
+  uint256 public remainingReward;
   State public currentState;
   BountySubmission[] public submissions;
 
@@ -43,6 +44,7 @@ contract PictureBounty is ReentrancyGuard {
     description = _description;
     imageId = _imageId;
     reward = msg.value;
+    remainingReward = msg.value;
     currentState = State.ACTIVE;
   }
 
@@ -78,8 +80,8 @@ contract PictureBounty is ReentrancyGuard {
 
     // Update state before transferring funds to prevent reentrancy attacks
     currentState = State.COMPLETED;
-    uint256 rewardAmount = reward;
-    reward = 0;
+    uint256 rewardAmount = remainingReward;
+    remainingReward = 0;
 
     (bool success, ) = submission.submitter().call{ value: rewardAmount }('');
     require(success, 'Transfer failed.');
@@ -92,8 +94,8 @@ contract PictureBounty is ReentrancyGuard {
   function cancelBounty() public onlyOwner nonReentrant {
     require(currentState == State.ACTIVE, 'Bounty cannot be cancelled in its current state');
 
-    uint256 refundAmount = reward;
-    reward = 0;
+    uint256 refundAmount = remainingReward;
+    remainingReward = 0;
     currentState = State.CANCELLED;
 
     (bool success, ) = owner.call{ value: refundAmount }('');

@@ -9,8 +9,7 @@ export const BountyHome: React.FC = () => {
   const { selectedWallet, selectedAccount } = useWallet()
 
   return (
-    <Box p={2}>
-      <SelectedWallet />
+    <div>
       {selectedWallet && selectedAccount && (
         <Box mt={2} textAlign="center">
           <Link href="/bounty/new" passHref>
@@ -23,6 +22,6 @@ export const BountyHome: React.FC = () => {
       <Box mt={2}>
         <BountyList />
       </Box>
-    </Box>
+    </div>
   )
 }

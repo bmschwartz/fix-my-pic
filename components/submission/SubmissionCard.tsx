@@ -1,28 +1,21 @@
 import React, { useState } from 'react'
-import {
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from '@mui/material'
+import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material'
 import { BountySubmission } from '@/types/submission'
+import { ChooseWinnerConfirmation } from './ChooseWinnerConfirmation'
 
 interface SubmissionCardProps {
   submission: BountySubmission
-  isBountyOwner: boolean
+  displayChooseWinner: boolean
   onChooseWinner: (address: string) => Promise<void>
 }
 
-const SubmissionCard = ({ submission, isBountyOwner, onChooseWinner }: SubmissionCardProps) => {
+const SubmissionCard = ({
+  submission,
+  displayChooseWinner,
+  onChooseWinner,
+}: SubmissionCardProps) => {
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleClickOpen = () => {
     setOpen(true)
@@ -33,7 +26,9 @@ const SubmissionCard = ({ submission, isBountyOwner, onChooseWinner }: Submissio
   }
 
   const handleConfirm = async () => {
+    setLoading(true)
     await onChooseWinner(submission.address)
+    setLoading(false)
     handleClose()
   }
 
@@ -49,7 +44,7 @@ const SubmissionCard = ({ submission, isBountyOwner, onChooseWinner }: Submissio
           <CardContent>
             <Typography variant="body2">{submission.description}</Typography>
           </CardContent>
-          {isBountyOwner && (
+          {displayChooseWinner && (
             <CardActions style={{ justifyContent: 'center' }}>
               <Button size="small" color="primary" variant="contained" onClick={handleClickOpen}>
                 Choose Winner
@@ -58,28 +53,14 @@ const SubmissionCard = ({ submission, isBountyOwner, onChooseWinner }: Submissio
           )}
         </Card>
       </Grid>
-      {isBountyOwner && (
-        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-          <DialogTitle>Confirm Winner</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to choose this submission as the winner?
-            </DialogContentText>
-            <CardMedia
-              component="img"
-              src={`https://ipfs.io/ipfs/${submission.imageId}`}
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirm} color="primary">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+      {displayChooseWinner && (
+        <ChooseWinnerConfirmation
+          handleClose={handleClose}
+          handleConfirm={handleConfirm}
+          open={open}
+          loading={loading}
+          imageURL={`https://ipfs.io/ipfs/${submission.imageId}`}
+        />
       )}
     </>
   )
