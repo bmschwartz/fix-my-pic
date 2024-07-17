@@ -91,14 +91,12 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
         setConfirmDialogOpen={setConfirmDialogOpen}
       />
 
-      {currentSlide && (
-        <ConfirmationDialog
-          open={confirmDialogOpen}
-          handleClose={() => setConfirmDialogOpen(false)}
-          submission={submissions[currentSlide]}
-          onChooseWinner={onChooseWinner}
-        />
-      )}
+      <ConfirmationDialog
+        open={confirmDialogOpen}
+        handleClose={() => setConfirmDialogOpen(false)}
+        submission={submissions[currentSlide]}
+        onChooseWinner={onChooseWinner}
+      />
     </Paper>
   )
 }

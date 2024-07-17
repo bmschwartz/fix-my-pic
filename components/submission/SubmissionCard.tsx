@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material'
 import { BountySubmission } from '@/types/submission'
 import { ChooseWinnerConfirmation } from './ChooseWinnerConfirmation'
+import ConfirmationDialog from './ConfirmationDialog'
 
 interface SubmissionCardProps {
   submission: BountySubmission
@@ -58,12 +59,11 @@ const SubmissionCard = ({
         </Card>
       </Grid>
       {displayChooseWinner && (
-        <ChooseWinnerConfirmation
-          handleClose={handleClose}
-          handleConfirm={handleConfirm}
+        <ConfirmationDialog
           open={open}
-          loading={loading}
-          imageURL={`https://ipfs.io/ipfs/${submission.imageId}`}
+          handleClose={() => setOpen(false)}
+          submission={submission}
+          onChooseWinner={onChooseWinner}
         />
       )}
     </>
