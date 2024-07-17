@@ -32,6 +32,10 @@ const ConfirmationDialog = ({
     handleClose()
   }
 
+  if (!submission) {
+    return <></>
+  }
+
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogContent style={{ textAlign: 'center' }}>
