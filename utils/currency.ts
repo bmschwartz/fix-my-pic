@@ -27,3 +27,13 @@ export const convertEthToUsdWithoutRate = async (ethAmount: number | string): Pr
   const ethUsdRate = await getEthUsdRate()
   return convertEthToUsd(ethAmount, ethUsdRate)
 }
+
+export const ethDisplayString = (ethAmount: number): string => {
+  const eth = ethAmount.toFixed(6)
+  return `${eth} ETH`
+}
+
+export const ethDisplayWithUSDString = (ethAmount: number, rate: number): string => {
+  const eth = ethAmount.toFixed(6)
+  return `${eth} ETH / $${convertEthToUsd(ethAmount, rate)}`
+}

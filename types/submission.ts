@@ -5,3 +5,11 @@ export interface BountySubmission {
   imageId: string
   isWinner: boolean
 }
+
+export interface ImageRequestSubmission {
+  submitter: string
+  address: string
+  description: string
+  imageId: string
+  price: number
+}

@@ -74,6 +74,12 @@ const config: any = {
       ethNetwork: 'localhost', // in-memory node doesn't support eth node; removing this line will cause an error
       zksync: true,
     },
+    zkSyncTestnet: {
+      url: 'https://sepolia.era.zksync.dev',
+      ethNetwork: 'sepolia',
+      zksync: true,
+      verifyURL: 'https://explorer.sepolia.era.zksync.dev/contract_verification',
+    },
     hardhat: {
       zksync: true,
     },
