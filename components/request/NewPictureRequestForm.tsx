@@ -1,9 +1,12 @@
 'use client'
-
 import React, { useState, FormEvent } from 'react'
+
+import { MuiFileInput } from 'mui-file-input'
+import CloseIcon from '@mui/icons-material/Close'
+import ImageIcon from '@mui/icons-material/Image'
 import { TextField, Button, Box, Backdrop, CircularProgress } from '@mui/material'
+
 import { useImageStore } from '@/hooks/useImageStore'
-import { DropzoneArea } from 'mui-file-dropzone'
 import { usePictureRequest } from '@/hooks/usePictureRequest'
 
 interface NewRequestFormProps {
@@ -50,9 +53,8 @@ export const NewRequestForm: React.FC<NewRequestFormProps> = ({
     onCreated?.()
   }
 
-  const handleFileChange = (files: File[]) => {
-    if (files && files.length > 0) {
-      const file = files[0]
+  const onFileChange = (file: File | null) => {
+    if (file) {
       setFile(file)
       setPreview(URL.createObjectURL(file))
     } else {
@@ -98,12 +100,21 @@ export const NewRequestForm: React.FC<NewRequestFormProps> = ({
         disabled={loading}
         InputProps={{ inputProps: { min: 0, step: '0.01' } }}
       />
-      <DropzoneArea
-        acceptedFiles={['image/*']}
-        fileObjects={[]}
-        dropzoneText={'Drag and drop an image here or click'}
-        onChange={handleFileChange}
-        showPreviewsInDropzone
+      <MuiFileInput
+        value={file}
+        placeholder="Click to upload an image"
+        inputProps={{ accept: 'image/*' }}
+        clearIconButtonProps={{
+          title: 'Remove',
+          children: <CloseIcon fontSize="small" />,
+        }}
+        InputProps={{
+          inputProps: {
+            accept: 'image/*',
+          },
+          startAdornment: <ImageIcon />,
+        }}
+        onChange={onFileChange}
       />
       {preview && (
         <Box mt={2} sx={{ textAlign: 'center' }}>

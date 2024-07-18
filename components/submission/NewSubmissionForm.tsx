@@ -1,7 +1,9 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
-import { DropzoneArea } from 'mui-file-dropzone'
+import { MuiFileInput } from 'mui-file-input'
+import CloseIcon from '@mui/icons-material/Close'
+import ImageIcon from '@mui/icons-material/Image'
 import { Backdrop, Box, Button, CircularProgress, TextField } from '@mui/material'
 
 import { useImageStore } from '@/hooks/useImageStore'
@@ -47,9 +49,8 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
     onCreated?.()
   }
 
-  const handleFileChange = (files: File[]) => {
-    if (files && files.length > 0) {
-      const file = files[0]
+  const onFileChange = (file: File | null) => {
+    if (file) {
       setFile(file)
       setPreview(URL.createObjectURL(file))
     } else {
@@ -86,12 +87,20 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
         disabled={loading}
         InputProps={{ inputProps: { min: 0, step: '0.01' } }}
       />
-      <DropzoneArea
-        acceptedFiles={['image/*']}
-        fileObjects={[]}
-        dropzoneText={'Drag and drop an image here or click'}
-        onChange={handleFileChange}
-        showPreviewsInDropzone
+      <MuiFileInput
+        value={file}
+        placeholder="Click to upload an image"
+        InputProps={{
+          inputProps: {
+            accept: 'image/*',
+          },
+          startAdornment: <ImageIcon />,
+        }}
+        clearIconButtonProps={{
+          title: 'Remove',
+          children: <CloseIcon fontSize="small" />,
+        }}
+        onChange={onFileChange}
       />
       {preview && (
         <Box mt={2} sx={{ textAlign: 'center' }}>
