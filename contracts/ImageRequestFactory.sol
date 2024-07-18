@@ -21,9 +21,9 @@ contract ImageRequestFactory {
     string memory imageId,
     uint256 budget
   ) public {
-    require(budget >= 0, 'Budget must be greater than 0');
+    require(budget >= 0, 'Budget must be positive or zero');
 
-    ImageRequest imageRequest = new ImageRequest(title, description, imageId, budget, msg.sender);
+    ImageRequest imageRequest = new ImageRequest(title, description, imageId, budget);
     imageRequests.push(imageRequest);
 
     emit ImageRequestCreated(

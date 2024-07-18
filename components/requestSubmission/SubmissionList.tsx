@@ -48,7 +48,7 @@ export const SubmissionList = ({ imageRequest }: { imageRequest: ImageRequest })
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Submissions</Typography>
         {displaySubmitEdit && (
-          <Link href={`/submission/new?request=${imageRequest.address}`} passHref>
+          <Link href={`/requestSubmission/new?request=${imageRequest.address}`} passHref>
             <Button variant="contained" color="primary">
               Submit Edit
             </Button>

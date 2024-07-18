@@ -16,11 +16,9 @@ contract ImageRequest {
     string memory _title,
     string memory _description,
     string memory _imageId,
-    uint256 _budget,
-    address _owner
+    uint256 _budget
   ) {
-    require(budget >= 0, 'Budget must be positive or zero');
-    require(_owner != address(0), 'Owner address cannot be zero');
+    require(_budget >= 0, 'Budget must be positive or zero');
 
     title = _title;
     description = _description;
@@ -34,6 +32,7 @@ contract ImageRequest {
     string memory _imageId,
     uint256 _price
   ) public {
+    require(_price >= 0, 'Price must be positive or zero');
     require(_submitter != address(0), 'Submitter address cannot be zero');
 
     RequestSubmission submission = new RequestSubmission(

@@ -82,10 +82,6 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     return provider.getSigner(account)
   }
 
-  const _imageRequestCreatedHandler = async (address: string) => {
-    await getImageRequest({ address, refetch: true })
-  }
-
   const _initFactoryContract = async (): Promise<void> => {
     if (factoryContract) {
       return
@@ -96,11 +92,6 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     if (!factoryContract) {
       throw new Error('Could not connect to the image request factory!')
     }
-
-    await factoryContract.addListener(
-      ContractEvents.ImageRequestCreated,
-      _imageRequestCreatedHandler
-    )
   }
 
   const _fetchImageRequestContract = async (address: string): Promise<ImageRequest> => {
@@ -225,6 +216,7 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     wallet,
     account,
   }: CreateSubmissionsParams): Promise<ImageRequestSubmission> => {
+    console.log(requestAddress, imageId, description, price, account)
     try {
       const imageRequestContract = new Contract(
         requestAddress,

@@ -14,7 +14,8 @@ contract RequestSubmission {
     string memory _imageId,
     uint256 _price
   ) {
-    require(price >= 0, 'Price must be positive or zero');
+    require(_price >= 0, 'Price must be positive or zero');
+    require(_submitter != address(0), 'Submitter address cannot be zero');
 
     submitter = payable(_submitter);
     description = _description;
