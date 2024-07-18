@@ -6,7 +6,6 @@ import { Dispatch, SetStateAction, useEffect } from 'react'
 interface SlideshowDialogProps {
   open: boolean
   currentSlide: number
-  displayPurchase: boolean
   submissions: ImageRequestSubmission[]
 
   handleClose: () => void
@@ -20,7 +19,6 @@ const SlideshowDialog = ({
   currentSlide,
   setCurrentSlide,
   handleClose,
-  displayPurchase,
   setConfirmDialogOpen,
 }: SlideshowDialogProps) => {
   useEffect(() => {
@@ -69,7 +67,7 @@ const SlideshowDialog = ({
               '& img': { height: 50, width: 50, objectFit: 'cover' },
             }}
           >
-            <img src={`https://ipfs.io/ipfs/${submission.imageId}`} alt={submission.description} />
+            <img src={submission.imageUrl} alt={submission.description} />
           </Box>
         ))}
       </Box>
@@ -86,7 +84,7 @@ const SlideshowDialog = ({
     >
       <DialogContent style={{ textAlign: 'center', position: 'relative' }}>
         <img
-          src={`https://ipfs.io/ipfs/${submissions[currentSlide]?.imageId}`}
+          src={submissions[currentSlide]?.imageUrl}
           alt={submissions[currentSlide]?.description}
           style={{ maxHeight: '80vh', maxWidth: '100%' }}
         />
@@ -100,13 +98,11 @@ const SlideshowDialog = ({
           <ArrowForwardIos />
         </IconButton>
       </DialogActions>
-      {displayPurchase && (
-        <Box display="flex" justifyContent="center" mt={2} mb={2}>
-          <Button variant="contained" color="primary" onClick={() => setConfirmDialogOpen(true)}>
-            Purchase
-          </Button>
-        </Box>
-      )}
+      <Box display="flex" justifyContent="center" mt={2} mb={2}>
+        <Button variant="contained" color="primary" onClick={() => setConfirmDialogOpen(true)}>
+          Purchase
+        </Button>
+      </Box>
     </Dialog>
   )
 }

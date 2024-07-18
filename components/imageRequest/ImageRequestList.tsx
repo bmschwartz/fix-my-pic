@@ -34,7 +34,7 @@ const ImageRequestCard = ({
         <Card>
           <CardMedia
             component="img"
-            src={`https://ipfs.io/ipfs/${imageRequest.imageId}`}
+            src={imageRequest.imageUrl}
             alt={imageRequest.title}
             style={{ height: '200px' }}
           />

@@ -5,7 +5,7 @@ import { Button, CircularProgress, Grid, Paper, Typography } from '@mui/material
 import { useWallet } from '@/hooks/useWallet'
 import { useRequestSubmissions } from '@/hooks/useSubmissions'
 import { ImageRequestSubmission } from '@/types/submission'
-import { ImageRequest, ImageRequestState } from '@/types/imageRequest'
+import { ImageRequest } from '@/types/imageRequest'
 
 import SubmissionCard from './SubmissionCard'
 import SlideshowDialog from './SlideshowDialog'
@@ -20,10 +20,7 @@ export const SubmissionList = ({ imageRequest }: { imageRequest: ImageRequest })
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
   const [submissions, setSubmissions] = useState<ImageRequestSubmission[]>([])
 
-  const isRequestOwner = selectedAccount?.toLowerCase() === imageRequest.owner.toLowerCase()
-  const isActiveRequest = Number(imageRequest.state) === ImageRequestState.ACTIVE
-  const displayPurchase = isRequestOwner && isActiveRequest
-  const displaySubmitEdit = selectedWallet && selectedAccount && isActiveRequest
+  const displaySubmitEdit = selectedWallet && selectedAccount
 
   useEffect(() => {
     const getSubmissions = async () => {
@@ -72,7 +69,6 @@ export const SubmissionList = ({ imageRequest }: { imageRequest: ImageRequest })
             <SubmissionCard
               key={submission.address}
               submission={submission}
-              displayPurchase={displayPurchase}
               onClick={() => setOpenSlideshow(true)}
               onPurchase={onPurchase}
             />
@@ -86,7 +82,6 @@ export const SubmissionList = ({ imageRequest }: { imageRequest: ImageRequest })
         currentSlide={currentSlide}
         setCurrentSlide={setCurrentSlide}
         handleClose={() => setOpenSlideshow(false)}
-        displayPurchase={displayPurchase}
         setConfirmDialogOpen={setConfirmDialogOpen}
       />
 

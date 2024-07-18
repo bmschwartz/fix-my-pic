@@ -42,7 +42,7 @@ const ConfirmationDialog = ({
           {`Are you sure you want to purchase this submission for ${ethToUsdRate ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ethDisplayString(submission.price)}?`}
         </Typography>
         <img
-          src={`https://ipfs.io/ipfs/${submission.imageId}`}
+          src={submission.imageUrl}
           alt={submission.description}
           style={{ maxHeight: '80vh', maxWidth: '100%', marginTop: '20px' }}
         />

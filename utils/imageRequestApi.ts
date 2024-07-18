@@ -3,7 +3,7 @@ import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 
 import { ContractEvents } from '@/types/events'
 import { ImageRequestSubmission } from '@/types/submission'
-import { ImageRequest, ImageRequestState } from '@/types/imageRequest'
+import { ImageRequest } from '@/types/imageRequest'
 import ImageRequestSchema from '@/public/artifacts/ImageRequest.json'
 import ImageRequestFactorySchema from '@/public/artifacts/ImageRequestFactory.json'
 import ImageRequestSubmissionSchema from '@/public/artifacts/ImageRequestSubmission.json'
@@ -11,6 +11,7 @@ import ImageRequestSubmissionSchema from '@/public/artifacts/ImageRequestSubmiss
 import { convertUsdToEthWithoutRate } from './currency'
 import { batchTasksAsync } from './batch'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
+import { arrayToMap } from './object'
 
 interface CreateImageRequestParams {
   title: string
@@ -24,12 +25,6 @@ interface CreateImageRequestParams {
 interface GetImageRequestParams {
   address: string
   refetch?: boolean
-}
-
-interface GetImageRequestsParams {
-  filters?: {
-    status: ImageRequestState
-  }
 }
 
 interface CreateSubmissionsParams {
@@ -54,7 +49,7 @@ interface GetSubmissionParams {
 export interface ImageRequestApi {
   createImageRequest(params: CreateImageRequestParams): Promise<ImageRequest>
   getImageRequest(params: GetImageRequestParams): Promise<ImageRequest>
-  getImageRequests(params?: GetImageRequestsParams): ImageRequest[]
+  getImageRequests(): ImageRequest[]
 
   createSubmission(params: CreateSubmissionsParams): Promise<ImageRequestSubmission>
   getSubmission(params: GetSubmissionParams): Promise<ImageRequestSubmission>
@@ -63,12 +58,16 @@ export interface ImageRequestApi {
 
 const IMAGE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
 const IMAGE_REQUEST_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_IMAGE_REQUEST_FACTORY_ADDRESS || ''
+const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_PINATA_GATEWAY || ''
 
 if (!IMAGE_REQUEST_RPC_URL) {
   process.exit('No RPC URL provided')
 }
 if (!IMAGE_REQUEST_FACTORY_ADDRESS) {
   process.exit('No bounty factory address provided')
+}
+if (!IMAGE_URL_ROOT) {
+  process.exit('No image url root provided')
 }
 
 async function createImageRequestApi(initialFactoryAddress: string): Promise<ImageRequestApi> {
@@ -106,21 +105,19 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
 
   const _fetchImageRequestContract = async (address: string): Promise<ImageRequest> => {
     const imageRequestContract = new ethers.Contract(address, ImageRequestSchema.abi, provider)
-    const owner = await imageRequestContract.owner()
     const title = await imageRequestContract.title()
-    const imageId = await imageRequestContract.imageId()
     const budget = await imageRequestContract.budget()
-    const state = await imageRequestContract.currentState()
+    const imageId = await imageRequestContract.imageId()
     const description = await imageRequestContract.description()
     const submissionAddresses = await imageRequestContract.getSubmissions()
     const submissions = await _fetchImageRequestSubmissions(submissionAddresses)
+    const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
 
     return {
-      owner,
       title,
-      state,
       address,
       imageId,
+      imageUrl,
       submissions,
       description,
       budget: Number(ethers.formatEther(budget)),
@@ -135,10 +132,7 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
       mapFunction: _fetchImageRequestContract,
     })
 
-    return requestContracts.reduce((acc: { [key: string]: ImageRequest }, obj: ImageRequest) => {
-      acc[obj.address] = obj
-      return acc
-    }, {})
+    return arrayToMap<ImageRequest>(requestContracts, 'address')
   }
 
   const _fetchImageRequestSubmissions = async (
@@ -162,16 +156,18 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
       ImageRequestSubmissionSchema.abi,
       provider
     )
-    const description = await submissionContract.description()
-    const imageId = await submissionContract.imageId()
     const price = await submissionContract.price()
+    const imageId = await submissionContract.imageId()
     const submitter = await submissionContract.submitter()
+    const description = await submissionContract.description()
+    const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
 
     return {
-      submitter,
+      price,
       address,
       imageId,
-      price,
+      imageUrl,
+      submitter,
       description,
     }
   }
@@ -186,13 +182,14 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     )
 
     const budgetEth = await convertUsdToEthWithoutRate(budget)
+    const budgetInWei = ethers.parseEther(budgetEth)
 
     try {
       const tx = await imageRequestFactory.createImageRequest(
         title,
         description,
         imageId,
-        budgetEth
+        budgetInWei
       )
       const receipt: ContractTransactionReceipt = await tx.wait()
 
@@ -207,7 +204,7 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     }
   }
 
-  const getImageRequests = (params?: GetImageRequestsParams): ImageRequest[] => {
+  const getImageRequests = (): ImageRequest[] => {
     return Object.values(imageRequests)
   }
 
@@ -236,7 +233,16 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
         ImageRequestSchema.abi,
         await _getSigner(wallet, account)
       )
-      const tx = await imageRequestContract.createSubmission(account, description, imageId, price)
+
+      const priceEth = await convertUsdToEthWithoutRate(price)
+      const priceInWei = ethers.parseEther(priceEth)
+
+      const tx = await imageRequestContract.createSubmission(
+        account,
+        description,
+        imageId,
+        priceInWei
+      )
       const receipt: ContractTransactionReceipt = await tx.wait()
 
       if (receipt.status !== 1 || !receipt.contractAddress) {

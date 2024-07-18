@@ -11,5 +11,6 @@ export interface ImageRequestSubmission {
   address: string
   description: string
   imageId: string
+  imageUrl: string
   price: number
 }

@@ -7,6 +7,10 @@ export const getEthUsdRate = async (): Promise<number> => {
 }
 
 export const convertUsdToEth = (usdAmount: number | string, rate: number): string => {
+  if (usdAmount === 0) {
+    return '0'
+  }
+
   const ethAmount = Number(usdAmount) / rate
   const ethString = String(ethAmount)
   const [integer, fraction] = ethString.split('.')

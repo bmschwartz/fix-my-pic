@@ -8,7 +8,7 @@ export const ImageRequestDetailInfo = ({ imageRequest }: { imageRequest: ImageRe
 
   const handleDownload = () => {
     const link = document.createElement('a')
-    link.href = `https://ipfs.io/ipfs/${imageRequest.imageId}`
+    link.href = imageRequest.imageUrl
     link.download = `${imageRequest.title}.jpg`
     link.click()
   }
@@ -18,7 +18,7 @@ export const ImageRequestDetailInfo = ({ imageRequest }: { imageRequest: ImageRe
       <Grid container spacing={4} justifyContent="center">
         <Grid item xs={12}>
           <img
-            src={`https://ipfs.io/ipfs/${imageRequest.imageId}`}
+            src={imageRequest.imageUrl}
             alt={imageRequest.title}
             style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }}
           />
