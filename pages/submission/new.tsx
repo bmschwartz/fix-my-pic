@@ -4,7 +4,7 @@ import NewSubmissionForm from '@/components/submission/NewSubmissionForm'
 
 export default function NewSubmissionPage() {
   const router = useRouter()
-  const requestAddress = router.query.requestAddress as string
+  const requestAddress = router.query.request as string
 
   const onSubmissionCreated = () => {
     router.push(`/request/${requestAddress}`)

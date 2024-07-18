@@ -36,7 +36,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
     try {
       await createSubmission({ requestAddress, description, imageId, price: Number(price) })
     } catch (e) {
-      console.error(e)
+      setLoading(false)
       return
     }
     setLoading(false)
