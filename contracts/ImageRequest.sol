@@ -12,11 +12,6 @@ contract ImageRequest {
 
   event SubmissionCreated(address _requestAddress, address _submissionAddress);
 
-  modifier onlyOwner() {
-    require(msg.sender == owner, 'Only owner can call this function');
-    _;
-  }
-
   constructor(
     string memory _title,
     string memory _description,
@@ -37,11 +32,16 @@ contract ImageRequest {
     address _submitter,
     string memory _description,
     string memory _imageId,
-    uint256 _price,
+    uint256 _price
   ) public {
     require(_submitter != address(0), 'Submitter address cannot be zero');
 
-    RequestSubmission submission = new RequestSubmission(_submitter, _description, _imageId, _price);
+    RequestSubmission submission = new RequestSubmission(
+      _submitter,
+      _description,
+      _imageId,
+      _price
+    );
     submissions.push(submission);
 
     emit SubmissionCreated(address(this), address(submission));

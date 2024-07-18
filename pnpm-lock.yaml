@@ -84,6 +84,9 @@ importers:
       '@matterlabs/hardhat-zksync-solc':
         specifier: 1.2.0
         version: 1.2.0(hardhat@2.22.6(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))(typescript@5.4.5)(utf-8-validate@5.0.7))
+      '@matterlabs/hardhat-zksync-verify':
+        specifier: 1.6.0
+        version: 1.6.0(@nomicfoundation/hardhat-verify@2.0.8(hardhat@2.22.6(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))(typescript@5.4.5)(utf-8-validate@5.0.7)))(hardhat@2.22.6(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))(typescript@5.4.5)(utf-8-validate@5.0.7))
       '@openzeppelin/contracts':
         specifier: 4.6.0
         version: 4.6.0

@@ -5,8 +5,8 @@ import { ContractEvents } from '@/types/events'
 import { ImageRequestSubmission } from '@/types/submission'
 import { ImageRequest } from '@/types/imageRequest'
 import ImageRequestSchema from '@/public/artifacts/ImageRequest.json'
+import RequestSubmission from '@/public/artifacts/RequestSubmission.json'
 import ImageRequestFactorySchema from '@/public/artifacts/ImageRequestFactory.json'
-import ImageRequestSubmissionSchema from '@/public/artifacts/ImageRequestSubmission.json'
 
 import { convertUsdToEthWithoutRate } from './currency'
 import { batchTasksAsync } from './batch'
@@ -151,11 +151,7 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
   }
 
   const _fetchSubmissionContractData = async (address: string): Promise<ImageRequestSubmission> => {
-    const submissionContract = new ethers.Contract(
-      address,
-      ImageRequestSubmissionSchema.abi,
-      provider
-    )
+    const submissionContract = new ethers.Contract(address, RequestSubmission.abi, provider)
     const price = await submissionContract.price()
     const imageId = await submissionContract.imageId()
     const submitter = await submissionContract.submitter()
@@ -183,6 +179,8 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
 
     const budgetEth = await convertUsdToEthWithoutRate(budget)
     const budgetInWei = ethers.parseEther(budgetEth)
+
+    console.log('Creating image request with', title, description, imageId, budgetInWei)
 
     try {
       const tx = await imageRequestFactory.createImageRequest(

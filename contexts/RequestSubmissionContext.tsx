@@ -10,7 +10,7 @@ export interface RequestSubmissionContextType {
   createSubmission: (submissionData: CreateSubmissionProps) => Promise<ImageRequestSubmission>
 }
 
-interface SubmissionProviderProps {
+interface RequestSubmissionProviderProps {
   children: ReactNode
   imageRequestApi: ImageRequestApi
 }
@@ -26,7 +26,10 @@ export const RequestSubmissionContext = createContext<RequestSubmissionContextTy
   undefined
 )
 
-export const SubmissionProvider = ({ children, imageRequestApi }: SubmissionProviderProps) => {
+export const RequestSubmissionProvider = ({
+  children,
+  imageRequestApi,
+}: RequestSubmissionProviderProps) => {
   const { selectedAccount: account, selectedWallet: wallet } = useWallet()
   const [submissions, setSubmissions] = useState<Record<string, ImageRequestSubmission[]>>({})
 

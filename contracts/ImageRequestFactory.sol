@@ -26,7 +26,14 @@ contract ImageRequestFactory {
     ImageRequest imageRequest = new ImageRequest(title, description, imageId, budget, msg.sender);
     imageRequests.push(imageRequest);
 
-    emit ImageRequestCreated(msg.sender, address(imageRequest), title, description, imageId);
+    emit ImageRequestCreated(
+      msg.sender,
+      address(imageRequest),
+      title,
+      description,
+      imageId,
+      budget
+    );
   }
 
   function getImageRequests() public view returns (address[] memory) {

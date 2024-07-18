@@ -1,12 +1,15 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 
-import { getPictureBountyApi, PictureBountyApi } from '@/utils/pictureBountyApi'
+// import { getPictureBountyApi, PictureBountyApi } from '@/utils/pictureBountyApi'
+import { getImageRequestApi, ImageRequestApi } from '@/utils/imageRequestApi'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
 
-import { BountyProvider } from './BountyContext'
+import { ImageRequestProvider } from './ImageRequestContext'
+// import { BountyProvider } from './BountyContext'
 import { WalletProvider } from './WalletProvider'
 import { EthUsdRateProvider } from './EthRateProvider'
-import { SubmissionProvider } from './SubmissionContext'
+import { RequestSubmissionProvider } from './RequestSubmissionContext'
+// import { SubmissionProvider } from './SubmissionContext'
 import { ImageStoreProvider } from './ImageStoreContext'
 
 interface AppProvidersProps {
@@ -14,17 +17,17 @@ interface AppProvidersProps {
 }
 
 const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
-  const [pictureBountyApi, setPictureBountyApi] = useState<PictureBountyApi>()
+  const [imageRequestApi, setImageRequestApi] = useState<ImageRequestApi>()
 
   useEffect(() => {
     async function initBountyApi() {
-      setPictureBountyApi(await getPictureBountyApi())
+      setImageRequestApi(await getImageRequestApi())
     }
 
     initBountyApi()
   }, [])
 
-  if (!pictureBountyApi) {
+  if (!imageRequestApi) {
     return (
       <div>
         <FullScreenLoader />
@@ -36,9 +39,11 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     <EthUsdRateProvider>
       <WalletProvider>
         <ImageStoreProvider>
-          <BountyProvider pictureBountyApi={pictureBountyApi}>
-            <SubmissionProvider pictureBountyApi={pictureBountyApi}>{children}</SubmissionProvider>
-          </BountyProvider>
+          <ImageRequestProvider imageRequestApi={imageRequestApi}>
+            <RequestSubmissionProvider imageRequestApi={imageRequestApi}>
+              {children}
+            </RequestSubmissionProvider>
+          </ImageRequestProvider>
         </ImageStoreProvider>
       </WalletProvider>
     </EthUsdRateProvider>

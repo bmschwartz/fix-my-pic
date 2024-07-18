@@ -11,7 +11,7 @@ export interface ImageRequestContextType {
   imageRequests: ImageRequest[]
 }
 
-interface BountyProviderProps {
+interface ImageRequestProviderProps {
   children: ReactNode
   imageRequestApi: ImageRequestApi
 }
@@ -23,7 +23,7 @@ interface CreateImageRequestProps {
   imageId: string
 }
 
-const factoryAddress = process.env.NEXT_PUBLIC_BOUNTY_FACTORY_ADDRESS
+const factoryAddress = process.env.NEXT_PUBLIC_IMAGE_REQUEST_FACTORY_ADDRESS
 const providerRpcUrl = process.env.NEXT_PUBLIC_RPC_URL
 
 if (!factoryAddress || factoryAddress === '') {
@@ -35,7 +35,7 @@ if (!providerRpcUrl || providerRpcUrl === '') {
 
 export const ImageRequestContext = createContext<ImageRequestContextType | undefined>(undefined)
 
-export const BountyProvider = ({ children, imageRequestApi }: BountyProviderProps) => {
+export const ImageRequestProvider = ({ children, imageRequestApi }: ImageRequestProviderProps) => {
   const { selectedAccount: account, selectedWallet: wallet } = useWallet()
   const [imageRequests, setImageRequests] = useState<ImageRequest[]>([])
 

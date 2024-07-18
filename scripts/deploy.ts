@@ -3,7 +3,8 @@ import { deployContract, getWallet } from '../contracts/utils'
 const main = async () => {
   try {
     const wallet = getWallet()
-    const contractName = 'PictureBountyFactory'
+
+    const contractName = 'ImageRequestFactory'
 
     await deployContract(contractName, [], { wallet })
   } catch (error) {

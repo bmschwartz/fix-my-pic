@@ -55,6 +55,7 @@
     "@matterlabs/hardhat-zksync-deploy": "1.5.0",
     "@matterlabs/hardhat-zksync-ethers": "1.1.0",
     "@matterlabs/hardhat-zksync-solc": "1.2.0",
+    "@matterlabs/hardhat-zksync-verify": "1.6.0",
     "@openzeppelin/contracts": "4.6.0",
     "@openzeppelin/contracts-upgradeable": "4.6.0",
     "@types/node": "20.14.2",
