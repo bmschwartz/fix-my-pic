@@ -4,7 +4,7 @@ import React, { useState, FormEvent } from 'react'
 import { TextField, Button, Box, Backdrop, CircularProgress } from '@mui/material'
 import { useImageStore } from '@/hooks/useImageStore'
 import { DropzoneArea } from 'mui-file-dropzone'
-import { useImageRequest } from '@/hooks/useImageRequest'
+import { usePictureRequest } from '@/hooks/usePictureRequest'
 
 interface NewRequestFormProps {
   onCreated?: () => void
@@ -13,7 +13,7 @@ interface NewRequestFormProps {
 export const NewRequestForm: React.FC<NewRequestFormProps> = ({
   onCreated,
 }: NewRequestFormProps) => {
-  const { createImageRequest } = useImageRequest()
+  const { createPictureRequest } = usePictureRequest()
   const { uploadImage } = useImageStore()
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
@@ -34,7 +34,7 @@ export const NewRequestForm: React.FC<NewRequestFormProps> = ({
     const imageId = await uploadImage(file!)
     const request = { title, description, budget: Number(budget), imageId }
     try {
-      await createImageRequest(request)
+      await createPictureRequest(request)
     } catch (e) {
       console.error(e)
       return

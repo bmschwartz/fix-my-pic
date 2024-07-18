@@ -1,19 +1,18 @@
 import { BrowserProvider, Contract, Provider, Signer } from 'zksync-ethers'
 import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 
-import { ContractEvents } from '@/types/events'
-import { ImageRequestSubmission } from '@/types/submission'
-import { ImageRequest } from '@/types/imageRequest'
-import ImageRequestSchema from '@/public/artifacts/ImageRequest.json'
+import { PictureRequestSubmission } from '@/types/submission'
+import { EIP6963ProviderDetail } from '@/types/eip6963'
+import { PictureRequest } from '@/types/pictureRequest'
+import PictureRequestSchema from '@/public/artifacts/PictureRequest.json'
 import RequestSubmission from '@/public/artifacts/RequestSubmission.json'
-import ImageRequestFactorySchema from '@/public/artifacts/ImageRequestFactory.json'
+import PictureRequestFactorySchema from '@/public/artifacts/PictureRequestFactory.json'
 
 import { convertUsdToEthWithoutRate } from './currency'
 import { batchTasksAsync } from './batch'
-import { EIP6963ProviderDetail } from '@/types/eip6963'
 import { arrayToMap } from './object'
 
-interface CreateImageRequestParams {
+interface CreatePictureRequestParams {
   title: string
   description: string
   imageId: string
@@ -22,7 +21,7 @@ interface CreateImageRequestParams {
   wallet: EIP6963ProviderDetail
 }
 
-interface GetImageRequestParams {
+interface GetPictureRequestParams {
   address: string
   refetch?: boolean
 }
@@ -46,14 +45,14 @@ interface GetSubmissionParams {
   refetch: boolean
 }
 
-export interface ImageRequestApi {
-  createImageRequest(params: CreateImageRequestParams): Promise<ImageRequest>
-  getImageRequest(params: GetImageRequestParams): Promise<ImageRequest>
-  getImageRequests(): ImageRequest[]
+export interface PictureRequestApi {
+  createPictureRequest(params: CreatePictureRequestParams): Promise<PictureRequest>
+  getPictureRequest(params: GetPictureRequestParams): Promise<PictureRequest>
+  getPictureRequests(): PictureRequest[]
 
-  createSubmission(params: CreateSubmissionsParams): Promise<ImageRequestSubmission>
-  getSubmission(params: GetSubmissionParams): Promise<ImageRequestSubmission>
-  getSubmissions(params: GetSubmissionsParams): Promise<ImageRequestSubmission[]>
+  createSubmission(params: CreateSubmissionsParams): Promise<PictureRequestSubmission>
+  getSubmission(params: GetSubmissionParams): Promise<PictureRequestSubmission>
+  getSubmissions(params: GetSubmissionsParams): Promise<PictureRequestSubmission[]>
 }
 
 const IMAGE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
@@ -70,11 +69,11 @@ if (!IMAGE_URL_ROOT) {
   process.exit('No image url root provided')
 }
 
-async function createImageRequestApi(initialFactoryAddress: string): Promise<ImageRequestApi> {
+async function createPictureRequestApi(initialFactoryAddress: string): Promise<PictureRequestApi> {
   let factoryContract: Contract
   let factoryAddress: string | Addressable = initialFactoryAddress
-  let imageRequests: Record<string, ImageRequest> = {}
-  let submissions: Record<string, ImageRequestSubmission> = {}
+  let pictureRequests: Record<string, PictureRequest> = {}
+  let submissions: Record<string, PictureRequestSubmission> = {}
   const provider = new Provider(IMAGE_REQUEST_RPC_URL)
 
   const _getSigner = (wallet: EIP6963ProviderDetail, account: string): Promise<Signer> => {
@@ -87,21 +86,21 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
       return
     }
 
-    factoryContract = new Contract(factoryAddress, ImageRequestFactorySchema.abi, provider)
+    factoryContract = new Contract(factoryAddress, PictureRequestFactorySchema.abi, provider)
 
     if (!factoryContract) {
       throw new Error('Could not connect to the image request factory!')
     }
   }
 
-  const _fetchImageRequestContract = async (address: string): Promise<ImageRequest> => {
-    const imageRequestContract = new ethers.Contract(address, ImageRequestSchema.abi, provider)
-    const title = await imageRequestContract.title()
-    const budget = await imageRequestContract.budget()
-    const imageId = await imageRequestContract.imageId()
-    const description = await imageRequestContract.description()
-    const submissionAddresses = await imageRequestContract.getSubmissions()
-    const submissions = await _fetchImageRequestSubmissions(submissionAddresses)
+  const _fetchPictureRequestContract = async (address: string): Promise<PictureRequest> => {
+    const pictureRequestContract = new ethers.Contract(address, PictureRequestSchema.abi, provider)
+    const title = await pictureRequestContract.title()
+    const budget = await pictureRequestContract.budget()
+    const imageId = await pictureRequestContract.imageId()
+    const description = await pictureRequestContract.description()
+    const submissionAddresses = await pictureRequestContract.getSubmissions()
+    const submissions = await _fetchPictureRequestSubmissions(submissionAddresses)
     const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
 
     return {
@@ -115,33 +114,35 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     }
   }
 
-  const _fetchAllImageRequests = async (): Promise<Record<string, ImageRequest>> => {
-    const requestAddresses = await factoryContract.getImageRequests()
-    let requestContracts: ImageRequest[] = await batchTasksAsync<ImageRequest>({
+  const _fetchAllPictureRequests = async (): Promise<Record<string, PictureRequest>> => {
+    const requestAddresses = await factoryContract.getPictureRequests()
+    let requestContracts: PictureRequest[] = await batchTasksAsync<PictureRequest>({
       batchSize: 50,
       tasks: requestAddresses,
-      mapFunction: _fetchImageRequestContract,
+      mapFunction: _fetchPictureRequestContract,
     })
 
-    return arrayToMap<ImageRequest>(requestContracts, 'address')
+    return arrayToMap<PictureRequest>(requestContracts, 'address')
   }
 
-  const _fetchImageRequestSubmissions = async (
+  const _fetchPictureRequestSubmissions = async (
     addresses: string[]
-  ): Promise<ImageRequestSubmission[]> => {
-    const requestSubmissions = await batchTasksAsync<ImageRequestSubmission>({
+  ): Promise<PictureRequestSubmission[]> => {
+    const requestSubmissions = await batchTasksAsync<PictureRequestSubmission>({
       tasks: addresses,
       mapFunction: _fetchSubmissionContractData,
     })
 
-    requestSubmissions.forEach((submission: ImageRequestSubmission) => {
+    requestSubmissions.forEach((submission: PictureRequestSubmission) => {
       submissions[submission.address] = submission
     })
 
     return requestSubmissions
   }
 
-  const _fetchSubmissionContractData = async (address: string): Promise<ImageRequestSubmission> => {
+  const _fetchSubmissionContractData = async (
+    address: string
+  ): Promise<PictureRequestSubmission> => {
     const submissionContract = new ethers.Contract(address, RequestSubmission.abi, provider)
     const price = await submissionContract.price()
     const imageId = await submissionContract.imageId()
@@ -159,12 +160,14 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     }
   }
 
-  const createImageRequest = async (params: CreateImageRequestParams): Promise<ImageRequest> => {
+  const createPictureRequest = async (
+    params: CreatePictureRequestParams
+  ): Promise<PictureRequest> => {
     const { title, description, imageId, budget, wallet, account } = params
 
-    const imageRequestFactory = new Contract(
+    const pictureRequestFactory = new Contract(
       factoryAddress,
-      ImageRequestFactorySchema.abi,
+      PictureRequestFactorySchema.abi,
       await _getSigner(wallet, account)
     )
 
@@ -174,7 +177,7 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     console.log('Creating image request with', title, description, imageId, budgetInWei)
 
     try {
-      const tx = await imageRequestFactory.createImageRequest(
+      const tx = await pictureRequestFactory.createPictureRequest(
         title,
         description,
         imageId,
@@ -186,26 +189,26 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
         throw new Error('Failed to create image request')
       }
 
-      return getImageRequest({ address: receipt.contractAddress, refetch: true })
+      return getPictureRequest({ address: receipt.contractAddress, refetch: true })
     } catch (error) {
       console.error('Unable to create the image request:', error, typeof error)
       throw error
     }
   }
 
-  const getImageRequests = (): ImageRequest[] => {
-    return Object.values(imageRequests)
+  const getPictureRequests = (): PictureRequest[] => {
+    return Object.values(pictureRequests)
   }
 
-  const getImageRequest = async ({
+  const getPictureRequest = async ({
     address,
     refetch,
-  }: GetImageRequestParams): Promise<ImageRequest> => {
-    if (refetch || !(address in imageRequests)) {
-      imageRequests[address] = await _fetchImageRequestContract(address)
+  }: GetPictureRequestParams): Promise<PictureRequest> => {
+    if (refetch || !(address in pictureRequests)) {
+      pictureRequests[address] = await _fetchPictureRequestContract(address)
     }
 
-    return imageRequests[address]
+    return pictureRequests[address]
   }
 
   const createSubmission = async ({
@@ -215,19 +218,19 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
     price,
     wallet,
     account,
-  }: CreateSubmissionsParams): Promise<ImageRequestSubmission> => {
+  }: CreateSubmissionsParams): Promise<PictureRequestSubmission> => {
     console.log(requestAddress, imageId, description, price, account)
     try {
-      const imageRequestContract = new Contract(
+      const pictureRequestContract = new Contract(
         requestAddress,
-        ImageRequestSchema.abi,
+        PictureRequestSchema.abi,
         await _getSigner(wallet, account)
       )
 
       const priceEth = await convertUsdToEthWithoutRate(price)
       const priceInWei = ethers.parseEther(priceEth)
 
-      const tx = await imageRequestContract.createSubmission(
+      const tx = await pictureRequestContract.createSubmission(
         account,
         description,
         imageId,
@@ -249,15 +252,15 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
   const getSubmissions = async ({
     requestAddress,
     refetch = false,
-  }: GetSubmissionsParams): Promise<ImageRequestSubmission[]> => {
-    const imageRequest = await getImageRequest({ address: requestAddress, refetch })
-    return imageRequest.submissions
+  }: GetSubmissionsParams): Promise<PictureRequestSubmission[]> => {
+    const pictureRequest = await getPictureRequest({ address: requestAddress, refetch })
+    return pictureRequest.submissions
   }
 
   const getSubmission = async ({
     address,
     refetch = false,
-  }: GetSubmissionParams): Promise<ImageRequestSubmission> => {
+  }: GetSubmissionParams): Promise<PictureRequestSubmission> => {
     if (refetch) {
       submissions[address] = await _fetchSubmissionContractData(address)
     }
@@ -265,25 +268,25 @@ async function createImageRequestApi(initialFactoryAddress: string): Promise<Ima
   }
 
   await _initFactoryContract()
-  imageRequests = await _fetchAllImageRequests()
+  pictureRequests = await _fetchAllPictureRequests()
 
   return {
-    createImageRequest,
-    getImageRequest,
-    getImageRequests,
+    createPictureRequest,
+    getPictureRequest,
+    getPictureRequests,
     createSubmission,
     getSubmission,
     getSubmissions,
   }
 }
 
-let imageRequestApiPromise: Promise<ImageRequestApi> | null = null
+let pictureRequestApiPromise: Promise<PictureRequestApi> | null = null
 
-const getImageRequestApi = async (): Promise<ImageRequestApi> => {
-  if (!imageRequestApiPromise) {
-    imageRequestApiPromise = createImageRequestApi(IMAGE_REQUEST_FACTORY_ADDRESS)
+const getPictureRequestApi = async (): Promise<PictureRequestApi> => {
+  if (!pictureRequestApiPromise) {
+    pictureRequestApiPromise = createPictureRequestApi(IMAGE_REQUEST_FACTORY_ADDRESS)
   }
-  return imageRequestApiPromise
+  return pictureRequestApiPromise
 }
 
-export { getImageRequestApi }
+export { getPictureRequestApi }

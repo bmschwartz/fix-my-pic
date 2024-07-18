@@ -1,4 +1,4 @@
-import { BountySubmission } from '@/types/submission'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -7,27 +7,30 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { PictureRequestSubmission } from '@/types/submission'
+import { ethDisplayString, ethDisplayWithUSDString } from '@/utils/currency'
+import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 
 interface ConfirmationDialogProps {
   open: boolean
-  submission: BountySubmission
+  submission: PictureRequestSubmission
 
   handleClose: () => void
-  onChooseWinner: (address: string) => Promise<void>
+  onPurchase: (address: string) => Promise<void>
 }
 
 const ConfirmationDialog = ({
   open,
   handleClose,
   submission,
-  onChooseWinner,
+  onPurchase,
 }: ConfirmationDialogProps) => {
+  const { ethToUsdRate } = useEthUsdRate()
   const [loadingConfirm, setLoadingConfirm] = useState(false)
 
   const handleConfirm = async () => {
     setLoadingConfirm(true)
-    await onChooseWinner(submission.address)
+    await onPurchase(submission.address)
     setLoadingConfirm(false)
     handleClose()
   }
@@ -36,10 +39,10 @@ const ConfirmationDialog = ({
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogContent style={{ textAlign: 'center' }}>
         <Typography variant="h6">
-          Are you sure you want to choose this submission as the winner?
+          {`Are you sure you want to purchase this submission for ${ethToUsdRate ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ethDisplayString(submission.price)}?`}
         </Typography>
         <img
-          src={`https://ipfs.io/ipfs/${submission.imageId}`}
+          src={submission.imageUrl}
           alt={submission.description}
           style={{ maxHeight: '80vh', maxWidth: '100%', marginTop: '20px' }}
         />

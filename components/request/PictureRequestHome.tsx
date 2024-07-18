@@ -2,9 +2,9 @@ import React from 'react'
 import Link from 'next/link'
 import { Button, Box } from '@mui/material'
 import { useWallet } from '@/hooks/useWallet'
-import { ImageRequestList } from './ImageRequestList'
+import { PictureRequestList } from './PictureRequestList'
 
-export const ImageRequestHome: React.FC = () => {
+export const PictureRequestHome: React.FC = () => {
   const { selectedWallet, selectedAccount } = useWallet()
 
   return (
@@ -19,7 +19,7 @@ export const ImageRequestHome: React.FC = () => {
         </Box>
       )}
       <Box mt={2}>
-        <ImageRequestList />
+        <PictureRequestList />
       </Box>
     </div>
   )

@@ -1,15 +1,12 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 
-// import { getPictureBountyApi, PictureBountyApi } from '@/utils/pictureBountyApi'
-import { getImageRequestApi, ImageRequestApi } from '@/utils/imageRequestApi'
+import { getPictureRequestApi, PictureRequestApi } from '@/utils/pictureRequestApi'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
 
-import { ImageRequestProvider } from './ImageRequestContext'
-// import { BountyProvider } from './BountyContext'
+import { PictureRequestProvider } from './PictureRequestContext'
 import { WalletProvider } from './WalletProvider'
 import { EthUsdRateProvider } from './EthRateProvider'
 import { RequestSubmissionProvider } from './RequestSubmissionContext'
-// import { SubmissionProvider } from './SubmissionContext'
 import { ImageStoreProvider } from './ImageStoreContext'
 
 interface AppProvidersProps {
@@ -17,17 +14,17 @@ interface AppProvidersProps {
 }
 
 const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
-  const [imageRequestApi, setImageRequestApi] = useState<ImageRequestApi>()
+  const [pictureRequestApi, setPictureRequestApi] = useState<PictureRequestApi>()
 
   useEffect(() => {
     async function initBountyApi() {
-      setImageRequestApi(await getImageRequestApi())
+      setPictureRequestApi(await getPictureRequestApi())
     }
 
     initBountyApi()
   }, [])
 
-  if (!imageRequestApi) {
+  if (!pictureRequestApi) {
     return (
       <div>
         <FullScreenLoader />
@@ -39,11 +36,11 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
     <EthUsdRateProvider>
       <WalletProvider>
         <ImageStoreProvider>
-          <ImageRequestProvider imageRequestApi={imageRequestApi}>
-            <RequestSubmissionProvider imageRequestApi={imageRequestApi}>
+          <PictureRequestProvider pictureRequestApi={pictureRequestApi}>
+            <RequestSubmissionProvider pictureRequestApi={pictureRequestApi}>
               {children}
             </RequestSubmissionProvider>
-          </ImageRequestProvider>
+          </PictureRequestProvider>
         </ImageStoreProvider>
       </WalletProvider>
     </EthUsdRateProvider>

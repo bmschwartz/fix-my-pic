@@ -1,18 +1,18 @@
 import React, { ReactNode, createContext, useCallback, useEffect, useState } from 'react'
 
 import { useWallet } from '@/hooks/useWallet'
-import { ImageRequest } from '@/types/imageRequest'
-import { ImageRequestApi } from '@/utils/imageRequestApi'
-import { ImageRequestSubmission } from '@/types/submission'
+import { PictureRequest } from '@/types/pictureRequest'
+import { PictureRequestApi } from '@/utils/pictureRequestApi'
+import { PictureRequestSubmission } from '@/types/submission'
 
 export interface RequestSubmissionContextType {
-  getRequestSubmissions: (requestAddress: string) => Promise<ImageRequestSubmission[]>
-  createSubmission: (submissionData: CreateSubmissionProps) => Promise<ImageRequestSubmission>
+  getRequestSubmissions: (requestAddress: string) => Promise<PictureRequestSubmission[]>
+  createSubmission: (submissionData: CreateSubmissionProps) => Promise<PictureRequestSubmission>
 }
 
 interface RequestSubmissionProviderProps {
   children: ReactNode
-  imageRequestApi: ImageRequestApi
+  pictureRequestApi: PictureRequestApi
 }
 
 interface CreateSubmissionProps {
@@ -28,17 +28,17 @@ export const RequestSubmissionContext = createContext<RequestSubmissionContextTy
 
 export const RequestSubmissionProvider = ({
   children,
-  imageRequestApi,
+  pictureRequestApi,
 }: RequestSubmissionProviderProps) => {
   const { selectedAccount: account, selectedWallet: wallet } = useWallet()
-  const [submissions, setSubmissions] = useState<Record<string, ImageRequestSubmission[]>>({})
+  const [submissions, setSubmissions] = useState<Record<string, PictureRequestSubmission[]>>({})
 
   useEffect(() => {
     async function _initSubmissions() {
-      const allImageRequests = imageRequestApi.getImageRequests()
-      const allSubmissions: Record<string, ImageRequestSubmission[]> = {}
+      const allPictureRequests = pictureRequestApi.getPictureRequests()
+      const allSubmissions: Record<string, PictureRequestSubmission[]> = {}
 
-      allImageRequests.forEach((request: ImageRequest) => {
+      allPictureRequests.forEach((request: PictureRequest) => {
         allSubmissions[request.address] = request.submissions
       })
 
@@ -48,12 +48,12 @@ export const RequestSubmissionProvider = ({
   }, [])
 
   const _refreshSubmissions = async (requestAddress: string) => {
-    const requestSubmissions = await imageRequestApi.getSubmissions({
+    const requestSubmissions = await pictureRequestApi.getSubmissions({
       requestAddress,
       refetch: true,
     })
 
-    setSubmissions((current: Record<string, ImageRequestSubmission[]>) => ({
+    setSubmissions((current: Record<string, PictureRequestSubmission[]>) => ({
       ...current,
       [requestAddress]: requestSubmissions,
     }))
@@ -80,12 +80,12 @@ export const RequestSubmissionProvider = ({
     requestAddress,
     imageId,
     price,
-  }: CreateSubmissionProps): Promise<ImageRequestSubmission> => {
+  }: CreateSubmissionProps): Promise<PictureRequestSubmission> => {
     if (!wallet || !account) {
       throw new Error('Wallet and account needed to create a submission!')
     }
 
-    const submission = await imageRequestApi.createSubmission({
+    const submission = await pictureRequestApi.createSubmission({
       wallet,
       account,
       requestAddress,

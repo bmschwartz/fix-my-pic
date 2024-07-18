@@ -2,28 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Container, Box, Button } from '@mui/material'
 
-import { ImageRequest } from '@/types/imageRequest'
-import { useImageRequest } from '@/hooks/useImageRequest'
+import { PictureRequest } from '@/types/pictureRequest'
+import { usePictureRequest } from '@/hooks/usePictureRequest'
 import { SelectedWallet } from '@/components/wallet'
 import FullScreenLoader from '@/components/loading/FullScreenLoader'
-import { SubmissionList } from '@/components/requestSubmission/SubmissionList'
-import { ImageRequestDetailInfo } from '@/components/imageRequest/ImageRequestDetailInfo'
+import { SubmissionList } from '@/components/submission/SubmissionList'
+import { PictureRequestDetail } from '@/components/request'
 
 const RequestDetailPage: React.FC = () => {
   const router = useRouter()
   const { address } = router.query
-  const { getImageRequest } = useImageRequest()
-  const [imageRequest, setImageRequest] = useState<ImageRequest>()
+  const { getPictureRequest } = usePictureRequest()
+  const [pictureRequest, setPictureRequest] = useState<PictureRequest>()
 
   useEffect(() => {
-    async function _initImageRequest() {
-      const _imageRequest = (await getImageRequest(address as string)) as ImageRequest
-      setImageRequest(_imageRequest)
+    async function _initPictureRequest() {
+      const _pictureRequest = (await getPictureRequest(address as string)) as PictureRequest
+      setPictureRequest(_pictureRequest)
     }
-    _initImageRequest()
+    _initPictureRequest()
   }, [address])
 
-  if (!imageRequest) {
+  if (!pictureRequest) {
     return (
       <div>
         <FullScreenLoader />
@@ -40,10 +40,10 @@ const RequestDetailPage: React.FC = () => {
         </Button>
       </Box>
       <Box mt={4} mb={4}>
-        <ImageRequestDetailInfo imageRequest={imageRequest} />
+        <PictureRequestDetail pictureRequest={pictureRequest} />
       </Box>
       <Box mt={4} mb={4}>
-        <SubmissionList imageRequest={imageRequest} />
+        <SubmissionList pictureRequest={pictureRequest} />
       </Box>
     </Container>
   )

@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import './RequestSubmission.sol';
 
-contract ImageRequest {
+contract PictureRequest {
   string public title;
   string public imageId;
   uint256 public budget;

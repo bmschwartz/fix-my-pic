@@ -1,5 +1,4 @@
-// import { BountyHome } from '@/components/bounty'
-import { ImageRequestHome } from '@/components/imageRequest'
+import { PictureRequestHome } from '@/components/request'
 import { SelectedWallet } from '@/components/wallet'
 import { Box, Container } from '@mui/material'
 
@@ -8,7 +7,7 @@ export default function Home() {
     <Container>
       <SelectedWallet />
       <Box mt={4} mb={4}>
-        <ImageRequestHome />
+        <PictureRequestHome />
         {/* <BountyHome /> */}
       </Box>
     </Container>

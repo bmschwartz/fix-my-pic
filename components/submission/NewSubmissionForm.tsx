@@ -1,20 +1,22 @@
 'use client'
 
-import { useImageStore } from '@/hooks/useImageStore'
-import { useSubmissions } from '@/hooks/useSubmissions'
-import { Backdrop, Box, Button, CircularProgress, TextField } from '@mui/material'
-import { DropzoneArea } from 'mui-file-dropzone'
 import { FormEvent, useState } from 'react'
+import { DropzoneArea } from 'mui-file-dropzone'
+import { Backdrop, Box, Button, CircularProgress, TextField } from '@mui/material'
+
+import { useImageStore } from '@/hooks/useImageStore'
+import { useRequestSubmissions } from '@/hooks/useRequestSubmissions'
 
 interface NewSubmissionFormProps {
   onCreated?: () => void
-  bountyAddress: string
+  requestAddress: string
 }
 
-export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmissionFormProps) {
-  const { createSubmission } = useSubmissions()
+export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubmissionFormProps) {
+  const { createSubmission } = useRequestSubmissions()
   const { uploadImage } = useImageStore()
   const [description, setDescription] = useState<string>('')
+  const [price, setPrice] = useState<string>('')
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
@@ -22,7 +24,7 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!file || !description) {
+    if (!file || !description || !price) {
       return
     }
 
@@ -30,13 +32,14 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
 
     const imageId = await uploadImage(file)
     try {
-      await createSubmission({ bountyAddress, description, imageId })
+      await createSubmission({ requestAddress, description, imageId, price: Number(price) })
     } catch (e) {
       console.error(e)
       return
     }
     setLoading(false)
 
+    setPrice('')
     setDescription('')
     setFile(null)
     setPreview(null)
@@ -71,6 +74,17 @@ export default function NewSubmissionForm({ onCreated, bountyAddress }: NewSubmi
         rows={4}
         required
         disabled={loading}
+      />
+      <TextField
+        label="Price (USD)"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        variant="outlined"
+        fullWidth
+        required
+        type="number"
+        disabled={loading}
+        InputProps={{ inputProps: { min: 0, step: '0.01' } }}
       />
       <DropzoneArea
         acceptedFiles={['image/*']}

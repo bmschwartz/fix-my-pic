@@ -5,7 +5,7 @@ contract RequestSubmission {
   string public imageId;
   string public description;
   uint256 public price;
-  address public imageRequest;
+  address public pictureRequest;
   address payable public submitter;
 
   constructor(
@@ -21,7 +21,7 @@ contract RequestSubmission {
     description = _description;
     imageId = _imageId;
     price = _price;
-    imageRequest = msg.sender;
+    pictureRequest = msg.sender;
   }
 
   receive() external payable {}

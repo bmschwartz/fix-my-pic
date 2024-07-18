@@ -6,7 +6,7 @@ export interface BountySubmission {
   isWinner: boolean
 }
 
-export interface ImageRequestSubmission {
+export interface PictureRequestSubmission {
   submitter: string
   address: string
   description: string

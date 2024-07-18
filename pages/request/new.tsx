@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { Box, Button, Container } from '@mui/material'
-import { NewRequestForm } from '@/components/imageRequest'
+import { NewRequestForm } from '@/components/request'
 
 export default function NewRequestPage() {
   const router = useRouter()

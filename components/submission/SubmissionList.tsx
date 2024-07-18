@@ -3,35 +3,30 @@ import Link from 'next/link'
 import { Button, CircularProgress, Grid, Paper, Typography } from '@mui/material'
 
 import { useWallet } from '@/hooks/useWallet'
-import { useBounty } from '@/hooks/useBounty'
-import { useSubmissions } from '@/hooks/useSubmissions'
-import { BountySubmission } from '@/types/submission'
-import { Bounty, BountyState } from '@/types/bounty'
+import { useRequestSubmissions } from '@/hooks/useRequestSubmissions'
+import { PictureRequestSubmission } from '@/types/submission'
+import { PictureRequest } from '@/types/pictureRequest'
 
 import SubmissionCard from './SubmissionCard'
 import SlideshowDialog from './SlideshowDialog'
-import ConfirmationDialog from './ConfirmationDialog'
+import ConfirmationDialog from './PurchaseConfirmationDialog'
 
-export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
-  const { payOutReward } = useBounty()
-  const { getBountySubmissions } = useSubmissions()
+export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequest }) => {
+  const { getRequestSubmissions } = useRequestSubmissions()
   const { selectedWallet, selectedAccount } = useWallet()
   const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [openSlideshow, setOpenSlideshow] = useState(false)
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
-  const [submissions, setSubmissions] = useState<BountySubmission[]>([])
+  const [submissions, setSubmissions] = useState<PictureRequestSubmission[]>([])
 
-  const isBountyOwner = selectedAccount?.toLowerCase() === bounty.owner.toLowerCase()
-  const isActiveBounty = Number(bounty.state) === BountyState.ACTIVE
-  const displayChooseWinner = isBountyOwner && isActiveBounty
-  const displaySubmitEdit = selectedWallet && selectedAccount && isActiveBounty
+  const displaySubmitEdit = selectedWallet && selectedAccount
 
   useEffect(() => {
     const getSubmissions = async () => {
       setLoading(true)
       try {
-        const data = await getBountySubmissions(bounty.address)
+        const data = await getRequestSubmissions(pictureRequest.address)
         setSubmissions(data)
       } catch (err) {
         console.error('Error fetching submissions', err)
@@ -41,10 +36,10 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
     }
 
     getSubmissions()
-  }, [bounty.address, getBountySubmissions])
+  }, [pictureRequest.address, getRequestSubmissions])
 
-  const onChooseWinner = useCallback(async (submissionAddress: string): Promise<void> => {
-    await payOutReward(bounty.address, submissionAddress)
+  const onPurchase = useCallback(async (submissionAddress: string): Promise<void> => {
+    console.log('DEBUG purchasing', submissionAddress)
   }, [])
 
   return (
@@ -52,7 +47,7 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Submissions</Typography>
         {displaySubmitEdit && (
-          <Link href={`/submission/new?bountyAddress=${bounty.address}`} passHref>
+          <Link href={`/submission/new?request=${pictureRequest.address}`} passHref>
             <Button variant="contained" color="primary">
               Submit Edit
             </Button>
@@ -69,13 +64,12 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
             <Typography variant="h6">No edits have been submitted yet</Typography>
           </Grid>
         ) : (
-          submissions.map((submission: BountySubmission) => (
+          submissions.map((submission: PictureRequestSubmission) => (
             <SubmissionCard
               key={submission.address}
               submission={submission}
-              displayChooseWinner={displayChooseWinner}
               onClick={() => setOpenSlideshow(true)}
-              onChooseWinner={onChooseWinner}
+              onPurchase={onPurchase}
             />
           ))
         )}
@@ -87,7 +81,6 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
         currentSlide={currentSlide}
         setCurrentSlide={setCurrentSlide}
         handleClose={() => setOpenSlideshow(false)}
-        displayChooseWinner={displayChooseWinner}
         setConfirmDialogOpen={setConfirmDialogOpen}
       />
 
@@ -96,7 +89,7 @@ export const SubmissionList = ({ bounty }: { bounty: Bounty }) => {
           open={confirmDialogOpen}
           handleClose={() => setConfirmDialogOpen(false)}
           submission={submissions[currentSlide]}
-          onChooseWinner={onChooseWinner}
+          onPurchase={onPurchase}
         />
       )}
     </Paper>

@@ -4,10 +4,10 @@ import NewSubmissionForm from '@/components/submission/NewSubmissionForm'
 
 export default function NewSubmissionPage() {
   const router = useRouter()
-  const bountyAddress = router.query.bountyAddress as string
+  const requestAddress = router.query.requestAddress as string
 
   const onSubmissionCreated = () => {
-    router.push(`/bounty/${bountyAddress}`)
+    router.push(`/request/${requestAddress}`)
   }
 
   return (
@@ -35,7 +35,7 @@ export default function NewSubmissionPage() {
           backgroundColor: 'background.paper',
         }}
       >
-        <NewSubmissionForm bountyAddress={bountyAddress} onCreated={onSubmissionCreated} />
+        <NewSubmissionForm requestAddress={requestAddress} onCreated={onSubmissionCreated} />
       </Box>
     </Container>
   )
