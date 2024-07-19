@@ -151,12 +151,12 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
 
     return {
-      price,
       address,
       imageId,
       imageUrl,
       submitter,
       description,
+      price: Number(ethers.formatEther(price)),
     }
   }
 
@@ -173,8 +173,6 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
 
     const budgetEth = await convertUsdToEthWithoutRate(budget)
     const budgetInWei = ethers.parseEther(budgetEth)
-
-    console.log('Creating image request with', title, description, imageId, budgetInWei)
 
     try {
       const tx = await pictureRequestFactory.createPictureRequest(
@@ -219,7 +217,6 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     wallet,
     account,
   }: CreateSubmissionsParams): Promise<PictureRequestSubmission> => {
-    console.log(requestAddress, imageId, description, price, account)
     try {
       const pictureRequestContract = new Contract(
         requestAddress,
