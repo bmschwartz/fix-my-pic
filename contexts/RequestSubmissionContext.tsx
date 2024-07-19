@@ -16,10 +16,11 @@ interface RequestSubmissionProviderProps {
 }
 
 interface CreateSubmissionProps {
-  requestAddress: string
-  description: string
-  imageId: string
   price: number
+  description: string
+  requestAddress: string
+  originalImageId: string
+  watermarkedImageId: string | null
 }
 
 export const RequestSubmissionContext = createContext<RequestSubmissionContextType | undefined>(
@@ -78,7 +79,7 @@ export const RequestSubmissionProvider = ({
   const createSubmission = async ({
     description,
     requestAddress,
-    imageId,
+    originalImageId,
     price,
   }: CreateSubmissionProps): Promise<PictureRequestSubmission> => {
     if (!wallet || !account) {
@@ -90,7 +91,7 @@ export const RequestSubmissionProvider = ({
       account,
       requestAddress,
       description,
-      imageId,
+      imageId: originalImageId,
       price,
     })
 
