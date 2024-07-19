@@ -77,14 +77,25 @@ export const RequestSubmissionProvider = ({
   )
 
   const createSubmission = async ({
+    price,
     description,
     requestAddress,
     originalImageId,
-    price,
+    watermarkedImageId,
   }: CreateSubmissionProps): Promise<PictureRequestSubmission> => {
     if (!wallet || !account) {
       throw new Error('Wallet and account needed to create a submission!')
     }
+
+    console.log('DEBUG Creating with ', {
+      price,
+      wallet,
+      account,
+      requestAddress,
+      description,
+      imageId: originalImageId,
+      watermarkedImageId,
+    })
 
     const submission = await pictureRequestApi.createSubmission({
       wallet,

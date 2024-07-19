@@ -7,9 +7,9 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material'
+import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 import { PictureRequestSubmission } from '@/types/submission'
 import { ethDisplayString, ethDisplayWithUSDString } from '@/utils/currency'
-import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 
 interface ConfirmationDialogProps {
   open: boolean

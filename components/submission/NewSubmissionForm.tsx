@@ -36,33 +36,39 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
   const { uploadImage } = useImageStore()
   const [description, setDescription] = useState<string>('')
   const [price, setPrice] = useState<string>('')
-  const [file, setFile] = useState<File | null>(null)
+  const [originalPictureFile, setOriginalPictureFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const [watermarkOption, setWatermarkOption] = useState<WatermarkOptions>(
     WatermarkOptions.AUTOMATIC
   )
-  const [watermarkedFile, setWatermarkedFile] = useState<File | null>(null)
+  const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null)
   const [isFree, setIsFree] = useState<boolean>(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!file || !description || (!isFree && !price)) {
+    if (
+      !originalPictureFile ||
+      !description ||
+      (!isFree && !price) ||
+      (watermarkOption === WatermarkOptions.UPLOAD && !watermarkPictureFile)
+    ) {
       return
     }
 
     setLoading(true)
 
-    const originalImageId = await uploadImage(file)
+    const originalImageId = await uploadImage({ file: originalPictureFile })
 
     let watermarkedImageId = null
-    if (watermarkOption === WatermarkOptions.UPLOAD && watermarkedFile) {
-      watermarkedImageId = await uploadImage(watermarkedFile)
+    if (watermarkOption === WatermarkOptions.UPLOAD && watermarkPictureFile) {
+      watermarkedImageId = await uploadImage({ file: watermarkPictureFile })
     } else if (watermarkOption === WatermarkOptions.AUTOMATIC) {
-      // Handle automatic watermarking logic here
-      // For example, you could call an API to add the watermark and get the new image ID
-      watermarkedImageId = await addSystemWatermark(originalImageId)
+      watermarkedImageId = await uploadImage({
+        file: originalPictureFile,
+        addWatermark: true,
+      })
     }
 
     try {
@@ -81,10 +87,10 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
 
     setPrice('')
     setDescription('')
-    setFile(null)
+    setOriginalPictureFile(null)
     setPreview(null)
     setWatermarkOption(WatermarkOptions.AUTOMATIC)
-    setWatermarkedFile(null)
+    setWatermarkPictureFile(null)
     setIsFree(false)
 
     onCreated?.()
@@ -92,9 +98,9 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
 
   const onFileChange = (file: File | null, isWatermarked: boolean = false) => {
     if (isWatermarked) {
-      setWatermarkedFile(file)
+      setWatermarkPictureFile(file)
     } else {
-      setFile(file)
+      setOriginalPictureFile(file)
       setPreview(file ? URL.createObjectURL(file) : null)
     }
   }
@@ -138,7 +144,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
         InputProps={{ inputProps: { min: 0, step: '0.01' } }}
       />
       <MuiFileInput
-        value={file}
+        value={originalPictureFile}
         label="Edited Picture"
         placeholder="Click to upload your edited picture"
         InputProps={{
@@ -180,7 +186,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
       </FormControl>
       {watermarkOption === 'upload' && !isFree && (
         <MuiFileInput
-          value={watermarkedFile}
+          value={watermarkPictureFile}
           label="Watermarked Picture"
           placeholder="Click to upload your watermarked picture"
           InputProps={{
