@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material'
 import { PictureRequestSubmission } from '@/types/submission'
 import ConfirmationDialog from './PurchaseConfirmationDialog'
+import { useEthUsdRate } from '@/hooks/useEthUsdRate'
+import { ethDisplayWithUSDString } from '@/utils/currency'
 
 interface SubmissionCardProps {
   submission: PictureRequestSubmission
@@ -12,6 +14,7 @@ interface SubmissionCardProps {
 
 const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps) => {
   const [open, setOpen] = useState(false)
+  const { ethToUsdRate } = useEthUsdRate()
 
   const handleClickOpen = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -32,7 +35,7 @@ const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps
           </CardContent>
           <CardActions style={{ justifyContent: 'center' }}>
             <Button size="small" color="primary" variant="contained" onClick={handleClickOpen}>
-              Purchase
+              {`Purchase ${ethToUsdRate && submission.price ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ''}`}
             </Button>
           </CardActions>
         </Card>

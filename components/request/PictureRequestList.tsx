@@ -46,7 +46,9 @@ const PictureRequestCard = ({
                 {pictureRequest.title}
               </Typography>
               <Typography variant="body2">
-                Budget: {ethDisplayWithUSDString(pictureRequest.budget, ethToUsdRate)}
+                {pictureRequest.budget !== undefined
+                  ? `Budget: ${ethDisplayWithUSDString(pictureRequest.budget, ethToUsdRate)}`
+                  : ''}
               </Typography>
             </Box>
             <IconButton size="large">

@@ -39,7 +39,7 @@ const ConfirmationDialog = ({
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogContent style={{ textAlign: 'center' }}>
         <Typography variant="h6">
-          {`Are you sure you want to purchase this submission for ${ethToUsdRate ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ethDisplayString(submission.price)}?`}
+          {`Are you sure you want to purchase this submission for ${ethToUsdRate && submission.price !== undefined ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ethDisplayString(submission.price)}?`}
         </Typography>
         <img
           src={submission.imageUrl}

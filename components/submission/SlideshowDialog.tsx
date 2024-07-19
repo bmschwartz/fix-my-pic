@@ -2,6 +2,8 @@ import { Dialog, DialogContent, DialogActions, IconButton, Box, Button } from '@
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material'
 import { PictureRequestSubmission } from '@/types/submission'
 import { Dispatch, SetStateAction, useEffect } from 'react'
+import { ethDisplayWithUSDString } from '@/utils/currency'
+import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 
 interface SlideshowDialogProps {
   open: boolean
@@ -21,6 +23,8 @@ const SlideshowDialog = ({
   handleClose,
   setConfirmDialogOpen,
 }: SlideshowDialogProps) => {
+  const { ethToUsdRate } = useEthUsdRate()
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft') {
@@ -100,7 +104,7 @@ const SlideshowDialog = ({
       </DialogActions>
       <Box display="flex" justifyContent="center" mt={2} mb={2}>
         <Button variant="contained" color="primary" onClick={() => setConfirmDialogOpen(true)}>
-          Purchase
+          {`Purchase ${ethToUsdRate && submissions[currentSlide]?.price !== undefined ? ethDisplayWithUSDString(submissions[currentSlide]?.price, ethToUsdRate) : ''}`}
         </Button>
       </Box>
     </Dialog>
