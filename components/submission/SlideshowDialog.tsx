@@ -24,6 +24,7 @@ const SlideshowDialog = ({
   setConfirmDialogOpen,
 }: SlideshowDialogProps) => {
   const { ethToUsdRate } = useEthUsdRate()
+  const submission = submissions[currentSlide]
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -88,8 +89,8 @@ const SlideshowDialog = ({
     >
       <DialogContent style={{ textAlign: 'center', position: 'relative' }}>
         <img
-          src={submissions[currentSlide]?.imageUrl}
-          alt={submissions[currentSlide]?.description}
+          src={submission?.imageUrl}
+          alt={submission?.description}
           style={{ maxHeight: '80vh', maxWidth: '100%' }}
         />
         {renderThumbnails()}
@@ -104,7 +105,9 @@ const SlideshowDialog = ({
       </DialogActions>
       <Box display="flex" justifyContent="center" mt={2} mb={2}>
         <Button variant="contained" color="primary" onClick={() => setConfirmDialogOpen(true)}>
-          {`Purchase ${ethToUsdRate && submissions[currentSlide]?.price !== undefined ? ethDisplayWithUSDString(submissions[currentSlide]?.price, ethToUsdRate) : ''}`}
+          {submission?.price === 0
+            ? 'Download Free'
+            : `Purchase ${ethToUsdRate && submission?.price !== undefined ? ethDisplayWithUSDString(submission?.price, ethToUsdRate) : ''}`}
         </Button>
       </Box>
     </Dialog>

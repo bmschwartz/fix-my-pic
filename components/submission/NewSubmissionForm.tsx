@@ -124,7 +124,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
             disabled={loading}
           />
         }
-        label="This image is free"
+        label="Make this image free"
       />
       <TextField
         label="Price (USD)"

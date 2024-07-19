@@ -35,7 +35,9 @@ const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps
           </CardContent>
           <CardActions style={{ justifyContent: 'center' }}>
             <Button size="small" color="primary" variant="contained" onClick={handleClickOpen}>
-              {`Purchase ${ethToUsdRate && submission.price ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ''}`}
+              {submission?.price === 0
+                ? 'Download Free'
+                : `Purchase ${ethToUsdRate && submission?.price !== undefined ? ethDisplayWithUSDString(submission?.price, ethToUsdRate) : ''}`}
             </Button>
           </CardActions>
         </Card>

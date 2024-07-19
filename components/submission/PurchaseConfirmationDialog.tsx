@@ -38,9 +38,11 @@ const ConfirmationDialog = ({
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogContent style={{ textAlign: 'center' }}>
-        <Typography variant="h6">
-          {`Are you sure you want to purchase this submission for ${ethToUsdRate && submission.price !== undefined ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ethDisplayString(submission.price)}?`}
-        </Typography>
+        {submission.price !== 0 && (
+          <Typography variant="h6">
+            {`Are you sure you want to purchase this picture for ${ethToUsdRate && submission.price !== undefined ? ethDisplayWithUSDString(submission.price, ethToUsdRate) : ethDisplayString(submission.price)}?`}
+          </Typography>
+        )}
         <img
           src={submission.imageUrl}
           alt={submission.description}
@@ -57,7 +59,13 @@ const ConfirmationDialog = ({
           onClick={handleConfirm}
           disabled={loadingConfirm}
         >
-          {loadingConfirm ? <CircularProgress size={24} /> : 'Confirm'}
+          {loadingConfirm ? (
+            <CircularProgress size={24} />
+          ) : submission.price === 0 ? (
+            'Download'
+          ) : (
+            'Confirm'
+          )}
         </Button>
       </DialogActions>
     </Dialog>
