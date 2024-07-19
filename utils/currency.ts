@@ -33,13 +33,11 @@ export const convertEthToUsdWithoutRate = async (ethAmount: number | string): Pr
 }
 
 export const ethDisplayString = (ethAmount: number): string => {
-  console.log('DEBUG ethAmount', ethAmount)
   const eth = ethAmount.toFixed(6)
   return `${eth} ETH`
 }
 
 export const ethDisplayWithUSDString = (ethAmount: number, rate: number): string => {
-  console.log('DEBUG ethAmount with usd', ethAmount)
   const eth = ethAmount.toFixed(6)
   return `${eth} ETH / $${convertEthToUsd(ethAmount, rate)}`
 }
