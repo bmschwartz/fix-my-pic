@@ -35,7 +35,7 @@ const RequestDetailPage: React.FC = () => {
     <Container>
       <SelectedWallet />
       <Box mt={4} mb={4}>
-        <Button variant="contained" color="primary" onClick={() => router.back()}>
+        <Button variant="contained" color="primary" onClick={() => router.push('/')}>
           Back
         </Button>
       </Box>
