@@ -61,13 +61,13 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
 
     setLoading(true)
 
-    const originalImageId = await uploadImage({ file: originalPictureFile })
+    const originalPictureId = await uploadImage({ file: originalPictureFile })
 
-    let watermarkedImageId = null
+    let watermarkedPictureId = null
     if (watermarkOption === WatermarkOptions.UPLOAD && watermarkPictureFile) {
-      watermarkedImageId = await uploadImage({ file: watermarkPictureFile })
+      watermarkedPictureId = await uploadImage({ file: watermarkPictureFile })
     } else if (watermarkOption === WatermarkOptions.AUTOMATIC) {
-      watermarkedImageId = await uploadImage({
+      watermarkedPictureId = await uploadImage({
         file: originalPictureFile,
         addWatermark: true,
       })
@@ -77,8 +77,8 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
       await createSubmission({
         requestAddress,
         description,
-        originalImageId,
-        watermarkedImageId,
+        originalPictureId,
+        watermarkedPictureId,
         price: isFree ? 0 : Number(price),
       })
     } catch (e) {

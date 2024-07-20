@@ -31,9 +31,10 @@ interface CreateSubmissionsParams {
   account: string
   description: string
   requestAddress: string
-  originalImageId: string
   wallet: EIP6963ProviderDetail
-  watermarkedImageId: string | null
+  freePictureId: string | null
+  encryptedPictureId: string | null
+  watermarkedPictureId: string | null
 }
 
 interface GetSubmissionsParams {
@@ -64,7 +65,7 @@ if (!IMAGE_REQUEST_RPC_URL) {
   process.exit('No RPC URL provided')
 }
 if (!IMAGE_REQUEST_FACTORY_ADDRESS) {
-  process.exit('No bounty factory address provided')
+  process.exit('No image factory address provided')
 }
 if (!IMAGE_URL_ROOT) {
   process.exit('No image url root provided')
@@ -216,8 +217,9 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     account,
     description,
     requestAddress,
-    originalImageId,
-    watermarkedImageId,
+    freePictureId,
+    encryptedPictureId,
+    watermarkedPictureId,
   }: CreateSubmissionsParams): Promise<PictureRequestSubmission> => {
     try {
       const pictureRequestContract = new Contract(

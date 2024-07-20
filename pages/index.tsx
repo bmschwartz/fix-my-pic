@@ -8,7 +8,6 @@ export default function Home() {
       <SelectedWallet />
       <Box mt={4} mb={4}>
         <PictureRequestHome />
-        {/* <BountyHome /> */}
       </Box>
     </Container>
   )

@@ -5,7 +5,7 @@ import { PictureRequest } from '@/types/pictureRequest'
 import { PictureRequestApi } from '@/utils/pictureRequestApi'
 
 export interface PictureRequestContextType {
-  createPictureRequest: (bountyData: CreatePictureRequestProps) => Promise<PictureRequest>
+  createPictureRequest: (props: CreatePictureRequestProps) => Promise<PictureRequest>
   getPictureRequests: () => Promise<PictureRequest[]>
   getPictureRequest: (address: string) => Promise<PictureRequest | undefined>
   pictureRequests: PictureRequest[]

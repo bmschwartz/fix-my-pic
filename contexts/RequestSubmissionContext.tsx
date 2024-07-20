@@ -19,8 +19,8 @@ interface CreateSubmissionProps {
   price: number
   description: string
   requestAddress: string
-  originalImageId: string
-  watermarkedImageId: string | null
+  originalPictureId: string
+  watermarkedPictureId: string | null
 }
 
 export const RequestSubmissionContext = createContext<RequestSubmissionContextType | undefined>(
@@ -80,12 +80,15 @@ export const RequestSubmissionProvider = ({
     price,
     description,
     requestAddress,
-    originalImageId,
-    watermarkedImageId,
+    originalPictureId,
+    watermarkedPictureId,
   }: CreateSubmissionProps): Promise<PictureRequestSubmission> => {
     if (!wallet || !account) {
       throw new Error('Wallet and account needed to create a submission!')
     }
+
+    const freePictureId = price === 0 ? originalPictureId : null
+    const encryptedPictureId = price === 0 ? null : 'encrypted'
 
     const submission = await pictureRequestApi.createSubmission({
       price,
@@ -93,8 +96,9 @@ export const RequestSubmissionProvider = ({
       account,
       requestAddress,
       description,
-      originalImageId,
-      watermarkedImageId,
+      freePictureId,
+      encryptedPictureId,
+      watermarkedPictureId,
     })
 
     await _refreshSubmissions(requestAddress)

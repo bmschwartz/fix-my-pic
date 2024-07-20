@@ -17,11 +17,11 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   const [pictureRequestApi, setPictureRequestApi] = useState<PictureRequestApi>()
 
   useEffect(() => {
-    async function initBountyApi() {
+    async function initPictureRequestApi() {
       setPictureRequestApi(await getPictureRequestApi())
     }
 
-    initBountyApi()
+    initPictureRequestApi()
   }, [])
 
   if (!pictureRequestApi) {

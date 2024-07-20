@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import './RequestSubmission.sol';
 
@@ -10,7 +10,7 @@ contract PictureRequest {
   string public description;
   RequestSubmission[] public submissions;
 
-  event SubmissionCreated(address _requestAddress, address _submissionAddress);
+  event SubmissionCreated(address indexed requestAddress, address indexed submissionAddress);
 
   constructor(
     string memory _title,
@@ -19,7 +19,6 @@ contract PictureRequest {
     uint256 _budget
   ) {
     require(_budget >= 0, 'Budget must be positive or zero');
-
     title = _title;
     description = _description;
     imageId = _imageId;
@@ -29,8 +28,11 @@ contract PictureRequest {
   function createSubmission(
     address _submitter,
     string memory _description,
-    string memory _imageId,
-    uint256 _price
+    string memory _watermarkedPictureId,
+    string memory _encryptedPictureId,
+    string memory _freePictureId,
+    uint256 _price,
+    bool _isFree
   ) public {
     require(_price >= 0, 'Price must be positive or zero');
     require(_submitter != address(0), 'Submitter address cannot be zero');
@@ -38,8 +40,11 @@ contract PictureRequest {
     RequestSubmission submission = new RequestSubmission(
       _submitter,
       _description,
-      _imageId,
-      _price
+      _watermarkedPictureId,
+      _encryptedPictureId,
+      _freePictureId,
+      _price,
+      _isFree
     );
     submissions.push(submission);
 
