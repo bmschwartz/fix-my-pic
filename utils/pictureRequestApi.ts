@@ -57,15 +57,16 @@ export interface PictureRequestApi {
   getSubmissions(params: GetSubmissionsParams): Promise<PictureRequestSubmission[]>
 }
 
-const IMAGE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
-const IMAGE_REQUEST_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_IMAGE_REQUEST_FACTORY_ADDRESS || ''
+const PICTURE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
+const PICTURE_REQUEST_FACTORY_ADDRESS =
+  process.env.NEXT_PUBLIC_PICTURE_REQUEST_FACTORY_ADDRESS || ''
 const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_PINATA_GATEWAY || ''
 
-if (!IMAGE_REQUEST_RPC_URL) {
+if (!PICTURE_REQUEST_RPC_URL) {
   process.exit('No RPC URL provided')
 }
-if (!IMAGE_REQUEST_FACTORY_ADDRESS) {
-  process.exit('No image factory address provided')
+if (!PICTURE_REQUEST_FACTORY_ADDRESS) {
+  process.exit('No picture factory address provided')
 }
 if (!IMAGE_URL_ROOT) {
   process.exit('No image url root provided')
@@ -76,7 +77,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
   let factoryAddress: string | Addressable = initialFactoryAddress
   let pictureRequests: Record<string, PictureRequest> = {}
   let submissions: Record<string, PictureRequestSubmission> = {}
-  const provider = new Provider(IMAGE_REQUEST_RPC_URL)
+  const provider = new Provider(PICTURE_REQUEST_RPC_URL)
 
   const _getSigner = (wallet: EIP6963ProviderDetail, account: string): Promise<Signer> => {
     const provider = new BrowserProvider(wallet.provider)
@@ -91,7 +92,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     factoryContract = new Contract(factoryAddress, PictureRequestFactorySchema.abi, provider)
 
     if (!factoryContract) {
-      throw new Error('Could not connect to the image request factory!')
+      throw new Error('Could not connect to the picture request factory!')
     }
   }
 
@@ -147,18 +148,24 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
   ): Promise<PictureRequestSubmission> => {
     const submissionContract = new ethers.Contract(address, RequestSubmission.abi, provider)
     const price = await submissionContract.price()
-    const imageId = await submissionContract.imageId()
     const submitter = await submissionContract.submitter()
     const description = await submissionContract.description()
-    const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
+    const freePictureId = await submissionContract.freePictureId()
+    const encryptedPictureId = await submissionContract.encryptedPictureId()
+    const watermarkedPictureId = await submissionContract.watermarkedPictureId()
 
     return {
       address,
-      imageId,
-      imageUrl,
       submitter,
       description,
       price: Number(ethers.formatEther(price)),
+      freePictureUrl: freePictureId ? `${IMAGE_URL_ROOT}/${freePictureId}` : undefined,
+      encryptedPictureUrl: encryptedPictureId
+        ? `${IMAGE_URL_ROOT}/${encryptedPictureId}`
+        : undefined,
+      watermarkedPictureUrl: watermarkedPictureId
+        ? `${IMAGE_URL_ROOT}/${watermarkedPictureId}`
+        : undefined,
     }
   }
 
@@ -231,16 +238,30 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
       const priceEth = await convertUsdToEthWithoutRate(price)
       const priceInWei = ethers.parseEther(priceEth)
 
+      console.log(
+        'createSubmission with',
+        account,
+        description,
+        watermarkedPictureId,
+        encryptedPictureId,
+        freePictureId,
+        priceInWei,
+        price === 0
+      )
+
       const tx = await pictureRequestContract.createSubmission(
         account,
         description,
-        originalImageId,
-        priceInWei
+        watermarkedPictureId || '',
+        encryptedPictureId || '',
+        freePictureId || '',
+        priceInWei,
+        price === 0
       )
       const receipt: ContractTransactionReceipt = await tx.wait()
 
       if (receipt.status !== 1 || !receipt.contractAddress) {
-        throw new Error(`Failed to create submission on image request ${requestAddress}`)
+        throw new Error(`Failed to create submission on picture request ${requestAddress}`)
       }
 
       return await getSubmission({ address: receipt.contractAddress, refetch: true })
@@ -265,6 +286,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     if (refetch) {
       submissions[address] = await _fetchSubmissionContractData(address)
     }
+
     return submissions[address]
   }
 
@@ -285,7 +307,7 @@ let pictureRequestApiPromise: Promise<PictureRequestApi> | null = null
 
 const getPictureRequestApi = async (): Promise<PictureRequestApi> => {
   if (!pictureRequestApiPromise) {
-    pictureRequestApiPromise = createPictureRequestApi(IMAGE_REQUEST_FACTORY_ADDRESS)
+    pictureRequestApiPromise = createPictureRequestApi(PICTURE_REQUEST_FACTORY_ADDRESS)
   }
   return pictureRequestApiPromise
 }

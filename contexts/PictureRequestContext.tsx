@@ -23,7 +23,7 @@ interface CreatePictureRequestProps {
   imageId: string
 }
 
-const factoryAddress = process.env.NEXT_PUBLIC_IMAGE_REQUEST_FACTORY_ADDRESS
+const factoryAddress = process.env.NEXT_PUBLIC_PICTURE_REQUEST_FACTORY_ADDRESS
 const providerRpcUrl = process.env.NEXT_PUBLIC_RPC_URL
 
 if (!factoryAddress || factoryAddress === '') {

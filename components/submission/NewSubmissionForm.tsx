@@ -72,6 +72,13 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
         addWatermark: true,
       })
     }
+    console.log('Create from Form with', {
+      requestAddress,
+      description,
+      originalPictureId,
+      watermarkedPictureId,
+      price: isFree ? 0 : Number(price),
+    })
 
     try {
       await createSubmission({

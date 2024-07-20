@@ -71,6 +71,7 @@ export const RequestSubmissionProvider = ({
           console.error(e)
         }
       }
+      console.log('Got submissions', submissions[requestAddress])
       return submissions[requestAddress] || []
     },
     [submissions]
@@ -89,6 +90,17 @@ export const RequestSubmissionProvider = ({
 
     const freePictureId = price === 0 ? originalPictureId : null
     const encryptedPictureId = price === 0 ? null : 'encrypted'
+
+    console.log('Create from context', {
+      price,
+      wallet,
+      account,
+      requestAddress,
+      description,
+      freePictureId,
+      encryptedPictureId,
+      watermarkedPictureId,
+    })
 
     const submission = await pictureRequestApi.createSubmission({
       price,

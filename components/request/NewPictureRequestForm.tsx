@@ -28,13 +28,13 @@ export const NewRequestForm: React.FC<NewRequestFormProps> = ({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if ([file, title, description, budget].includes(null)) {
+    if (!title || !file || !description || Number.isNaN(budget)) {
       return
     }
 
     setLoading(true)
 
-    const imageId = await uploadImage(file!)
+    const imageId = await uploadImage({ file })
     const request = { title, description, budget: Number(budget), imageId }
     try {
       await createPictureRequest(request)

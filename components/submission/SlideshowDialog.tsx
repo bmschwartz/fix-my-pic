@@ -72,7 +72,10 @@ const SlideshowDialog = ({
               '& img': { height: 50, width: 50, objectFit: 'cover' },
             }}
           >
-            <img src={submission.imageUrl} alt={submission.description} />
+            <img
+              src={submission.freePictureUrl || submission.watermarkedPictureUrl}
+              alt={submission.description}
+            />
           </Box>
         ))}
       </Box>
@@ -89,7 +92,7 @@ const SlideshowDialog = ({
     >
       <DialogContent style={{ textAlign: 'center', position: 'relative' }}>
         <img
-          src={submission?.imageUrl}
+          src={submission?.freePictureUrl || submission?.watermarkedPictureUrl}
           alt={submission?.description}
           style={{ maxHeight: '80vh', maxWidth: '100%' }}
         />
