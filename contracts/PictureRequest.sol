@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import './RequestSubmission.sol';
+import './PictureNFT.sol';
 
 contract PictureRequest {
   string public title;
@@ -9,6 +10,7 @@ contract PictureRequest {
   uint256 public budget;
   string public description;
   RequestSubmission[] public submissions;
+  address public pictureNFTAddress;
 
   event SubmissionCreated(address indexed requestAddress, address indexed submissionAddress);
 
@@ -16,13 +18,17 @@ contract PictureRequest {
     string memory _title,
     string memory _description,
     string memory _imageId,
-    uint256 _budget
+    uint256 _budget,
+    address _pictureNFTAddress
   ) {
     require(_budget >= 0, 'Budget must be positive or zero');
+    require(_pictureNFTAddress != address(0), 'Invalid NFT contract address');
+
     title = _title;
     description = _description;
     imageId = _imageId;
     budget = _budget;
+    pictureNFTAddress = _pictureNFTAddress;
   }
 
   function createSubmission(
@@ -44,7 +50,8 @@ contract PictureRequest {
       _encryptedPictureId,
       _freePictureId,
       _price,
-      _isFree
+      _isFree,
+      pictureNFTAddress
     );
     submissions.push(submission);
 

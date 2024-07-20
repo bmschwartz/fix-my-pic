@@ -1,39 +1,34 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+pragma solidity ^0.8.20;
 
 import './PictureRequest.sol';
+import './PictureNFT.sol';
 
 contract PictureRequestFactory {
+  PictureNFT public pictureNFT;
   PictureRequest[] public pictureRequests;
 
-  event PictureRequestCreated(
-    address indexed creator,
-    address requestAddress,
-    string title,
-    string description,
-    string imageId,
-    uint256 budget
-  );
+  event PictureRequestCreated(address indexed pictureRequestAddress);
+
+  constructor() {
+    pictureNFT = new PictureNFT();
+  }
 
   function createPictureRequest(
-    string memory title,
-    string memory description,
-    string memory imageId,
-    uint256 budget
+    string memory _title,
+    string memory _description,
+    string memory _imageId,
+    uint256 _budget
   ) public {
-    require(budget >= 0, 'Budget must be positive or zero');
-
-    PictureRequest pictureRequest = new PictureRequest(title, description, imageId, budget);
-    pictureRequests.push(pictureRequest);
-
-    emit PictureRequestCreated(
-      msg.sender,
-      address(pictureRequest),
-      title,
-      description,
-      imageId,
-      budget
+    PictureRequest pictureRequest = new PictureRequest(
+      _title,
+      _description,
+      _imageId,
+      _budget,
+      address(pictureNFT)
     );
+    pictureRequests.push(pictureRequest);
+    emit PictureRequestCreated(address(pictureRequest));
   }
 
   function getPictureRequests() public view returns (address[] memory) {
