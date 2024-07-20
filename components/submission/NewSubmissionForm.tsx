@@ -16,6 +16,7 @@ import {
   FormControl,
   FormLabel,
   Checkbox,
+  Typography,
 } from '@mui/material'
 
 import { useImageStore } from '@/hooks/useImageStore'
@@ -43,6 +44,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
     WatermarkOptions.AUTOMATIC
   )
   const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null)
+  const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null)
   const [isFree, setIsFree] = useState<boolean>(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -91,6 +93,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
     setPreview(null)
     setWatermarkOption(WatermarkOptions.AUTOMATIC)
     setWatermarkPictureFile(null)
+    setWatermarkPreview(null)
     setIsFree(false)
 
     onCreated?.()
@@ -99,6 +102,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
   const onFileChange = (file: File | null, isWatermarked: boolean = false) => {
     if (isWatermarked) {
       setWatermarkPictureFile(file)
+      setWatermarkPreview(file ? URL.createObjectURL(file) : null)
     } else {
       setOriginalPictureFile(file)
       setPreview(file ? URL.createObjectURL(file) : null)
@@ -130,19 +134,21 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
             disabled={loading}
           />
         }
-        label="Make this image free"
+        label="This picture is free"
       />
-      <TextField
-        label="Price (USD)"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-        variant="outlined"
-        fullWidth
-        required
-        type="number"
-        disabled={loading || isFree}
-        InputProps={{ inputProps: { min: 0, step: '0.01' } }}
-      />
+      {!isFree && (
+        <TextField
+          label="Price (USD)"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          variant="outlined"
+          fullWidth
+          required
+          type="number"
+          disabled={loading || isFree}
+          InputProps={{ inputProps: { min: 0, step: '0.01' } }}
+        />
+      )}
       <MuiFileInput
         value={originalPictureFile}
         label="Edited Picture"
@@ -164,43 +170,59 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
           <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
         </Box>
       )}
-      <FormControl component="fieldset" disabled={isFree}>
-        <FormLabel component="legend">Watermark Options</FormLabel>
-        <RadioGroup
-          aria-label="watermark"
-          name="watermarkOptions"
-          value={watermarkOption}
-          onChange={(e) => setWatermarkOption(e.target.value as WatermarkOptions)}
-        >
-          <FormControlLabel
-            value={WatermarkOptions.AUTOMATIC}
-            control={<Radio />}
-            label="FixMyPic Watermark"
+      {!isFree && (
+        <FormControl component="fieldset" disabled={isFree}>
+          <FormLabel component="legend">Watermark Options</FormLabel>
+          <Typography variant="caption" color="textSecondary">
+            Only the watermarked picture will be shown until the user pays to view the original
+          </Typography>
+          <RadioGroup
+            aria-label="watermark"
+            name="watermarkOptions"
+            value={watermarkOption}
+            onChange={(e) => setWatermarkOption(e.target.value as WatermarkOptions)}
+          >
+            <FormControlLabel
+              value={WatermarkOptions.AUTOMATIC}
+              control={<Radio />}
+              label="Automatically Add Watermark"
+            />
+            <FormControlLabel
+              value={WatermarkOptions.UPLOAD}
+              control={<Radio />}
+              label="Upload Watermarked Picture"
+            />
+          </RadioGroup>
+        </FormControl>
+      )}
+      {watermarkOption === WatermarkOptions.UPLOAD && !isFree && (
+        <>
+          <MuiFileInput
+            value={watermarkPictureFile}
+            label="Watermarked Picture"
+            placeholder="Click to upload your watermarked picture"
+            InputProps={{
+              inputProps: {
+                accept: 'image/*',
+              },
+              startAdornment: <ImageIcon />,
+            }}
+            clearIconButtonProps={{
+              title: 'Remove',
+              children: <CloseIcon fontSize="small" />,
+            }}
+            onChange={(file) => onFileChange(file, true)}
           />
-          <FormControlLabel
-            value={WatermarkOptions.UPLOAD}
-            control={<Radio />}
-            label="Upload Watermarked Picture"
-          />
-        </RadioGroup>
-      </FormControl>
-      {watermarkOption === 'upload' && !isFree && (
-        <MuiFileInput
-          value={watermarkPictureFile}
-          label="Watermarked Picture"
-          placeholder="Click to upload your watermarked picture"
-          InputProps={{
-            inputProps: {
-              accept: 'image/*',
-            },
-            startAdornment: <ImageIcon />,
-          }}
-          clearIconButtonProps={{
-            title: 'Remove',
-            children: <CloseIcon fontSize="small" />,
-          }}
-          onChange={(file) => onFileChange(file, true)}
-        />
+          {watermarkPreview && (
+            <Box mt={2} sx={{ textAlign: 'center' }}>
+              <img
+                src={watermarkPreview}
+                alt="Watermarked Preview"
+                style={{ maxWidth: '100%', maxHeight: '300px' }}
+              />
+            </Box>
+          )}
+        </>
       )}
       <Button type="submit" variant="contained" color="primary" disabled={loading}>
         Create Submission
@@ -210,10 +232,4 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
       </Backdrop>
     </Box>
   )
-}
-
-// Example function to handle system watermarking
-async function addSystemWatermark(imageId: string): Promise<string> {
-  // Implement your logic to add a watermark and return the new image ID
-  return 'new_watermarked_image_id'
 }
