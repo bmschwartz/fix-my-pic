@@ -25,11 +25,17 @@ const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps
     setOpen(false)
   }
 
+  console.log('submission', submission)
+
   return (
     <>
       <Grid item xs={12} sm={6} md={4} key={submission.address}>
         <Card onClick={onClick} sx={{ cursor: 'pointer' }}>
-          <CardMedia component="img" src={submission.imageUrl} style={{ height: '200px' }} />
+          <CardMedia
+            component="img"
+            src={submission.watermarkedPictureUrl || submission.freePictureUrl}
+            style={{ height: '200px' }}
+          />
           <CardContent>
             <Typography variant="body2">{submission.description}</Typography>
           </CardContent>

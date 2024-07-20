@@ -89,7 +89,7 @@ export const RequestSubmissionProvider = ({
     }
 
     const freePictureId = price === 0 ? originalPictureId : null
-    const encryptedPictureId = price === 0 ? null : 'encrypted'
+    // const encryptedPictureId = price === 0 ? null : 'encrypted'
 
     console.log('Create from context', {
       price,
@@ -98,7 +98,7 @@ export const RequestSubmissionProvider = ({
       requestAddress,
       description,
       freePictureId,
-      encryptedPictureId,
+      encryptedPictureId: originalPictureId,
       watermarkedPictureId,
     })
 
@@ -109,7 +109,7 @@ export const RequestSubmissionProvider = ({
       requestAddress,
       description,
       freePictureId,
-      encryptedPictureId,
+      encryptedPictureId: originalPictureId,
       watermarkedPictureId,
     })
 

@@ -64,21 +64,16 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
     const originalPictureId = await uploadImage({ file: originalPictureFile })
 
     let watermarkedPictureId = null
-    if (watermarkOption === WatermarkOptions.UPLOAD && watermarkPictureFile) {
-      watermarkedPictureId = await uploadImage({ file: watermarkPictureFile })
-    } else if (watermarkOption === WatermarkOptions.AUTOMATIC) {
-      watermarkedPictureId = await uploadImage({
-        file: originalPictureFile,
-        addWatermark: true,
-      })
+    if (!isFree) {
+      if (watermarkOption === WatermarkOptions.UPLOAD && watermarkPictureFile) {
+        watermarkedPictureId = await uploadImage({ file: watermarkPictureFile })
+      } else if (watermarkOption === WatermarkOptions.AUTOMATIC) {
+        watermarkedPictureId = await uploadImage({
+          file: originalPictureFile,
+          addWatermark: true,
+        })
+      }
     }
-    console.log('Create from Form with', {
-      requestAddress,
-      description,
-      originalPictureId,
-      watermarkedPictureId,
-      price: isFree ? 0 : Number(price),
-    })
 
     try {
       await createSubmission({
