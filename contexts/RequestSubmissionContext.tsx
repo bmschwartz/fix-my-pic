@@ -87,23 +87,14 @@ export const RequestSubmissionProvider = ({
       throw new Error('Wallet and account needed to create a submission!')
     }
 
-    console.log('DEBUG Creating with ', {
-      price,
-      wallet,
-      account,
-      requestAddress,
-      description,
-      imageId: originalImageId,
-      watermarkedImageId,
-    })
-
     const submission = await pictureRequestApi.createSubmission({
+      price,
       wallet,
       account,
       requestAddress,
       description,
-      imageId: originalImageId,
-      price,
+      originalImageId,
+      watermarkedImageId,
     })
 
     await _refreshSubmissions(requestAddress)

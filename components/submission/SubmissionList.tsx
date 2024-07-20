@@ -42,6 +42,11 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
     console.log('DEBUG purchasing', submissionAddress)
   }, [])
 
+  const onClickSubmissionCard = useCallback((index: number) => {
+    setCurrentSlide(index)
+    setOpenSlideshow(true)
+  }, [])
+
   return (
     <Paper elevation={3} style={{ padding: '16px' }}>
       <Grid container justifyContent="space-between" alignItems="center">
@@ -64,11 +69,11 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
             <Typography variant="h6">No edits have been submitted yet</Typography>
           </Grid>
         ) : (
-          submissions.map((submission: PictureRequestSubmission) => (
+          submissions.map((submission: PictureRequestSubmission, index: number) => (
             <SubmissionCard
               key={submission.address}
               submission={submission}
-              onClick={() => setOpenSlideshow(true)}
+              onClick={() => onClickSubmissionCard(index)}
               onPurchase={onPurchase}
             />
           ))

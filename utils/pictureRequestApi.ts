@@ -27,12 +27,13 @@ interface GetPictureRequestParams {
 }
 
 interface CreateSubmissionsParams {
-  requestAddress: string
-  description: string
-  imageId: string
   price: number
-  wallet: EIP6963ProviderDetail
   account: string
+  description: string
+  requestAddress: string
+  originalImageId: string
+  wallet: EIP6963ProviderDetail
+  watermarkedImageId: string | null
 }
 
 interface GetSubmissionsParams {
@@ -210,12 +211,13 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
   }
 
   const createSubmission = async ({
-    requestAddress,
-    imageId,
-    description,
     price,
     wallet,
     account,
+    description,
+    requestAddress,
+    originalImageId,
+    watermarkedImageId,
   }: CreateSubmissionsParams): Promise<PictureRequestSubmission> => {
     try {
       const pictureRequestContract = new Contract(
@@ -230,7 +232,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
       const tx = await pictureRequestContract.createSubmission(
         account,
         description,
-        imageId,
+        originalImageId,
         priceInWei
       )
       const receipt: ContractTransactionReceipt = await tx.wait()

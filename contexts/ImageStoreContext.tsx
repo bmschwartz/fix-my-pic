@@ -18,7 +18,6 @@ export const ImageStoreContext = createContext<ImageStoreContextType | undefined
 
 export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
   const uploadImage = async ({ file, addWatermark }: UploadImageProps): Promise<string> => {
-    console.log(addWatermark ? `Adding a watermark to ${file.name}` : 'Uploading file as is')
     const fileToUpload: File = addWatermark ? await createWatermarkedImage(file) : file
 
     try {
@@ -44,7 +43,6 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
   }
 
   const createWatermarkedImage = async (file: File): Promise<File> => {
-    console.log('Creating watermarked image from ', file.name)
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -54,10 +52,8 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
         },
         responseType: 'arraybuffer',
       })
-      console.log('Received data from /api/watermark')
       const blob = new Blob([response.data], { type: 'image/png' })
-      const fileName = 'watermark.png'
-      return new File([blob], fileName, { type: 'image/png' })
+      return new File([blob], `${file.name.slice(0, 10)}-watermarked.png`, { type: 'image/png' })
     } catch (e) {
       console.error(e)
       throw new Error('Error creating a watermarked image!')
