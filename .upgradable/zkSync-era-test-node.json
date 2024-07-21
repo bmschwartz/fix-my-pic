@@ -1,0 +1,69 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021",
+    "txHash": "0xa3b080042d27774a15b44edd203d90d3e1cef515bfd30f588489ed239ae6233c"
+  },
+  "proxies": [
+    {
+      "address": "0x26b368C3Ed16313eBd6660b72d8e4439a697Cb0B",
+      "txHash": "0xbc011069f96ed057a02d9f8e17c61f8f26ebe25f2e6d4ea1dbde80a2e5e486a3",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "ab29981a34c39bad458914c1c980439dd18169094101fea2d30a21a6ca0b9ed3": {
+      "address": "0x111C3E89Ce80e62EE88318C2804920D4c96f92bb",
+      "txHash": "0x88241805e67a439d8a8cd794e5a5b66d7fdf25e74ed9ea2b9bb50cbe3dd646e4",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "pictureRequests",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_contract(PictureRequest)1953)dyn_storage",
+            "contract": "PictureRequestFactory",
+            "src": "contracts/PictureRequestFactory.sol:13"
+          }
+        ],
+        "types": {
+          "t_array(t_contract(PictureRequest)1953)dyn_storage": {
+            "label": "contract PictureRequest[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(PictureRequest)1953": {
+            "label": "contract PictureRequest",
+            "numberOfBytes": "20"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    }
+  }
+}

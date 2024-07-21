@@ -6,7 +6,7 @@ const main = async () => {
 
     const contractName = 'PictureRequestFactory'
 
-    await deployContract(contractName, [], { wallet })
+    const contract = await deployContract(contractName, [], { wallet, asProxy: true })
   } catch (error) {
     console.error('Error deploying contract:', error)
     process.exit(1)

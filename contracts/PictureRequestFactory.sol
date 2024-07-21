@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.20;
 
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+
 import './PictureRequest.sol';
 
 /**
  * @title PictureRequestFactory
  * @dev Factory contract to create and manage picture requests.
  */
-contract PictureRequestFactory {
+contract PictureRequestFactory is Initializable {
   PictureRequest[] public pictureRequests;
 
   /**
@@ -15,6 +17,9 @@ contract PictureRequestFactory {
    * @param pictureRequestAddress The address of the new PictureRequest contract.
    */
   event PictureRequestCreated(address indexed pictureRequestAddress);
+
+  // Initializer function, replaces constructor for upgradeable contracts
+  function initialize() public initializer {}
 
   /**
    * @dev Creates a new PictureRequest.
@@ -29,7 +34,8 @@ contract PictureRequestFactory {
     string memory _imageId,
     uint256 _budget
   ) public {
-    PictureRequest pictureRequest = new PictureRequest(_title, _description, _imageId, _budget);
+    PictureRequest pictureRequest = new PictureRequest();
+    pictureRequest.initialize(_title, _description, _imageId, _budget);
     pictureRequests.push(pictureRequest);
     emit PictureRequestCreated(address(pictureRequest));
   }

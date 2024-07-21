@@ -59,6 +59,13 @@ export const verifyContract = async (data: {
   return verificationRequestId
 }
 
+type DeploymentProxy = {
+  /**
+   * Address of the proxy contract
+   */
+  address: string
+}
+
 type DeployContractOptions = {
   /**
    * If true, the deployment process will not print any logs
@@ -72,6 +79,18 @@ type DeployContractOptions = {
    * If specified, the contract will be deployed using this wallet
    */
   wallet?: Wallet
+  /**
+   * If true, the contract will be deployed as a proxy for upgradability
+   */
+  asProxy?: boolean
+  /**
+   * If true, the contract will be deployed as an upgrade to the proxy with the given address
+   */
+  proxyAddress?: string
+  /**
+   * Arguments to the constructor initializer
+   */
+  upgradeConstructorArgs?: object
 }
 export const deployContract = async (
   contractArtifactName: string,
@@ -103,7 +122,20 @@ export const deployContract = async (
   await verifyEnoughBalance(wallet, deploymentFee)
 
   // Deploy the contract to zkSync
-  const contract = await deployer.deploy(artifact, constructorArguments)
+  let contract: ethers.Contract
+
+  if (options?.asProxy) {
+    console.log(`Deploying ${artifact.contractName} as proxy`)
+    contract = await hre.zkUpgrades.deployProxy(wallet, artifact, constructorArguments, {
+      initializer: 'initialize',
+    })
+  } else if (options?.proxyAddress) {
+    console.log('upgradeProxy', options?.proxyAddress, artifact.contractName)
+    contract = await hre.zkUpgrades.upgradeProxy(wallet, options?.proxyAddress, artifact)
+  } else {
+    contract = await deployer.deploy(artifact, constructorArguments)
+  }
+
   const address = await contract.getAddress()
   const constructorArgs = contract.interface.encodeDeploy(constructorArguments)
   const fullContractSource = `${artifact.sourceName}:${artifact.contractName}`

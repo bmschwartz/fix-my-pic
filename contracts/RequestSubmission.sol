@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.20;
 
+import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 /**
  * @title RequestSubmission
  * @dev Manages individual submissions for a picture request.
  */
-contract RequestSubmission is ReentrancyGuard {
+contract RequestSubmission is Initializable, ReentrancyGuard {
   string public description;
   string public watermarkedPictureId;
   string public encryptedPictureId;
@@ -24,7 +25,7 @@ contract RequestSubmission is ReentrancyGuard {
   event SubmissionPurchased(address indexed buyer, address indexed submissionAddress);
 
   /**
-   * @dev Constructor for RequestSubmission.
+   * @dev Initializer for RequestSubmission.
    * @param _submitter The address of the submitter.
    * @param _description The description of the submission.
    * @param _watermarkedPictureId The ID of the watermarked picture.
@@ -32,14 +33,14 @@ contract RequestSubmission is ReentrancyGuard {
    * @param _freePictureId The ID of the free picture.
    * @param _price The price of the submission.
    */
-  constructor(
+  function initialize(
     address _submitter,
     string memory _description,
     string memory _watermarkedPictureId,
     string memory _encryptedPictureId,
     string memory _freePictureId,
     uint256 _price
-  ) {
+  ) public initializer {
     require(_price >= 0, 'Price must be positive or zero');
     require(_submitter != address(0), 'Submitter address cannot be zero');
 
