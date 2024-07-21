@@ -1,11 +1,11 @@
 import { BrowserProvider, Contract, Provider, Signer } from 'zksync-ethers'
-import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
+import { Addressable, BigNumberish, ContractTransactionReceipt, ethers } from 'ethers'
 
 import { PictureRequestSubmission } from '@/types/submission'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 import { PictureRequest } from '@/types/pictureRequest'
 import PictureRequestSchema from '@/public/artifacts/PictureRequest.json'
-import RequestSubmission from '@/public/artifacts/RequestSubmission.json'
+import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json'
 import PictureRequestFactorySchema from '@/public/artifacts/PictureRequestFactory.json'
 
 import { convertUsdToEthWithoutRate } from './currency'
@@ -47,6 +47,12 @@ interface GetSubmissionParams {
   refetch: boolean
 }
 
+interface PurchaseSubmissionParams {
+  account: string
+  wallet: EIP6963ProviderDetail
+  address: string
+}
+
 export interface PictureRequestApi {
   createPictureRequest(params: CreatePictureRequestParams): Promise<PictureRequest>
   getPictureRequest(params: GetPictureRequestParams): Promise<PictureRequest>
@@ -55,6 +61,7 @@ export interface PictureRequestApi {
   createSubmission(params: CreateSubmissionsParams): Promise<PictureRequestSubmission>
   getSubmission(params: GetSubmissionParams): Promise<PictureRequestSubmission>
   getSubmissions(params: GetSubmissionsParams): Promise<PictureRequestSubmission[]>
+  purchaseSubmission(params: PurchaseSubmissionParams): Promise<BigNumberish>
 }
 
 const PICTURE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
@@ -146,7 +153,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
   const _fetchSubmissionContractData = async (
     address: string
   ): Promise<PictureRequestSubmission> => {
-    const submissionContract = new ethers.Contract(address, RequestSubmission.abi, provider)
+    const submissionContract = new ethers.Contract(address, RequestSubmissionSchema.abi, provider)
     const price = await submissionContract.price()
     const submitter = await submissionContract.submitter()
     const description = await submissionContract.description()
@@ -169,11 +176,14 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     }
   }
 
-  const createPictureRequest = async (
-    params: CreatePictureRequestParams
-  ): Promise<PictureRequest> => {
-    const { title, description, imageId, budget, wallet, account } = params
-
+  const createPictureRequest = async ({
+    title,
+    description,
+    imageId,
+    budget,
+    wallet,
+    account,
+  }: CreatePictureRequestParams): Promise<PictureRequest> => {
     const pictureRequestFactory = new Contract(
       factoryAddress,
       PictureRequestFactorySchema.abi,
@@ -290,6 +300,33 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     return submissions[address]
   }
 
+  const purchaseSubmission = async ({
+    wallet,
+    account,
+    address,
+  }: PurchaseSubmissionParams): Promise<BigNumberish> => {
+    const submissionContract = new ethers.Contract(
+      address,
+      RequestSubmissionSchema.abi,
+      await _getSigner(wallet, account)
+    )
+    const price = await submissionContract.price()
+
+    console.log(`Calling purchaseSubmission on submission ${address} for ${price}`)
+    const tx = await submissionContract.purchaseSubmission({ value: price })
+    const receipt: ContractTransactionReceipt = await tx.wait()
+
+    const event = receipt.logs
+      .map((log) => submissionContract.interface.parseLog(log))
+      .find((log) => log && log.name === 'SubmissionPurchased')
+    if (!event) {
+      throw new Error('SubmissionPurchased event not found')
+    }
+
+    console.log('NFT event args', event.args)
+    return event.args.nftId
+  }
+
   await _initFactoryContract()
   pictureRequests = await _fetchAllPictureRequests()
 
@@ -300,6 +337,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     createSubmission,
     getSubmission,
     getSubmissions,
+    purchaseSubmission,
   }
 }
 

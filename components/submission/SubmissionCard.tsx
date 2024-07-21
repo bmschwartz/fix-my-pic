@@ -13,19 +13,17 @@ interface SubmissionCardProps {
 }
 
 const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps) => {
-  const [open, setOpen] = useState(false)
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
   const { ethToUsdRate } = useEthUsdRate()
 
   const handleClickOpen = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setOpen(true)
+    setConfirmationOpen(true)
   }
 
   const handleClickClose = () => {
-    setOpen(false)
+    setConfirmationOpen(false)
   }
-
-  console.log('submission', submission)
 
   return (
     <>
@@ -50,7 +48,7 @@ const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps
       </Grid>
 
       <ConfirmationDialog
-        open={open}
+        open={confirmationOpen}
         handleClose={handleClickClose}
         submission={submission}
         onPurchase={onPurchase}

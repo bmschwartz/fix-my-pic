@@ -8,10 +8,24 @@ import '@openzeppelin/contracts/utils/Counters.sol';
 contract PictureNFT is ERC721URIStorage, Ownable {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
+  mapping(address => bool) public minters;
 
   constructor() ERC721('PictureNFT', 'PNFT') {}
 
-  function mintNFT(address recipient, string memory tokenURI) public onlyOwner returns (uint256) {
+  modifier onlyMinters() {
+    require(minters[msg.sender], 'Caller is not a minter');
+    _;
+  }
+
+  function addMinter(address minter) public onlyOwner {
+    minters[minter] = true;
+  }
+
+  function removeMinter(address minter) public onlyOwner {
+    minters[minter] = false;
+  }
+
+  function mintNFT(address recipient, string memory tokenURI) public onlyMinters returns (uint256) {
     _tokenIds.increment();
     uint256 newItemId = _tokenIds.current();
     _safeMint(recipient, newItemId);

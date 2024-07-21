@@ -44,7 +44,7 @@ const ConfirmationDialog = ({
           </Typography>
         )}
         <img
-          src={submission.imageUrl}
+          src={submission.freePictureUrl || submission.watermarkedPictureUrl}
           alt={submission.description}
           style={{ maxHeight: '80vh', maxWidth: '100%', marginTop: '20px' }}
         />

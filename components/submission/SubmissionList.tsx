@@ -12,7 +12,7 @@ import SlideshowDialog from './SlideshowDialog'
 import ConfirmationDialog from './PurchaseConfirmationDialog'
 
 export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequest }) => {
-  const { getRequestSubmissions } = useRequestSubmissions()
+  const { getRequestSubmissions, purchaseSubmission } = useRequestSubmissions()
   const { selectedWallet, selectedAccount } = useWallet()
   const [loading, setLoading] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -39,7 +39,9 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
   }, [pictureRequest.address, getRequestSubmissions])
 
   const onPurchase = useCallback(async (submissionAddress: string): Promise<void> => {
-    console.log('DEBUG purchasing', submissionAddress)
+    console.log('Purchasing', submissionAddress)
+    const nftId = await purchaseSubmission(submissionAddress)
+    console.log('Completed purchase and received nft', nftId)
   }, [])
 
   const onClickSubmissionCard = useCallback((index: number) => {

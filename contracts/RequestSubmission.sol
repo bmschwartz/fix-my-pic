@@ -65,7 +65,7 @@ contract RequestSubmission is ReentrancyGuard {
   function purchaseSubmission() public payable nonReentrant {
     require(msg.value == price, 'Incorrect payment amount');
 
-    string memory tokenURI = isFree ? freePictureId : encryptedPictureId; // Assuming the pictureId serves as metadata
+    string memory tokenURI = isFree ? freePictureId : encryptedPictureId;
     uint256 nftId = pictureNFT.mintNFT(msg.sender, tokenURI);
 
     // Transfer payment to the submitter

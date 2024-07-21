@@ -4,8 +4,10 @@ import { useWallet } from '@/hooks/useWallet'
 import { PictureRequest } from '@/types/pictureRequest'
 import { PictureRequestApi } from '@/utils/pictureRequestApi'
 import { PictureRequestSubmission } from '@/types/submission'
+import { BigNumberish } from 'ethers'
 
 export interface RequestSubmissionContextType {
+  purchaseSubmission: (submissionAddress: string) => Promise<BigNumberish>
   getRequestSubmissions: (requestAddress: string) => Promise<PictureRequestSubmission[]>
   createSubmission: (submissionData: CreateSubmissionProps) => Promise<PictureRequestSubmission>
 }
@@ -118,8 +120,18 @@ export const RequestSubmissionProvider = ({
     return submission
   }
 
+  const purchaseSubmission = async (submissionAddress: string): Promise<BigNumberish> => {
+    if (!wallet || !account) {
+      throw new Error('Wallet and account needed to create a submission!')
+    }
+
+    return pictureRequestApi.purchaseSubmission({ address: submissionAddress, wallet, account })
+  }
+
   return (
-    <RequestSubmissionContext.Provider value={{ getRequestSubmissions, createSubmission }}>
+    <RequestSubmissionContext.Provider
+      value={{ getRequestSubmissions, createSubmission, purchaseSubmission }}
+    >
       {children}
     </RequestSubmissionContext.Provider>
   )
