@@ -125,7 +125,21 @@ export const RequestSubmissionProvider = ({
       throw new Error('Wallet and account needed to create a submission!')
     }
 
-    return pictureRequestApi.purchaseSubmission({ address: submissionAddress, wallet, account })
+    console.log('<BEFORE> Getting submission URI for account', account)
+    let uri = await pictureRequestApi.getSubmissionURI(account)
+    console.log('<BEFORE> URI', uri)
+
+    const nftId = pictureRequestApi.purchaseSubmission({
+      address: submissionAddress,
+      wallet,
+      account,
+    })
+
+    console.log('<AFTER> Getting submission URI for account', account)
+    uri = await pictureRequestApi.getSubmissionURI(account)
+    console.log('<AFTER> URI', uri)
+
+    return nftId
   }
 
   return (
