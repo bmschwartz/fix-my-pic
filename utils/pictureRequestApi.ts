@@ -255,8 +255,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
         watermarkedPictureId,
         encryptedPictureId,
         freePictureId,
-        priceInWei,
-        price === 0
+        priceInWei
       )
 
       const tx = await pictureRequestContract.createSubmission(
@@ -265,8 +264,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
         watermarkedPictureId || '',
         encryptedPictureId || '',
         freePictureId || '',
-        priceInWei,
-        price === 0
+        priceInWei
       )
       const receipt: ContractTransactionReceipt = await tx.wait()
 
@@ -274,7 +272,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
         throw new Error(`Failed to create submission on picture request ${requestAddress}`)
       }
 
-      return await getSubmission({ address: receipt.contractAddress, refetch: true })
+      return getSubmission({ address: receipt.contractAddress, refetch: true })
     } catch (error) {
       console.error('Unable to create the submission:', error)
       throw error
@@ -323,7 +321,6 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
       throw new Error('SubmissionPurchased event not found')
     }
 
-    console.log('NFT event args', event.args)
     return event.args.nftId
   }
 
