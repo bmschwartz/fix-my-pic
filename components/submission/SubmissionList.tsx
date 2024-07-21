@@ -39,8 +39,8 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
   }, [pictureRequest.address, getRequestSubmissions])
 
   const onPurchase = useCallback(async (submissionAddress: string): Promise<void> => {
-    const nftId = await purchaseSubmission(submissionAddress)
-    console.log('Completed purchase and received nft', nftId)
+    const pictureId = await purchaseSubmission(submissionAddress)
+    console.log('onPurchase pictureId', pictureId)
   }, [])
 
   const onClickSubmissionCard = useCallback((index: number) => {

@@ -1,10 +1,9 @@
 import { BrowserProvider, Contract, Provider, Signer } from 'zksync-ethers'
-import { Addressable, BigNumberish, ContractTransactionReceipt, ethers } from 'ethers'
+import { Addressable, ContractTransactionReceipt, ethers } from 'ethers'
 
 import { PictureRequestSubmission } from '@/types/submission'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 import { PictureRequest } from '@/types/pictureRequest'
-import PictureNFTSchema from '@/public/artifacts/PictureNFT.json'
 import PictureRequestSchema from '@/public/artifacts/PictureRequest.json'
 import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json'
 import PictureRequestFactorySchema from '@/public/artifacts/PictureRequestFactory.json'
@@ -54,6 +53,12 @@ interface PurchaseSubmissionParams {
   address: string
 }
 
+interface GetSubmissionPictureIdParams {
+  account: string
+  wallet: EIP6963ProviderDetail
+  address: string
+}
+
 export interface PictureRequestApi {
   createPictureRequest(params: CreatePictureRequestParams): Promise<PictureRequest>
   getPictureRequest(params: GetPictureRequestParams): Promise<PictureRequest>
@@ -62,9 +67,8 @@ export interface PictureRequestApi {
   createSubmission(params: CreateSubmissionsParams): Promise<PictureRequestSubmission>
   getSubmission(params: GetSubmissionParams): Promise<PictureRequestSubmission>
   getSubmissions(params: GetSubmissionsParams): Promise<PictureRequestSubmission[]>
-  purchaseSubmission(params: PurchaseSubmissionParams): Promise<BigNumberish>
-
-  getSubmissionURI(walletAddress: string): Promise<string>
+  purchaseSubmission(params: PurchaseSubmissionParams): Promise<void>
+  getSubmissionPictureId(params: GetSubmissionPictureIdParams): Promise<string>
 }
 
 const PICTURE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
@@ -84,7 +88,6 @@ if (!IMAGE_URL_ROOT) {
 
 async function createPictureRequestApi(initialFactoryAddress: string): Promise<PictureRequestApi> {
   let factoryContract: Contract
-  let pictureNFTContract: Contract
   let factoryAddress: string | Addressable = initialFactoryAddress
   let pictureRequests: Record<string, PictureRequest> = {}
   let submissions: Record<string, PictureRequestSubmission> = {}
@@ -104,21 +107,6 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
 
     if (!factoryContract) {
       throw new Error('Could not connect to the picture request factory!')
-    }
-  }
-
-  const _initPictureNFTContract = async (): Promise<void> => {
-    if (pictureNFTContract) {
-      return
-    }
-
-    const pictureNFTAddress = await factoryContract.pictureNFT()
-    console.log('pictureNFT', pictureNFTAddress)
-
-    pictureNFTContract = new Contract(pictureNFTAddress, PictureNFTSchema.abi, provider)
-
-    if (!pictureNFTContract) {
-      throw new Error('Could not connect to the picture NFT contract!')
     }
   }
 
@@ -321,7 +309,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     wallet,
     account,
     address,
-  }: PurchaseSubmissionParams): Promise<BigNumberish> => {
+  }: PurchaseSubmissionParams): Promise<void> => {
     const submissionContract = new ethers.Contract(
       address,
       RequestSubmissionSchema.abi,
@@ -339,26 +327,23 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     if (!event) {
       throw new Error('SubmissionPurchased event not found')
     }
-
-    return event.args.nftId
   }
 
-  const getSubmissionURI = async (account: string): Promise<string> => {
-    const balance = await pictureNFTContract.balanceOf(account)
+  const getSubmissionPictureId = async ({
+    address,
+    wallet,
+    account,
+  }: GetSubmissionPictureIdParams): Promise<string> => {
+    const submissionContract = new ethers.Contract(
+      address,
+      RequestSubmissionSchema.abi,
+      await _getSigner(wallet, account)
+    )
 
-    console.log('balanace of account', account, balance)
-    if (!balance.gt(0)) {
-      return ''
-    }
-
-    const tokenId = await pictureNFTContract.tokenOfOwnerByIndex(account, 0)
-    const tokenURI = await pictureNFTContract.tokenURI(tokenId)
-    console.log('Got tokenId, tokenURI', tokenId, tokenURI)
-    return tokenURI
+    return submissionContract.getPictureId()
   }
 
   await _initFactoryContract()
-  await _initPictureNFTContract()
   pictureRequests = await _fetchAllPictureRequests()
 
   return {
@@ -369,7 +354,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     getSubmission,
     getSubmissions,
     purchaseSubmission,
-    getSubmissionURI,
+    getSubmissionPictureId,
   }
 }
 

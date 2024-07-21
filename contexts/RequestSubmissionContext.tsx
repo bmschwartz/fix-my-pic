@@ -120,26 +120,33 @@ export const RequestSubmissionProvider = ({
     return submission
   }
 
-  const purchaseSubmission = async (submissionAddress: string): Promise<BigNumberish> => {
+  const purchaseSubmission = async (submissionAddress: string): Promise<string> => {
     if (!wallet || !account) {
       throw new Error('Wallet and account needed to create a submission!')
     }
 
-    console.log('<BEFORE> Getting submission URI for account', account)
-    let uri = await pictureRequestApi.getSubmissionURI(account)
-    console.log('<BEFORE> URI', uri)
+    console.log('<BEFORE> Getting submission pictureId', account, submissionAddress)
+    let pictureId = await pictureRequestApi.getSubmissionPictureId({
+      account,
+      wallet,
+      address: submissionAddress,
+    })
+    console.log('<BEFORE> pictureId', pictureId)
 
-    const nftId = pictureRequestApi.purchaseSubmission({
+    await pictureRequestApi.purchaseSubmission({
       address: submissionAddress,
       wallet,
       account,
     })
 
-    console.log('<AFTER> Getting submission URI for account', account)
-    uri = await pictureRequestApi.getSubmissionURI(account)
-    console.log('<AFTER> URI', uri)
-
-    return nftId
+    console.log('<AFTER> Getting pictueId for account', account, submissionAddress)
+    pictureId = await pictureRequestApi.getSubmissionPictureId({
+      account,
+      wallet,
+      address: submissionAddress,
+    })
+    console.log('<AFTER> pictureId', pictureId)
+    return pictureId
   }
 
   return (
