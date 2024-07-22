@@ -8,14 +8,14 @@ import { BigNumberish } from 'ethers'
 import axios from 'axios'
 import { SubmissionPurchase } from '@/types/purchase'
 
-export interface RequestSubmissionContextType {
+export interface PurchaseManagerContextType {
   purchaseSubmission: (submissionAddress: string) => Promise<BigNumberish>
   getRequestSubmissions: (requestAddress: string) => Promise<PictureRequestSubmission[]>
   getPurchasesForSubmission: (submissionAddress: string) => Promise<SubmissionPurchase[]>
   createSubmission: (submissionData: CreateSubmissionProps) => Promise<PictureRequestSubmission>
 }
 
-interface RequestSubmissionProviderProps {
+interface PurchaseManagerProviderProps {
   children: ReactNode
   pictureRequestApi: PictureRequestApi
 }
@@ -28,46 +28,55 @@ interface CreateSubmissionProps {
   watermarkedPictureId?: string
 }
 
-export const RequestSubmissionContext = createContext<RequestSubmissionContextType | undefined>(
+export const PurchaseManagerContext = createContext<PurchaseManagerContextType | undefined>(
   undefined
 )
 
-export const RequestSubmissionProvider = ({
+export const PurchaseManagerProvider = ({
   children,
   pictureRequestApi,
-}: RequestSubmissionProviderProps) => {
+}: PurchaseManagerProviderProps) => {
   const { selectedAccount: account, selectedWallet: wallet } = useWallet()
-  const [submissions, setSubmissions] = useState<Record<string, PictureRequestSubmission[]>>({})
+  const [submissionPurchases, setSubmissionPurchases] = useState<
+    Record<string, SubmissionPurchase>
+  >({})
 
   useEffect(() => {
-    async function _initSubmissions() {
-      const allPictureRequests = pictureRequestApi.getPictureRequests()
-      const allSubmissions: Record<string, PictureRequestSubmission[]> = {}
+    async function _initPurchases() {
+      if (!wallet || !account) {
+        return
+      }
 
-      allPictureRequests.forEach((request: PictureRequest) => {
-        allSubmissions[request.address] = request.submissions
+      const allPurchases = await pictureRequestApi.getPurchasesForAccount({ account, wallet })
+      const allSubmissionPurchases: Record<string, SubmissionPurchase[]> = {}
+
+      allPurchases.forEach((purchase: SubmissionPurchase) => {
+        if (!(purchase.submissionAddress in allSubmissionPurchases)) {
+          allSubmissionPurchases[purchase.submissionAddress] = []
+        }
+        allSubmissionPurchases[purchase.submissionAddress].push(purchase)
       })
 
-      setSubmissions(allSubmissions)
+      setSubmissionPurchases(allSubmissionPurchases)
     }
-    _initSubmissions()
-  }, [])
+    _initPurchases()
+  }, [account, wallet])
 
-  const _refreshSubmissions = async (requestAddress: string) => {
-    const requestSubmissions = await pictureRequestApi.getSubmissions({
-      requestAddress,
+  const _refreshPurchases = async (submissionAddress: string) => {
+    const submission = await pictureRequestApi.getSubmission({
       refetch: true,
+      address: submissionAddress,
     })
 
-    setSubmissions((current: Record<string, PictureRequestSubmission[]>) => ({
+    setSubmissionPurchases((current: Record<string, SubmissionPurchase[]>) => ({
       ...current,
-      [requestAddress]: requestSubmissions,
+      [submissionAddress]: submission.purchases,
     }))
 
-    return requestSubmissions
+    return submissionPurchases
   }
 
-  const getRequestSubmissions = useCallback(
+  const getSubmissionPurchases = useCallback(
     async (requestAddress: string) => {
       if (!submissions[requestAddress]) {
         try {
@@ -161,10 +170,10 @@ export const RequestSubmissionProvider = ({
   }
 
   return (
-    <RequestSubmissionContext.Provider
+    <PurchaseManagerContext.Provider
       value={{ getRequestSubmissions, createSubmission, purchaseSubmission }}
     >
       {children}
-    </RequestSubmissionContext.Provider>
+    </PurchaseManagerContext.Provider>
   )
 }

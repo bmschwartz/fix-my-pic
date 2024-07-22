@@ -61,7 +61,7 @@ interface GetSubmissionPictureIdParams {
   wallet: EIP6963ProviderDetail
 }
 
-interface GetPurchasesForAddressParams {
+interface GetPurchasesForAccountParams {
   account: string
   wallet: EIP6963ProviderDetail
 }
@@ -77,7 +77,7 @@ export interface PictureRequestApi {
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<SubmissionPurchase>
   getSubmissionPictureId(params: GetSubmissionPictureIdParams): Promise<string>
 
-  getPurchasesForAddress(params: GetPurchasesForAddressParams): Promise<SubmissionPurchase[]>
+  getPurchasesForAccount(params: GetPurchasesForAccountParams): Promise<SubmissionPurchase[]>
 }
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
@@ -377,10 +377,10 @@ async function createPictureRequestApi(
     }
   }
 
-  const getPurchasesForAddress = async ({
+  const getPurchasesForAccount = async ({
     account,
     wallet,
-  }: GetPurchasesForAddressParams): Promise<SubmissionPurchase[]> => {
+  }: GetPurchasesForAccountParams): Promise<SubmissionPurchase[]> => {
     const purchaseContract = new ethers.Contract(
       purchaseManagerAddress,
       PurchaseManagerSchema.abi,
@@ -420,7 +420,7 @@ async function createPictureRequestApi(
     getSubmission,
     getSubmissions,
     purchaseSubmission,
-    getPurchasesForAddress,
+    getPurchasesForAccount,
     getSubmissionPictureId,
   }
 }
