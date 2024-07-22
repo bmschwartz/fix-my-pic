@@ -63,7 +63,7 @@ export default function NewSubmissionForm({ onCreated, requestAddress }: NewSubm
 
     const originalPictureId = await uploadImage({ file: originalPictureFile })
 
-    let watermarkedPictureId = null
+    let watermarkedPictureId: string | undefined
     if (!isFree) {
       if (watermarkOption === WatermarkOptions.UPLOAD && watermarkPictureFile) {
         watermarkedPictureId = await uploadImage({ file: watermarkPictureFile })

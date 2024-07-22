@@ -5,6 +5,7 @@ import { PictureRequest } from '@/types/pictureRequest'
 import { PictureRequestApi } from '@/utils/pictureRequestApi'
 import { PictureRequestSubmission } from '@/types/submission'
 import { BigNumberish } from 'ethers'
+import axios from 'axios'
 
 export interface RequestSubmissionContextType {
   purchaseSubmission: (submissionAddress: string) => Promise<BigNumberish>
@@ -22,7 +23,7 @@ interface CreateSubmissionProps {
   description: string
   requestAddress: string
   originalPictureId: string
-  watermarkedPictureId: string | null
+  watermarkedPictureId?: string
 }
 
 export const RequestSubmissionContext = createContext<RequestSubmissionContextType | undefined>(
@@ -90,8 +91,12 @@ export const RequestSubmissionProvider = ({
       throw new Error('Wallet and account needed to create a submission!')
     }
 
-    const freePictureId = price === 0 ? originalPictureId : null
-    // const encryptedPictureId = price === 0 ? null : 'encrypted'
+    let encryptedPictureId: string | undefined
+    if (watermarkedPictureId) {
+      const { data } = await axios.post('/api/pinata/encrypt', { pictureId: originalPictureId })
+      encryptedPictureId = data.encryptedPictureId
+    }
+    const freePictureId = price === 0 ? originalPictureId : undefined
 
     console.log('Create from context', {
       price,
@@ -100,7 +105,7 @@ export const RequestSubmissionProvider = ({
       requestAddress,
       description,
       freePictureId,
-      encryptedPictureId: originalPictureId,
+      encryptedPictureId,
       watermarkedPictureId,
     })
 
@@ -111,7 +116,7 @@ export const RequestSubmissionProvider = ({
       requestAddress,
       description,
       freePictureId,
-      encryptedPictureId: originalPictureId,
+      encryptedPictureId,
       watermarkedPictureId,
     })
 

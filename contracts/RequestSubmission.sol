@@ -2,13 +2,24 @@
 pragma solidity ^0.8.20;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+
+/**
+ * @title IRequestSubmission
+ * @dev Interface for RequestSubmission contract.
+ */
+interface IRequestSubmission {
+  function addBuyer(address buyer) external;
+
+  function getPrice() external view returns (uint256);
+
+  function getSubmitter() external view returns (address);
+}
 
 /**
  * @title RequestSubmission
  * @dev Manages individual submissions for a picture request.
  */
-contract RequestSubmission is Initializable, ReentrancyGuard {
+contract RequestSubmission is Initializable, IRequestSubmission {
   string public description;
   string public watermarkedPictureId;
   string public encryptedPictureId;
@@ -16,13 +27,6 @@ contract RequestSubmission is Initializable, ReentrancyGuard {
   uint256 public price;
   address public submitter;
   mapping(address => bool) public purchasers;
-
-  /**
-   * @dev Emitted when a submission is purchased.
-   * @param buyer The address of the buyer.
-   * @param submissionAddress The address of the submission.
-   */
-  event SubmissionPurchased(address indexed buyer, address indexed submissionAddress);
 
   /**
    * @dev Initializer for RequestSubmission.
@@ -53,21 +57,12 @@ contract RequestSubmission is Initializable, ReentrancyGuard {
   }
 
   /**
-   * @dev Purchases the submission.
+   * @dev Adds a buyer to the purchasers mapping.
+   * @param buyer The address of the buyer.
    */
-  function purchaseSubmission() public payable nonReentrant {
-    require(msg.value == price, 'Incorrect payment amount');
-    require(!purchasers[msg.sender], 'Already purchased');
-
-    purchasers[msg.sender] = true;
-
-    // Transfer payment to the submitter
-    if (price > 0) {
-      (bool success, ) = submitter.call{ value: msg.value }('');
-      require(success, 'Transfer failed');
-    }
-
-    emit SubmissionPurchased(msg.sender, address(this));
+  function addBuyer(address buyer) external override {
+    require(buyer != address(0), 'Invalid buyer address');
+    purchasers[buyer] = true;
   }
 
   /**
@@ -82,5 +77,21 @@ contract RequestSubmission is Initializable, ReentrancyGuard {
     } else {
       return watermarkedPictureId;
     }
+  }
+
+  /**
+   * @dev Returns the price of the submission.
+   * @return The price.
+   */
+  function getPrice() external view override returns (uint256) {
+    return price;
+  }
+
+  /**
+   * @dev Returns the submitter's address.
+   * @return The submitter's address.
+   */
+  function getSubmitter() external view override returns (address) {
+    return submitter;
   }
 }

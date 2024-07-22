@@ -42,6 +42,7 @@
     "@types/klaw": "3.0.6",
     "@types/mocha": "10.0.7",
     "axios": "1.7.2",
+    "crypto": "1.0.1",
     "dotenv": "16.4.5",
     "ethers": "6.13.1",
     "formidable": "3.5.1",
