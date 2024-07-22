@@ -5,12 +5,14 @@ import { PictureRequestSubmission } from '@/types/submission'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 import { PictureRequest } from '@/types/pictureRequest'
 import PictureRequestSchema from '@/public/artifacts/PictureRequest.json'
+import PurchaseManagerSchema from '@/public/artifacts/PurchaseManager.json'
 import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json'
 import PictureRequestFactorySchema from '@/public/artifacts/PictureRequestFactory.json'
 
 import { convertUsdToEthWithoutRate } from './currency'
 import { batchTasksAsync } from './batch'
 import { arrayToMap } from './object'
+import { SubmissionPurchase } from '@/types/purchase'
 
 interface CreatePictureRequestParams {
   title: string
@@ -32,9 +34,9 @@ interface CreateSubmissionsParams {
   description: string
   requestAddress: string
   wallet: EIP6963ProviderDetail
-  freePictureId: string | null
-  encryptedPictureId: string | null
-  watermarkedPictureId: string | null
+  freePictureId: string | undefined
+  encryptedPictureId: string | undefined
+  watermarkedPictureId: string | undefined
 }
 
 interface GetSubmissionsParams {
@@ -49,14 +51,19 @@ interface GetSubmissionParams {
 
 interface PurchaseSubmissionParams {
   account: string
-  wallet: EIP6963ProviderDetail
   address: string
+  wallet: EIP6963ProviderDetail
 }
 
 interface GetSubmissionPictureIdParams {
+  address: string
   account: string
   wallet: EIP6963ProviderDetail
-  address: string
+}
+
+interface GetPurchasesForAddressParams {
+  account: string
+  wallet: EIP6963ProviderDetail
 }
 
 export interface PictureRequestApi {
@@ -67,16 +74,19 @@ export interface PictureRequestApi {
   createSubmission(params: CreateSubmissionsParams): Promise<PictureRequestSubmission>
   getSubmission(params: GetSubmissionParams): Promise<PictureRequestSubmission>
   getSubmissions(params: GetSubmissionsParams): Promise<PictureRequestSubmission[]>
-  purchaseSubmission(params: PurchaseSubmissionParams): Promise<void>
+  purchaseSubmission(params: PurchaseSubmissionParams): Promise<SubmissionPurchase>
   getSubmissionPictureId(params: GetSubmissionPictureIdParams): Promise<string>
+
+  getPurchasesForAddress(params: GetPurchasesForAddressParams): Promise<SubmissionPurchase[]>
 }
 
-const PICTURE_REQUEST_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
 const PICTURE_REQUEST_FACTORY_ADDRESS =
   process.env.NEXT_PUBLIC_PICTURE_REQUEST_FACTORY_ADDRESS || ''
 const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_PINATA_GATEWAY || ''
+const PURCHASE_MANAGER_ADDRESS = process.env.NEXT_PUBLIC_PURCHASE_MANAGER_ADDRESS || ''
 
-if (!PICTURE_REQUEST_RPC_URL) {
+if (!RPC_URL) {
   process.exit('No RPC URL provided')
 }
 if (!PICTURE_REQUEST_FACTORY_ADDRESS) {
@@ -85,13 +95,23 @@ if (!PICTURE_REQUEST_FACTORY_ADDRESS) {
 if (!IMAGE_URL_ROOT) {
   process.exit('No image url root provided')
 }
+if (!PURCHASE_MANAGER_ADDRESS) {
+  process.exit('No purchase manager address provided')
+}
 
-async function createPictureRequestApi(initialFactoryAddress: string): Promise<PictureRequestApi> {
+async function createPictureRequestApi(
+  _factoryAddress: string,
+  _purchaseManagerAddress: string
+): Promise<PictureRequestApi> {
+  const provider = new Provider(RPC_URL)
+
   let factoryContract: Contract
-  let factoryAddress: string | Addressable = initialFactoryAddress
+  let purchaseManagerContract: Contract
+  let factoryAddress: string | Addressable = _factoryAddress
+  let purchaseManagerAddress: string | Addressable = _purchaseManagerAddress
+
   let pictureRequests: Record<string, PictureRequest> = {}
   let submissions: Record<string, PictureRequestSubmission> = {}
-  const provider = new Provider(PICTURE_REQUEST_RPC_URL)
 
   const _getSigner = (wallet: EIP6963ProviderDetail, account: string): Promise<Signer> => {
     const provider = new BrowserProvider(wallet.provider)
@@ -107,6 +127,21 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
 
     if (!factoryContract) {
       throw new Error('Could not connect to the picture request factory!')
+    }
+  }
+  const _initPurchaseManagerContract = async (): Promise<void> => {
+    if (purchaseManagerContract) {
+      return
+    }
+
+    purchaseManagerContract = new Contract(
+      purchaseManagerAddress,
+      PurchaseManagerSchema.abi,
+      provider
+    )
+
+    if (!purchaseManagerContract) {
+      throw new Error('Could not connect to the purchase manager!')
     }
   }
 
@@ -147,7 +182,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
   ): Promise<PictureRequestSubmission[]> => {
     const requestSubmissions = await batchTasksAsync<PictureRequestSubmission>({
       tasks: addresses,
-      mapFunction: _fetchSubmissionContractData,
+      mapFunction: _fetchSubmissionContract,
     })
 
     requestSubmissions.forEach((submission: PictureRequestSubmission) => {
@@ -157,9 +192,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     return requestSubmissions
   }
 
-  const _fetchSubmissionContractData = async (
-    address: string
-  ): Promise<PictureRequestSubmission> => {
+  const _fetchSubmissionContract = async (address: string): Promise<PictureRequestSubmission> => {
     const submissionContract = new ethers.Contract(address, RequestSubmissionSchema.abi, provider)
     const price = await submissionContract.price()
     const submitter = await submissionContract.submitter()
@@ -180,6 +213,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
       watermarkedPictureUrl: watermarkedPictureId
         ? `${IMAGE_URL_ROOT}/${watermarkedPictureId}`
         : undefined,
+      purchases: [], // TODO
     }
   }
 
@@ -299,7 +333,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     refetch = false,
   }: GetSubmissionParams): Promise<PictureRequestSubmission> => {
     if (refetch) {
-      submissions[address] = await _fetchSubmissionContractData(address)
+      submissions[address] = await _fetchSubmissionContract(address)
     }
 
     return submissions[address]
@@ -309,7 +343,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     wallet,
     account,
     address,
-  }: PurchaseSubmissionParams): Promise<void> => {
+  }: PurchaseSubmissionParams): Promise<SubmissionPurchase> => {
     const submissionContract = new ethers.Contract(
       address,
       RequestSubmissionSchema.abi,
@@ -317,16 +351,47 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     )
     const price = await submissionContract.price()
 
-    console.log(`Calling purchaseSubmission on submission ${address} for ${price}`)
-    const tx = await submissionContract.purchaseSubmission({ value: price })
+    console.log('Connecting to purchase contract')
+    const purchaseContract = new ethers.Contract(
+      purchaseManagerAddress,
+      PurchaseManagerSchema.abi,
+      await _getSigner(wallet, account)
+    )
+    console.log(`Calling purchaseSubmission for submission ${address} for ${price}`)
+    const tx = await purchaseContract.purchaseSubmission(address, { value: price })
     const receipt: ContractTransactionReceipt = await tx.wait()
 
+    console.log('Received receipt')
     const event = receipt.logs
-      .map((log) => submissionContract.interface.parseLog(log))
+      .map((log) => purchaseContract.interface.parseLog(log))
       .find((log) => log && log.name === 'SubmissionPurchased')
     if (!event) {
       throw new Error('SubmissionPurchased event not found')
     }
+    console.log('Received event', event.name, event.args)
+
+    return {
+      price,
+      buyer: address,
+      submissionAddress: address,
+    }
+  }
+
+  const getPurchasesForAddress = async ({
+    account,
+    wallet,
+  }: GetPurchasesForAddressParams): Promise<SubmissionPurchase[]> => {
+    const purchaseContract = new ethers.Contract(
+      purchaseManagerAddress,
+      PurchaseManagerSchema.abi,
+      await _getSigner(wallet, account)
+    )
+    const purchases = await purchaseContract.getPurchases(account)
+
+    purchases.forEach((purchase: any) => {
+      console.log('Purchase', purchase, purchase.buyer)
+    })
+    return []
   }
 
   const getSubmissionPictureId = async ({
@@ -344,6 +409,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
   }
 
   await _initFactoryContract()
+  await _initPurchaseManagerContract()
   pictureRequests = await _fetchAllPictureRequests()
 
   return {
@@ -354,6 +420,7 @@ async function createPictureRequestApi(initialFactoryAddress: string): Promise<P
     getSubmission,
     getSubmissions,
     purchaseSubmission,
+    getPurchasesForAddress,
     getSubmissionPictureId,
   }
 }
@@ -362,7 +429,10 @@ let pictureRequestApiPromise: Promise<PictureRequestApi> | null = null
 
 const getPictureRequestApi = async (): Promise<PictureRequestApi> => {
   if (!pictureRequestApiPromise) {
-    pictureRequestApiPromise = createPictureRequestApi(PICTURE_REQUEST_FACTORY_ADDRESS)
+    pictureRequestApiPromise = createPictureRequestApi(
+      PICTURE_REQUEST_FACTORY_ADDRESS,
+      PURCHASE_MANAGER_ADDRESS
+    )
   }
   return pictureRequestApiPromise
 }

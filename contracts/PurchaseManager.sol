@@ -2,14 +2,14 @@
 pragma solidity ^0.8.20;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
-import './RequestSubmission.sol'; // Import the file containing the interface
+import '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
+import './RequestSubmission.sol';
 
 /**
  * @title PurchaseManager
  * @dev Manages purchases of request submissions.
  */
-contract PurchaseManager is Initializable, ReentrancyGuard {
+contract PurchaseManager is Initializable, ReentrancyGuardUpgradeable {
   struct Purchase {
     address buyer;
     uint256 price;

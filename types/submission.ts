@@ -1,3 +1,5 @@
+import { SubmissionPurchase } from './purchase'
+
 export interface PictureRequestSubmission {
   price: number
   address: string
@@ -6,4 +8,5 @@ export interface PictureRequestSubmission {
   freePictureUrl?: string
   encryptedPictureUrl?: string
   watermarkedPictureUrl?: string
+  purchases: SubmissionPurchase[]
 }
