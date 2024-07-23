@@ -17,7 +17,7 @@ const decrypt = (encryptedText: string) => {
 
 const verifyPurchase = async (userAddress: string, submissionAddress: string): Promise<boolean> => {
   try {
-    const response = await axios.post('http://localhost:3000/api/verifyPurchase', {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/verifyPurchase`, {
       userAddress,
       submissionAddress,
     })

@@ -31,7 +31,9 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
     const fileToUpload: File = addWatermark ? await createWatermarkedImage(file) : file
 
     try {
-      const jwtRes = await fetch('/api/pinata/jwt', { method: 'POST' })
+      const jwtRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pinata/jwt`, {
+        method: 'POST',
+      })
       const JWT = await jwtRes.text()
 
       const formData = new FormData()
@@ -56,12 +58,16 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const response = await axios.post('/api/watermark', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        responseType: 'arraybuffer',
-      })
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/watermark`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          responseType: 'arraybuffer',
+        }
+      )
       const blob = new Blob([response.data], { type: 'image/png' })
       return new File([blob], `${file.name.slice(0, 10)}-watermarked.png`, { type: 'image/png' })
     } catch (e) {
@@ -83,7 +89,7 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/pinata/decrypt', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pinata/decrypt`, {
         submissionAddress,
         encryptedPictureId,
         userAddress: account,

@@ -94,7 +94,9 @@ export const RequestSubmissionProvider = ({
 
     let encryptedPictureId: string | undefined
     if (watermarkedPictureId) {
-      const { data } = await axios.post('/api/pinata/encrypt', { pictureId: originalPictureId })
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pinata/encrypt`, {
+        pictureId: originalPictureId,
+      })
       encryptedPictureId = data.encryptedPictureId
     }
     const freePictureId = price === 0 ? originalPictureId : undefined
