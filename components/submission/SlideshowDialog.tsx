@@ -4,11 +4,11 @@ import { PictureRequestSubmission } from '@/types/submission'
 import { Dispatch, SetStateAction, useEffect } from 'react'
 import { ethDisplayWithUSDString } from '@/utils/currency'
 import { useEthUsdRate } from '@/hooks/useEthUsdRate'
-import { useImageStore } from '@/hooks/useImageStore'
 
 interface SlideshowDialogProps {
   open: boolean
   currentSlide: number
+  imageUrl: string | undefined
   submissions: PictureRequestSubmission[]
 
   handleClose: () => void
@@ -18,6 +18,7 @@ interface SlideshowDialogProps {
 
 const SlideshowDialog = ({
   open,
+  imageUrl,
   submissions,
   currentSlide,
   setCurrentSlide,
@@ -25,7 +26,6 @@ const SlideshowDialog = ({
   setConfirmDialogOpen,
 }: SlideshowDialogProps) => {
   const { ethToUsdRate } = useEthUsdRate()
-  const { getFreeImageUrl } = useImageStore()
   const submission = submissions[currentSlide]
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const SlideshowDialog = ({
               '& img': { height: 50, width: 50, objectFit: 'cover' },
             }}
           >
-            <img src={getFreeImageUrl(submission)} alt={submission.description} />
+            <img src={imageUrl} alt={submission.description} />
           </Box>
         ))}
       </Box>
@@ -91,7 +91,7 @@ const SlideshowDialog = ({
     >
       <DialogContent style={{ textAlign: 'center', position: 'relative' }}>
         <img
-          src={getFreeImageUrl(submission)}
+          src={imageUrl}
           alt={submission?.description}
           style={{ maxHeight: '80vh', maxWidth: '100%' }}
         />

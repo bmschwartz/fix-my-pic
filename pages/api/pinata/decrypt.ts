@@ -15,11 +15,11 @@ const decrypt = (encryptedText: string) => {
   return decrypted.toString()
 }
 
-const verifyPurchase = async (userAddress: string, submissionId: string): Promise<boolean> => {
+const verifyPurchase = async (userAddress: string, submissionAddress: string): Promise<boolean> => {
   try {
-    const response = await axios.post('https://your-pictureBountyApi.com/api/verify-purchase', {
+    const response = await axios.post('http://localhost:3000/api/verifyPurchase', {
       userAddress,
-      submissionId,
+      submissionAddress,
     })
     return response.data.purchased
   } catch (error) {
@@ -35,24 +35,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return
   }
 
-  const { encryptedImageId, userAddress, submissionId } = req.body
+  const { encryptedPictureId, userAddress, submissionAddress } = req.body
 
-  if (!encryptedImageId || !userAddress || !submissionId) {
+  if (!encryptedPictureId || !userAddress || !submissionAddress) {
     res
       .status(400)
-      .json({ message: 'Encrypted Image ID, User Address, and Submission ID are required' })
+      .json({ message: 'Encrypted Picture ID, User Address, and Submission Address are required' })
     return
   }
 
   try {
-    const purchased = await verifyPurchase(userAddress, submissionId)
+    const purchased = await verifyPurchase(userAddress, submissionAddress)
 
     if (!purchased) {
       res.status(403).json({ message: 'User has not purchased this submission' })
       return
     }
 
-    const decryptedImageId = decrypt(encryptedImageId)
+    const decryptedImageId = decrypt(encryptedPictureId)
     res.status(200).json({ decryptedImageId })
   } catch (error) {
     const err = error as AxiosError

@@ -6,8 +6,9 @@ import { PictureRequestApi } from '@/utils/pictureRequestApi'
 
 export interface PurchaseManagerContextType {
   purchases: SubmissionPurchase[]
+  purchasesBySubmission: Record<string, SubmissionPurchase>
   purchaseSubmission: (submissionAddress: string) => Promise<SubmissionPurchase>
-  getPurchaseBySubmission: (submissionAddress: string) => SubmissionPurchase | undefined
+  getPurchaseForSubmission: (submissionAddress: string) => SubmissionPurchase | undefined
 }
 
 interface PurchaseManagerProviderProps {
@@ -44,10 +45,14 @@ export const PurchaseManagerProvider = ({
     const allPurchases = await pictureRequestApi.getPurchasesForAccount({ account, wallet })
     setPurchases(allPurchases)
 
+    console.log('DEBUG allPurchases', allPurchases)
+
     const allSubmissionPurchases: Record<string, SubmissionPurchase> = {}
     allPurchases.forEach((purchase: SubmissionPurchase) => {
       allSubmissionPurchases[purchase.submissionAddress] = purchase
     })
+
+    console.log('DEBUG allSubmissionPurchases', allSubmissionPurchases)
 
     setPurchasesBySubmission(allSubmissionPurchases)
   }
@@ -58,22 +63,31 @@ export const PurchaseManagerProvider = ({
         throw new Error('Wallet and account needed to create a submission!')
       }
 
-      return pictureRequestApi.purchaseSubmission({
+      console.log('Calling pictureRequestApi.purchaseSubmission')
+      const purchase = await pictureRequestApi.purchaseSubmission({
         address: submissionAddress,
         wallet,
         account,
       })
+      console.log('Received purchase', purchase)
+
+      await _refreshPurchases()
+
+      return purchase
     },
     []
   )
 
-  const getPurchaseBySubmission = (submissionAddress: string): SubmissionPurchase | undefined => {
+  const getPurchaseForSubmission = (submissionAddress: string): SubmissionPurchase | undefined => {
+    console.log('DEBUG getPurchaseForSubmission', purchasesBySubmission[submissionAddress])
+    if (!purchasesBySubmission[submissionAddress]) {
+    }
     return purchasesBySubmission[submissionAddress]
   }
 
   return (
     <PurchaseManagerContext.Provider
-      value={{ purchases, getPurchaseBySubmission, purchaseSubmission }}
+      value={{ purchases, purchasesBySubmission, getPurchaseForSubmission, purchaseSubmission }}
     >
       {children}
     </PurchaseManagerContext.Provider>

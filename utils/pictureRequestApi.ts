@@ -341,11 +341,13 @@ async function createPictureRequestApi(
     account,
     address,
   }: PurchaseSubmissionParams): Promise<SubmissionPurchase> => {
+    console.log('Getting submission contract')
     const submissionContract = new ethers.Contract(
       address,
       RequestSubmissionSchema.abi,
       await _getSigner(wallet, account)
     )
+    console.log('Getting price')
     const price = await submissionContract.price()
 
     console.log('Connecting to purchase contract')
@@ -385,10 +387,11 @@ async function createPictureRequestApi(
     )
     const purchases = await purchaseContract.getPurchases(account)
 
-    purchases.forEach((purchase: any) => {
-      console.log('Purchase', purchase, purchase.buyer)
-    })
-    return []
+    return purchases.map((purchase: any) => ({
+      buyer: purchase.buyer,
+      submissionAddress: purchase.submissionAddress,
+      price: Number(ethers.formatEther(purchase.price)),
+    }))
   }
 
   const getSubmissionPictureId = async ({

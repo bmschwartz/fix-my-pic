@@ -6,15 +6,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return
   }
 
-  const { userAddress, submissionId } = req.body
+  const { userAddress, submissionAddress } = req.body
 
-  if (!userAddress || !submissionId) {
-    res.status(400).json({ message: 'User Address and Submission ID are required' })
+  if (!userAddress || !submissionAddress) {
+    res.status(400).json({ message: 'User Address and Submission Address are required' })
     return
   }
 
   console.log(`User Address: ${userAddress}`)
-  console.log(`Submission ID: ${submissionId}`)
+  console.log(`Submission ID: ${submissionAddress}`)
 
   res.status(200).json({ purchased: true })
 }

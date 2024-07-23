@@ -6,13 +6,14 @@ import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 import { ethDisplayWithUSDString } from '@/utils/currency'
 
 interface SubmissionCardProps {
+  imageUrl: string
   submission: PictureRequestSubmission
 
   onClick: () => void
   onPurchase: (address: string) => Promise<void>
 }
 
-const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps) => {
+const SubmissionCard = ({ submission, imageUrl, onClick, onPurchase }: SubmissionCardProps) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false)
   const { ethToUsdRate } = useEthUsdRate()
 
@@ -29,11 +30,7 @@ const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps
     <>
       <Grid item xs={12} sm={6} md={4} key={submission.address}>
         <Card onClick={onClick} sx={{ cursor: 'pointer' }}>
-          <CardMedia
-            component="img"
-            src={submission.watermarkedPictureUrl || submission.freePictureUrl}
-            style={{ height: '200px' }}
-          />
+          <CardMedia component="img" src={imageUrl} style={{ height: '200px' }} />
           <CardContent>
             <Typography variant="body2">{submission.description}</Typography>
           </CardContent>
@@ -51,6 +48,7 @@ const SubmissionCard = ({ submission, onClick, onPurchase }: SubmissionCardProps
         open={confirmationOpen}
         handleClose={handleClickClose}
         submission={submission}
+        imageUrl={imageUrl}
         onPurchase={onPurchase}
       />
     </>

@@ -14,6 +14,7 @@ import { useImageStore } from '@/hooks/useImageStore'
 
 interface ConfirmationDialogProps {
   open: boolean
+  imageUrl: string | undefined
   submission: PictureRequestSubmission
 
   handleClose: () => void
@@ -22,12 +23,12 @@ interface ConfirmationDialogProps {
 
 const ConfirmationDialog = ({
   open,
+  imageUrl,
   submission,
   onPurchase,
   handleClose,
 }: ConfirmationDialogProps) => {
   const { ethToUsdRate } = useEthUsdRate()
-  const { getFreeImageUrl } = useImageStore()
   const [loadingConfirm, setLoadingConfirm] = useState(false)
 
   const handleConfirm = async () => {
@@ -46,7 +47,7 @@ const ConfirmationDialog = ({
           </Typography>
         )}
         <img
-          src={getFreeImageUrl(submission)}
+          src={imageUrl}
           alt={submission.description}
           style={{ maxHeight: '80vh', maxWidth: '100%', marginTop: '20px' }}
         />

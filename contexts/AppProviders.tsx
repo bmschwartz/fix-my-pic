@@ -8,6 +8,7 @@ import { WalletProvider } from './WalletProvider'
 import { EthUsdRateProvider } from './EthRateProvider'
 import { RequestSubmissionProvider } from './RequestSubmissionContext'
 import { ImageStoreProvider } from './ImageStoreContext'
+import { PurchaseManagerProvider } from './PurchaseManagerContext'
 
 interface AppProvidersProps {
   children: ReactNode
@@ -37,9 +38,11 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
       <WalletProvider>
         <ImageStoreProvider>
           <PictureRequestProvider pictureRequestApi={pictureRequestApi}>
-            <RequestSubmissionProvider pictureRequestApi={pictureRequestApi}>
-              {children}
-            </RequestSubmissionProvider>
+            <PurchaseManagerProvider pictureRequestApi={pictureRequestApi}>
+              <RequestSubmissionProvider pictureRequestApi={pictureRequestApi}>
+                {children}
+              </RequestSubmissionProvider>
+            </PurchaseManagerProvider>
           </PictureRequestProvider>
         </ImageStoreProvider>
       </WalletProvider>

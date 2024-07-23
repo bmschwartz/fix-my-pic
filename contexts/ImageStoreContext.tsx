@@ -15,7 +15,7 @@ interface GetDecryptedImageUrl {
 export interface ImageStoreContextType {
   uploadImage: (props: UploadImageProps) => Promise<string>
   getFreeImageUrl: (submission: PictureRequestSubmission) => string
-  getDecryptedImageUrl: (props: GetDecryptedImageUrl) => Promise<string>
+  getDecryptedImageUrl: (submission: PictureRequestSubmission) => Promise<string>
 }
 
 interface ImageStoreProviderProps {
@@ -79,11 +79,27 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
     return `${IMAGE_URL_ROOT}/${pictureId}`
   }
 
-  const getDecryptedImageUrl = async ({ submission }: GetDecryptedImageUrl): Promise<string> => {
-    if (!account || !submission.encryptedPictureId) {
+  const getDecryptedImageUrl = async (submission: PictureRequestSubmission): Promise<string> => {
+    const { address: submissionAddress, encryptedPictureId } = submission
+
+    if (!account || !encryptedPictureId) {
+      console.log('Missing account or encryptedPictureId', account, encryptedPictureId)
       return ''
     }
-    return `${IMAGE_URL_ROOT}/${''}`
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/pinata/decrypt', {
+        submissionAddress,
+        encryptedPictureId,
+        userAddress: account,
+      })
+      console.log('Got decrypt response', response.data)
+      const { decryptedImageId } = response.data
+      return `${IMAGE_URL_ROOT}/${decryptedImageId}`
+    } catch (e) {
+      console.error(e)
+      throw new Error('Error decrypting picture id!')
+    }
   }
 
   return (

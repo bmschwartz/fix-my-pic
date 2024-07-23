@@ -16,6 +16,7 @@ contract BaseRequestSubmission is Initializable, IRequestSubmission {
   string public freePictureId;
   uint256 public price;
   address public submitter;
+  address[] public purchaserList;
   mapping(address => bool) public purchasers;
 
   /**
@@ -53,6 +54,7 @@ contract BaseRequestSubmission is Initializable, IRequestSubmission {
   function addBuyer(address buyer) public virtual override {
     require(buyer != address(0), 'Invalid buyer address');
     purchasers[buyer] = true;
+    purchaserList.push(buyer);
   }
 
   /**
@@ -69,5 +71,13 @@ contract BaseRequestSubmission is Initializable, IRequestSubmission {
    */
   function getSubmitter() public view virtual override returns (address) {
     return submitter;
+  }
+
+  /**
+   * @dev Returns the list of purchasers.
+   * @return The addresses of purchasers.
+   */
+  function getPurchaserList() public view returns (address[] memory) {
+    return purchaserList;
   }
 }
