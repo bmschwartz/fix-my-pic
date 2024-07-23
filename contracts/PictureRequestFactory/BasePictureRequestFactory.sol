@@ -15,8 +15,20 @@ contract BasePictureRequestFactory is Initializable {
   /**
    * @dev Emitted when a new PictureRequest is created.
    * @param pictureRequestAddress The address of the new PictureRequest contract.
+   * @param creator The address of the user who created the PictureRequest.
+   * @param title The title of the picture request.
+   * @param description The description of the picture request.
+   * @param imageId The image ID for the picture request.
+   * @param budget The budget for the picture request.
    */
-  event PictureRequestCreated(address indexed pictureRequestAddress);
+  event PictureRequestCreated(
+    address indexed pictureRequestAddress,
+    address indexed creator,
+    string title,
+    string description,
+    string imageId,
+    uint256 budget
+  );
 
   // Initializer function, replaces constructor for upgradeable contracts
   function initialize() public virtual initializer {}
@@ -37,7 +49,15 @@ contract BasePictureRequestFactory is Initializable {
     PictureRequest pictureRequest = new PictureRequest();
     pictureRequest.initialize(_title, _description, _imageId, _budget);
     pictureRequests.push(pictureRequest);
-    emit PictureRequestCreated(address(pictureRequest));
+
+    emit PictureRequestCreated(
+      address(pictureRequest),
+      msg.sender,
+      _title,
+      _description,
+      _imageId,
+      _budget
+    );
   }
 
   /**
