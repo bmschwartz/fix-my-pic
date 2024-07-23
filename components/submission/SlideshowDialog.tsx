@@ -9,22 +9,22 @@ import { usePurchases } from '@/hooks/usePurchases'
 interface SlideshowDialogProps {
   open: boolean
   currentSlide: number
-  imageUrl: string | undefined
   submissions: PictureRequestSubmission[]
 
   handleClose: () => void
   setCurrentSlide: Dispatch<SetStateAction<number>>
   setConfirmDialogOpen: Dispatch<SetStateAction<boolean>>
+  getSubmissionImageUrl: (submission?: PictureRequestSubmission) => string | undefined
 }
 
 const SlideshowDialog = ({
   open,
-  imageUrl,
   submissions,
   currentSlide,
   setCurrentSlide,
   handleClose,
   setConfirmDialogOpen,
+  getSubmissionImageUrl,
 }: SlideshowDialogProps) => {
   const { ethToUsdRate } = useEthUsdRate()
   const { getPurchaseForSubmission } = usePurchases()
@@ -85,7 +85,7 @@ const SlideshowDialog = ({
               '& img': { height: 50, width: 50, objectFit: 'cover' },
             }}
           >
-            <img src={imageUrl} alt={submission.description} />
+            <img src={getSubmissionImageUrl(submission)} alt={submission.description} />
           </Box>
         ))}
       </Box>
@@ -102,7 +102,7 @@ const SlideshowDialog = ({
     >
       <DialogContent style={{ textAlign: 'center', position: 'relative' }}>
         <img
-          src={imageUrl}
+          src={getSubmissionImageUrl(submission)}
           alt={submission?.description}
           style={{ maxHeight: '80vh', maxWidth: '100%' }}
         />

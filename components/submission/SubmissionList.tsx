@@ -12,7 +12,6 @@ import SlideshowDialog from './SlideshowDialog'
 import ConfirmationDialog from './PurchaseConfirmationDialog'
 import { usePurchases } from '@/hooks/usePurchases'
 import { useImageStore } from '@/hooks/useImageStore'
-import { SubmissionPurchase } from '@/types/purchase'
 
 export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequest }) => {
   const { selectedWallet, selectedAccount } = useWallet()
@@ -141,12 +140,12 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
       {submissions[currentSlide] && (
         <SlideshowDialog
           open={openSlideshow}
-          imageUrl={getSubmissionImageUrl(submissions[currentSlide])}
           submissions={submissions}
           currentSlide={currentSlide}
           setCurrentSlide={setCurrentSlide}
           handleClose={() => setOpenSlideshow(false)}
           setConfirmDialogOpen={setConfirmDialogOpen}
+          getSubmissionImageUrl={getSubmissionImageUrl}
         />
       )}
 

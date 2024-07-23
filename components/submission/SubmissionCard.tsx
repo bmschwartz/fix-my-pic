@@ -30,7 +30,7 @@ const SubmissionCard = ({ submission, imageUrl, onClick, onPurchase }: Submissio
 
   const handlePurchaseClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (submissionPurchased) {
+    if (submissionPurchased || submission.price === 0) {
       handleDownload()
     } else {
       setConfirmationOpen(true)
