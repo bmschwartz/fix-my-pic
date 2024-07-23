@@ -45,14 +45,10 @@ export const PurchaseManagerProvider = ({
     const allPurchases = await pictureRequestApi.getPurchasesForAccount({ account, wallet })
     setPurchases(allPurchases)
 
-    console.log('DEBUG allPurchases', allPurchases)
-
     const allSubmissionPurchases: Record<string, SubmissionPurchase> = {}
     allPurchases.forEach((purchase: SubmissionPurchase) => {
       allSubmissionPurchases[purchase.submissionAddress] = purchase
     })
-
-    console.log('DEBUG allSubmissionPurchases', allSubmissionPurchases)
 
     setPurchasesBySubmission(allSubmissionPurchases)
   }
@@ -63,13 +59,11 @@ export const PurchaseManagerProvider = ({
         throw new Error('Wallet and account needed to create a submission!')
       }
 
-      console.log('Calling pictureRequestApi.purchaseSubmission')
       const purchase = await pictureRequestApi.purchaseSubmission({
         address: submissionAddress,
         wallet,
         account,
       })
-      console.log('Received purchase', purchase)
 
       await _refreshPurchases()
 
@@ -79,9 +73,6 @@ export const PurchaseManagerProvider = ({
   )
 
   const getPurchaseForSubmission = (submissionAddress: string): SubmissionPurchase | undefined => {
-    console.log('DEBUG getPurchaseForSubmission', purchasesBySubmission[submissionAddress])
-    if (!purchasesBySubmission[submissionAddress]) {
-    }
     return purchasesBySubmission[submissionAddress]
   }
 

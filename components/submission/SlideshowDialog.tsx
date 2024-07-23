@@ -4,6 +4,7 @@ import { PictureRequestSubmission } from '@/types/submission'
 import { Dispatch, SetStateAction, useEffect } from 'react'
 import { ethDisplayWithUSDString } from '@/utils/currency'
 import { useEthUsdRate } from '@/hooks/useEthUsdRate'
+import { usePurchases } from '@/hooks/usePurchases'
 
 interface SlideshowDialogProps {
   open: boolean
@@ -26,7 +27,17 @@ const SlideshowDialog = ({
   setConfirmDialogOpen,
 }: SlideshowDialogProps) => {
   const { ethToUsdRate } = useEthUsdRate()
+  const { getPurchaseForSubmission } = usePurchases()
+
   const submission = submissions[currentSlide]
+  const submissionPurchased = Boolean(getPurchaseForSubmission(submission.address))
+
+  let purchaseButtonText: string
+  if (submissionPurchased || submission?.price === 0) {
+    purchaseButtonText = 'Download'
+  } else {
+    purchaseButtonText = `Purchase ${ethToUsdRate && submission?.price !== undefined ? ethDisplayWithUSDString(submission?.price, ethToUsdRate) : ''}`
+  }
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -107,9 +118,7 @@ const SlideshowDialog = ({
       </DialogActions>
       <Box display="flex" justifyContent="center" mt={2} mb={2}>
         <Button variant="contained" color="primary" onClick={() => setConfirmDialogOpen(true)}>
-          {submission?.price === 0
-            ? 'Download Free'
-            : `Purchase ${ethToUsdRate && submission?.price !== undefined ? ethDisplayWithUSDString(submission?.price, ethToUsdRate) : ''}`}
+          {purchaseButtonText}
         </Button>
       </Box>
     </Dialog>

@@ -4,6 +4,7 @@ import { PictureRequestSubmission } from '@/types/submission'
 import ConfirmationDialog from './PurchaseConfirmationDialog'
 import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 import { ethDisplayWithUSDString } from '@/utils/currency'
+import { usePurchases } from '@/hooks/usePurchases'
 
 interface SubmissionCardProps {
   imageUrl: string
@@ -14,12 +15,36 @@ interface SubmissionCardProps {
 }
 
 const SubmissionCard = ({ submission, imageUrl, onClick, onPurchase }: SubmissionCardProps) => {
-  const [confirmationOpen, setConfirmationOpen] = useState(false)
   const { ethToUsdRate } = useEthUsdRate()
+  const { getPurchaseForSubmission } = usePurchases()
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
 
-  const handleClickOpen = (e: React.MouseEvent) => {
+  const submissionPurchased = Boolean(getPurchaseForSubmission(submission.address))
+
+  let purchaseButtonText: string
+  if (submissionPurchased || submission?.price === 0) {
+    purchaseButtonText = 'Download'
+  } else {
+    purchaseButtonText = `Purchase ${ethToUsdRate && submission?.price !== undefined ? ethDisplayWithUSDString(submission?.price, ethToUsdRate) : ''}`
+  }
+
+  const handlePurchaseClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setConfirmationOpen(true)
+    if (submissionPurchased) {
+      handleDownload()
+    } else {
+      setConfirmationOpen(true)
+    }
+  }
+
+  const handleDownload = () => {
+    const link = document.createElement('a')
+    link.href = imageUrl
+    link.target = '_blank'
+    link.download = `${submission.address}.jpg`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const handleClickClose = () => {
@@ -35,10 +60,8 @@ const SubmissionCard = ({ submission, imageUrl, onClick, onPurchase }: Submissio
             <Typography variant="body2">{submission.description}</Typography>
           </CardContent>
           <CardActions style={{ justifyContent: 'center' }}>
-            <Button size="small" color="primary" variant="contained" onClick={handleClickOpen}>
-              {submission?.price === 0
-                ? 'Download Free'
-                : `Purchase ${ethToUsdRate && submission?.price !== undefined ? ethDisplayWithUSDString(submission?.price, ethToUsdRate) : ''}`}
+            <Button size="small" color="primary" variant="contained" onClick={handlePurchaseClick}>
+              {purchaseButtonText}
             </Button>
           </CardActions>
         </Card>

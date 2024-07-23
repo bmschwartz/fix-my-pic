@@ -286,16 +286,6 @@ async function createPictureRequestApi(
       const priceEth = await convertUsdToEthWithoutRate(price)
       const priceInWei = ethers.parseEther(priceEth)
 
-      console.log(
-        'createSubmission with',
-        account,
-        description,
-        watermarkedPictureId,
-        encryptedPictureId,
-        freePictureId,
-        priceInWei
-      )
-
       const tx = await pictureRequestContract.createSubmission(
         account,
         description,
@@ -341,33 +331,27 @@ async function createPictureRequestApi(
     account,
     address,
   }: PurchaseSubmissionParams): Promise<SubmissionPurchase> => {
-    console.log('Getting submission contract')
     const submissionContract = new ethers.Contract(
       address,
       RequestSubmissionSchema.abi,
       await _getSigner(wallet, account)
     )
-    console.log('Getting price')
     const price = await submissionContract.price()
 
-    console.log('Connecting to purchase contract')
     const purchaseContract = new ethers.Contract(
       purchaseManagerAddress,
       PurchaseManagerSchema.abi,
       await _getSigner(wallet, account)
     )
-    console.log(`Calling purchaseSubmission for submission ${address} for ${price}`)
     const tx = await purchaseContract.purchaseSubmission(address, { value: price })
     const receipt: ContractTransactionReceipt = await tx.wait()
 
-    console.log('Received receipt')
     const event = receipt.logs
       .map((log) => purchaseContract.interface.parseLog(log))
       .find((log) => log && log.name === 'SubmissionPurchased')
     if (!event) {
       throw new Error('SubmissionPurchased event not found')
     }
-    console.log('Received event', event.name, event.args)
 
     return {
       price,

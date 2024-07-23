@@ -8,10 +8,6 @@ interface UploadImageProps {
   addWatermark?: boolean
 }
 
-interface GetDecryptedImageUrl {
-  submission: PictureRequestSubmission
-}
-
 export interface ImageStoreContextType {
   uploadImage: (props: UploadImageProps) => Promise<string>
   getFreeImageUrl: (submission: PictureRequestSubmission) => string
@@ -83,7 +79,6 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
     const { address: submissionAddress, encryptedPictureId } = submission
 
     if (!account || !encryptedPictureId) {
-      console.log('Missing account or encryptedPictureId', account, encryptedPictureId)
       return ''
     }
 
@@ -93,11 +88,9 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
         encryptedPictureId,
         userAddress: account,
       })
-      console.log('Got decrypt response', response.data)
       const { decryptedImageId } = response.data
       return `${IMAGE_URL_ROOT}/${decryptedImageId}`
     } catch (e) {
-      console.error(e)
       throw new Error('Error decrypting picture id!')
     }
   }

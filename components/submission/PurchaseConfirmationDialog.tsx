@@ -10,7 +10,6 @@ import {
 import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 import { PictureRequestSubmission } from '@/types/submission'
 import { ethDisplayString, ethDisplayWithUSDString } from '@/utils/currency'
-import { useImageStore } from '@/hooks/useImageStore'
 
 interface ConfirmationDialogProps {
   open: boolean

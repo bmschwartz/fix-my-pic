@@ -24,14 +24,12 @@ const main = async () => {
       throw new Error(`Missing initializer function name to upgrade ${contractName}!`)
     }
 
-    console.log(factoryProxyAddress, contractName, contractInitializer)
-
     const upgradedContract = await deployContract(contractName, [], {
       wallet,
       proxyAddress: factoryProxyAddress,
     })
-    console.log(upgradedContract.target)
     upgradedContract.connect(deployer.zkWallet)
+
     // wait some time before the next call
     await new Promise((resolve) => setTimeout(resolve, 2000))
 

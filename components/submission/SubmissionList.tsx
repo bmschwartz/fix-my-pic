@@ -50,14 +50,7 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
       ? submissions.filter((s) => submissionAddresses.includes(s.address))
       : submissions
 
-    console.log('DEBUG _refreshSubmissions toFetch', submissionsToFetch)
-
     const imageUrlPromises = submissionsToFetch.map(async (submission) => {
-      console.log(
-        'DEBUG imageUrlPromises',
-        submission.address,
-        purchasesBySubmission[submission.address]
-      )
       const url = purchasesBySubmission[submission.address]
         ? await getDecryptedImageUrl(submission)
         : Promise.resolve(getFreeImageUrl(submission))
@@ -91,10 +84,8 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
   }, [submissions, pictureRequest.address, purchasesBySubmission, selectedAccount])
 
   const onPurchase = useCallback(async (submissionAddress: string): Promise<void> => {
-    console.log('DEBUG Purchasing submission')
     try {
-      const purchase = await purchaseSubmission(submissionAddress)
-      console.log('DEBUG onPurchase result', purchase)
+      await purchaseSubmission(submissionAddress)
       await _refreshSubmissionImageUrls([submissionAddress])
     } catch (e) {
       console.error('DEBUG Error purchasing the submission')
@@ -147,15 +138,17 @@ export const SubmissionList = ({ pictureRequest }: { pictureRequest: PictureRequ
         )}
       </Grid>
 
-      <SlideshowDialog
-        open={openSlideshow}
-        imageUrl={getSubmissionImageUrl(submissions[currentSlide])}
-        submissions={submissions}
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-        handleClose={() => setOpenSlideshow(false)}
-        setConfirmDialogOpen={setConfirmDialogOpen}
-      />
+      {submissions[currentSlide] && (
+        <SlideshowDialog
+          open={openSlideshow}
+          imageUrl={getSubmissionImageUrl(submissions[currentSlide])}
+          submissions={submissions}
+          currentSlide={currentSlide}
+          setCurrentSlide={setCurrentSlide}
+          handleClose={() => setOpenSlideshow(false)}
+          setConfirmDialogOpen={setConfirmDialogOpen}
+        />
+      )}
 
       {submissions[currentSlide] && (
         <ConfirmationDialog

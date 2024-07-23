@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { Contract, Provider } from 'zksync-ethers'
+import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -13,8 +15,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return
   }
 
-  console.log(`User Address: ${userAddress}`)
-  console.log(`Submission ID: ${submissionAddress}`)
+  const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
+  const provider = new Provider(RPC_URL)
 
-  res.status(200).json({ purchased: true })
+  const submissionContract = new Contract(submissionAddress, RequestSubmissionSchema.abi, provider)
+  const purchasers = Object.values(await submissionContract.getPurchaserList()).map(
+    (address: unknown) => {
+      return (address as string).toUpperCase()
+    }
+  )
+
+  const purchased = purchasers.includes(userAddress.toUpperCase())
+
+  res.status(200).json({ purchased })
 }
