@@ -11,7 +11,7 @@ import { SubmissionPurchase } from '@/types/purchase'
 export interface RequestSubmissionContextType {
   purchaseSubmission: (submissionAddress: string) => Promise<BigNumberish>
   getRequestSubmissions: (requestAddress: string) => Promise<PictureRequestSubmission[]>
-  getPurchasesForSubmission: (submissionAddress: string) => Promise<SubmissionPurchase[]>
+  // getPurchasesForSubmission: (submissionAddress: string) => Promise<SubmissionPurchase[]>
   createSubmission: (submissionData: CreateSubmissionProps) => Promise<PictureRequestSubmission>
 }
 
@@ -154,10 +154,6 @@ export const RequestSubmissionProvider = ({
     })
     console.log('<AFTER> pictureId', pictureId)
     return pictureId
-  }
-
-  const getPurchasesForSubmission = async (submissionAddress: string) => {
-    await pictureRequestApi.getPurchasesForAddress()
   }
 
   return (
