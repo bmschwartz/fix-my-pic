@@ -197,7 +197,7 @@ async function createPictureRequestApi(
     const price = await submissionContract.price()
     const submitter = await submissionContract.submitter()
     const description = await submissionContract.description()
-    const purchasers = await submissionContract.getPurchasers()
+    const purchasers = await submissionContract.getPurchaserList()
     const freePictureId = await submissionContract.freePictureId()
     const encryptedPictureId = await submissionContract.encryptedPictureId()
     const watermarkedPictureId = await submissionContract.watermarkedPictureId()
