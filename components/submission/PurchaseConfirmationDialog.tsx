@@ -10,6 +10,7 @@ import {
 import { useEthUsdRate } from '@/hooks/useEthUsdRate'
 import { PictureRequestSubmission } from '@/types/submission'
 import { ethDisplayString, ethDisplayWithUSDString } from '@/utils/currency'
+import { useImageStore } from '@/hooks/useImageStore'
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -21,11 +22,12 @@ interface ConfirmationDialogProps {
 
 const ConfirmationDialog = ({
   open,
-  handleClose,
   submission,
   onPurchase,
+  handleClose,
 }: ConfirmationDialogProps) => {
   const { ethToUsdRate } = useEthUsdRate()
+  const { getFreeImageUrl } = useImageStore()
   const [loadingConfirm, setLoadingConfirm] = useState(false)
 
   const handleConfirm = async () => {
@@ -44,7 +46,7 @@ const ConfirmationDialog = ({
           </Typography>
         )}
         <img
-          src={submission.freePictureUrl || submission.watermarkedPictureUrl}
+          src={getFreeImageUrl(submission)}
           alt={submission.description}
           style={{ maxHeight: '80vh', maxWidth: '100%', marginTop: '20px' }}
         />

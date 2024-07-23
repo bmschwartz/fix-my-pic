@@ -1,3 +1,5 @@
+import { useWallet } from '@/hooks/useWallet'
+import { PictureRequestSubmission } from '@/types/submission'
 import axios from 'axios'
 import React, { ReactNode, createContext } from 'react'
 
@@ -6,17 +8,29 @@ interface UploadImageProps {
   addWatermark?: boolean
 }
 
+interface GetDecryptedImageUrl {
+  submission: PictureRequestSubmission
+}
+
 export interface ImageStoreContextType {
   uploadImage: (props: UploadImageProps) => Promise<string>
+  getFreeImageUrl: (submission: PictureRequestSubmission) => string
+  getDecryptedImageUrl: (props: GetDecryptedImageUrl) => Promise<string>
 }
 
 interface ImageStoreProviderProps {
   children: ReactNode
 }
 
+const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_PINATA_GATEWAY || ''
+if (!IMAGE_URL_ROOT) {
+  process.exit('No image url root provided')
+}
+
 export const ImageStoreContext = createContext<ImageStoreContextType | undefined>(undefined)
 
 export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
+  const { selectedAccount: account } = useWallet()
   const uploadImage = async ({ file, addWatermark }: UploadImageProps): Promise<string> => {
     const fileToUpload: File = addWatermark ? await createWatermarkedImage(file) : file
 
@@ -60,5 +74,21 @@ export const ImageStoreProvider = ({ children }: ImageStoreProviderProps) => {
     }
   }
 
-  return <ImageStoreContext.Provider value={{ uploadImage }}>{children}</ImageStoreContext.Provider>
+  const getFreeImageUrl = (submission: PictureRequestSubmission): string => {
+    const pictureId = submission.freePictureId || (submission.watermarkedPictureId as string)
+    return `${IMAGE_URL_ROOT}/${pictureId}`
+  }
+
+  const getDecryptedImageUrl = async ({ submission }: GetDecryptedImageUrl): Promise<string> => {
+    if (!account || !submission.encryptedPictureId) {
+      return ''
+    }
+    return `${IMAGE_URL_ROOT}/${''}`
+  }
+
+  return (
+    <ImageStoreContext.Provider value={{ uploadImage, getFreeImageUrl, getDecryptedImageUrl }}>
+      {children}
+    </ImageStoreContext.Provider>
+  )
 }

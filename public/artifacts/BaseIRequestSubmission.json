@@ -1,7 +1,7 @@
 {
   "_format": "hh-zksolc-artifact-1",
-  "contractName": "IRequestSubmission",
-  "sourceName": "contracts/IRequestSubmission.sol",
+  "contractName": "BaseIRequestSubmission",
+  "sourceName": "contracts/RequestSubmission/BaseIRequestSubmission.sol",
   "abi": [
     {
       "inputs": [

@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createDecipheriv, createHash } from 'crypto'
+import axios, { AxiosError } from 'axios'
 
 const algorithm = 'aes-256-ctr'
-const secretKey = process.env.SECRET_KEY || 'mysecretkey' // Replace with your secret key
+const secretKey = process.env.SECRET_KEY || 'mysecretkey'
 
 const decrypt = (encryptedText: string) => {
   const key = createHash('sha256').update(String(secretKey)).digest('base64').substr(0, 32)
@@ -14,23 +15,47 @@ const decrypt = (encryptedText: string) => {
   return decrypted.toString()
 }
 
+const verifyPurchase = async (userAddress: string, submissionId: string): Promise<boolean> => {
+  try {
+    const response = await axios.post('https://your-pictureBountyApi.com/api/verify-purchase', {
+      userAddress,
+      submissionId,
+    })
+    return response.data.purchased
+  } catch (error) {
+    const err = error as AxiosError
+    console.error('Error verifying purchase:', err.response ? err.response.data : err.message)
+    return false
+  }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ message: 'Method Not Allowed' })
     return
   }
 
-  const { encryptedPictureId } = req.body
+  const { encryptedImageId, userAddress, submissionId } = req.body
 
-  if (!encryptedPictureId) {
-    res.status(400).json({ message: 'Encrypted Picture ID is required' })
+  if (!encryptedImageId || !userAddress || !submissionId) {
+    res
+      .status(400)
+      .json({ message: 'Encrypted Image ID, User Address, and Submission ID are required' })
     return
   }
 
   try {
-    const decryptedPictureId = decrypt(encryptedPictureId)
-    res.status(200).json({ decryptedPictureId })
-  } catch (error: any) {
-    res.status(500).json({ message: 'Internal Server Error', error: error.message })
+    const purchased = await verifyPurchase(userAddress, submissionId)
+
+    if (!purchased) {
+      res.status(403).json({ message: 'User has not purchased this submission' })
+      return
+    }
+
+    const decryptedImageId = decrypt(encryptedImageId)
+    res.status(200).json({ decryptedImageId })
+  } catch (error) {
+    const err = error as AxiosError
+    res.status(500).json({ message: 'Internal Server Error', error: err.message })
   }
 }

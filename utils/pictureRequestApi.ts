@@ -197,6 +197,7 @@ async function createPictureRequestApi(
     const price = await submissionContract.price()
     const submitter = await submissionContract.submitter()
     const description = await submissionContract.description()
+    const purchasers = await submissionContract.getPurchasers()
     const freePictureId = await submissionContract.freePictureId()
     const encryptedPictureId = await submissionContract.encryptedPictureId()
     const watermarkedPictureId = await submissionContract.watermarkedPictureId()
@@ -204,16 +205,12 @@ async function createPictureRequestApi(
     return {
       address,
       submitter,
+      purchasers,
       description,
+      freePictureId,
+      encryptedPictureId,
+      watermarkedPictureId,
       price: Number(ethers.formatEther(price)),
-      freePictureUrl: freePictureId ? `${IMAGE_URL_ROOT}/${freePictureId}` : undefined,
-      encryptedPictureUrl: encryptedPictureId
-        ? `${IMAGE_URL_ROOT}/${encryptedPictureId}`
-        : undefined,
-      watermarkedPictureUrl: watermarkedPictureId
-        ? `${IMAGE_URL_ROOT}/${watermarkedPictureId}`
-        : undefined,
-      purchases: [], // TODO
     }
   }
 
