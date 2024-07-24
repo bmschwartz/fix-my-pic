@@ -1,83 +1,89 @@
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
 
-import '../IRequestSubmission.sol';
+contract BaseRequestSubmission is Initializable, ReentrancyGuardUpgradeable {
+  event RequestSubmissionCreated(
+    address indexed submissionId,
+    address indexed requestId,
+    string description,
+    uint256 price,
+    string freeImageId,
+    string watermarkedImageId,
+    string encryptedImageId,
+    address indexed creator,
+    uint256 createdAt
+  );
 
-/**
- * @title BaseRequestSubmission
- * @dev Manages individual submissions for a picture request.
- */
-contract BaseRequestSubmission is Initializable, IRequestSubmission {
+  event SubmissionPurchased(
+    address indexed submissionId,
+    address indexed purchaser,
+    uint256 purchaseDate
+  );
+
+  address public requestId;
   string public description;
-  string public watermarkedPictureId;
-  string public encryptedPictureId;
-  string public freePictureId;
   uint256 public price;
-  address public submitter;
-  address[] public purchaserList;
-  mapping(address => bool) public purchasers;
+  string public freeImageId;
+  string public watermarkedImageId;
+  string public encryptedImageId;
+  address public creator;
+  uint256 public createdAt;
+  mapping(address => bool) public submissionPurchasers;
 
-  /**
-   * @dev Initializer for BaseRequestSubmission.
-   * @param _submitter The address of the submitter.
-   * @param _description The description of the submission.
-   * @param _watermarkedPictureId The ID of the watermarked picture.
-   * @param _encryptedPictureId The ID of the encrypted picture.
-   * @param _freePictureId The ID of the free picture.
-   * @param _price The price of the submission.
-   */
   function initialize(
-    address _submitter,
-    string memory _description,
-    string memory _watermarkedPictureId,
-    string memory _encryptedPictureId,
-    string memory _freePictureId,
-    uint256 _price
-  ) public virtual initializer {
-    require(_price >= 0, 'Price must be positive or zero');
-    require(_submitter != address(0), 'Submitter address cannot be zero');
+    address _requestId,
+    string calldata _description,
+    uint256 _price,
+    string calldata _freeImageId,
+    string calldata _watermarkedImageId,
+    string calldata _encryptedImageId,
+    address _creator
+  ) external initializer {
+    __ReentrancyGuard_init();
 
-    submitter = _submitter;
+    requestId = _requestId;
     description = _description;
     price = _price;
-    watermarkedPictureId = _watermarkedPictureId;
-    encryptedPictureId = _encryptedPictureId;
-    freePictureId = _freePictureId;
+    freeImageId = _freeImageId;
+    watermarkedImageId = _watermarkedImageId;
+    encryptedImageId = _encryptedImageId;
+    creator = _creator;
+    createdAt = block.timestamp;
+
+    emit RequestSubmissionCreated(
+      address(this),
+      _requestId,
+      _description,
+      _price,
+      _freeImageId,
+      _watermarkedImageId,
+      _encryptedImageId,
+      _creator,
+      block.timestamp
+    );
   }
 
-  /**
-   * @dev Adds a buyer to the purchasers mapping.
-   * @param buyer The address of the buyer.
-   */
-  function addBuyer(address buyer) public virtual override {
-    require(buyer != address(0), 'Invalid buyer address');
-    purchasers[buyer] = true;
-    purchaserList.push(buyer);
+  function purchaseSubmission() external payable nonReentrant {
+    require(msg.value >= price, 'Insufficient payment');
+    require(!submissionPurchasers[msg.sender], 'Already purchased');
+
+    (bool success, ) = creator.call{ value: msg.value }('');
+    require(success, 'Payment failed');
+
+    submissionPurchasers[msg.sender] = true;
+
+    emit SubmissionPurchased(address(this), msg.sender, block.timestamp);
   }
 
-  /**
-   * @dev Returns the price of the submission.
-   * @return The price.
-   */
-  function getPrice() public view virtual override returns (uint256) {
-    return price;
+  function hasPurchased(address _user) external view returns (bool) {
+    return submissionPurchasers[_user];
   }
 
-  /**
-   * @dev Returns the submitter's address.
-   * @return The submitter's address.
-   */
-  function getSubmitter() public view virtual override returns (address) {
-    return submitter;
-  }
-
-  /**
-   * @dev Returns the list of purchasers.
-   * @return The addresses of purchasers.
-   */
-  function getPurchaserList() public view returns (address[] memory) {
-    return purchaserList;
+  function getEncryptedImageId(address _user) external view returns (string memory) {
+    require(submissionPurchasers[_user], 'User has not purchased this submission');
+    return encryptedImageId;
   }
 }
