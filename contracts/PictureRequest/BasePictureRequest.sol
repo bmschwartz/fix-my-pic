@@ -15,6 +15,7 @@ contract BasePictureRequest is Initializable {
   string public description;
   uint256 public budget;
   address[] public submissions;
+  uint256 public expiresAt;
 
   /**
    * @dev Emitted when a new submission is created.
@@ -29,19 +30,23 @@ contract BasePictureRequest is Initializable {
    * @param _description The description of the picture request.
    * @param _imageId The image ID for the picture request.
    * @param _budget The budget for the picture request.
+   * @param _expiresAt The timestamp when the picture request expires.
    */
   function initialize(
     string memory _title,
     string memory _description,
     string memory _imageId,
-    uint256 _budget
+    uint256 _budget,
+    uint256 _expiresAt
   ) public virtual initializer {
     require(_budget >= 0, 'Budget must be positive or zero');
+    require(_expiresAt > block.timestamp, 'Expiration time must be in the future');
 
     title = _title;
     description = _description;
     imageId = _imageId;
     budget = _budget;
+    expiresAt = _expiresAt;
   }
 
   /**
@@ -61,6 +66,7 @@ contract BasePictureRequest is Initializable {
     string memory _freePictureId,
     uint256 _price
   ) public virtual {
+    require(block.timestamp <= expiresAt, 'The picture request has expired');
     require(_price >= 0, 'Price must be positive or zero');
     require(_submitter != address(0), 'Submitter address cannot be zero');
 

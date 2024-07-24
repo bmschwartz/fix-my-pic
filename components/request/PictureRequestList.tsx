@@ -3,15 +3,13 @@
 import React from 'react'
 import Link from 'next/link'
 import {
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  Container,
+  ImageList,
+  ImageListItem,
   Paper,
   IconButton,
   Box,
+  Typography,
+  Container,
   Skeleton,
 } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -30,16 +28,21 @@ const PictureRequestCard = ({
 }) => {
   return (
     <Link href={`/request/${pictureRequest.address}`} passHref>
-      <Paper elevation={3} style={{ margin: '16px', cursor: 'pointer' }}>
-        <Card>
-          <CardMedia
-            component="img"
-            src={pictureRequest.imageUrl}
+      <Paper elevation={3} style={{ margin: '8px', cursor: 'pointer' }}>
+        <ImageListItem key={pictureRequest.imageUrl}>
+          <img
+            srcSet={`${pictureRequest.imageUrl}?w=248&fit=crop&auto=format&dpr=2 2x`}
+            src={`${pictureRequest.imageUrl}?w=248&fit=crop&auto=format`}
             alt={pictureRequest.title}
-            style={{ height: '200px' }}
+            loading="lazy"
           />
-          <CardContent
-            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          {/* <Box
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '8px',
+            }}
           >
             <Box>
               <Typography variant="h6" gutterBottom>
@@ -54,8 +57,8 @@ const PictureRequestCard = ({
             <IconButton size="large">
               <ChevronRightIcon />
             </IconButton>
-          </CardContent>
-        </Card>
+          </Box> */}
+        </ImageListItem>
       </Paper>
     </Link>
   )
@@ -67,17 +70,24 @@ export const PictureRequestList = () => {
 
   return (
     <Container>
-      <Grid container spacing={3}>
-        {pictureRequests.map((pictureRequest: PictureRequest) => (
-          <Grid item xs={12} sm={6} md={4} key={pictureRequest.address}>
-            {ethToUsdRate === undefined ? (
-              <Skeleton variant="rectangular" width="100%" height={200} />
-            ) : (
-              <PictureRequestCard pictureRequest={pictureRequest} ethToUsdRate={ethToUsdRate} />
-            )}
-          </Grid>
-        ))}
-      </Grid>
+      <ImageList variant="masonry" cols={3} gap={8}>
+        {pictureRequests.map((pictureRequest: PictureRequest) =>
+          ethToUsdRate === undefined ? (
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={200}
+              key={pictureRequest.address}
+            />
+          ) : (
+            <PictureRequestCard
+              pictureRequest={pictureRequest}
+              ethToUsdRate={ethToUsdRate}
+              key={pictureRequest.address}
+            />
+          )
+        )}
+      </ImageList>
     </Container>
   )
 }
