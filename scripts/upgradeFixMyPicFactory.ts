@@ -10,15 +10,15 @@ const main = async () => {
     const wallet = getWallet()
     const deployer = new Deployer(hre, wallet)
 
-    const purchaseManagerProxyAddress = process.env.PROXY as string
+    const factoryProxyAddress = process.env.PROXY as string
     const contractName = process.env.CONTRACT as string
     const contractInitializer = process.env.INITIALIZER as string
 
-    if (!purchaseManagerProxyAddress) {
-      throw new Error('Missing proxy address for the PurchaseManager contract')
+    if (!factoryProxyAddress) {
+      throw new Error('Missing proxy address for the FixMyPicFactory contract')
     }
     if (!contractName) {
-      throw new Error('Missing purchase manager contract name for upgrade!')
+      throw new Error('Missing factory contract name for upgrade!')
     }
     if (!contractInitializer) {
       throw new Error(`Missing initializer function name to upgrade ${contractName}!`)
@@ -26,9 +26,10 @@ const main = async () => {
 
     const upgradedContract = await deployContract(contractName, [], {
       wallet,
-      proxyAddress: purchaseManagerProxyAddress,
+      proxyAddress: factoryProxyAddress,
     })
     upgradedContract.connect(deployer.zkWallet)
+
     // wait some time before the next call
     await new Promise((resolve) => setTimeout(resolve, 2000))
 

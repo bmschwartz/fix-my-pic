@@ -4,7 +4,7 @@ const main = async () => {
   try {
     const wallet = getWallet()
 
-    const contractName = 'PurchaseManager'
+    const contractName = 'FixMyPicFactory'
 
     await deployContract(contractName, [], { wallet, asProxy: true })
   } catch (error) {
