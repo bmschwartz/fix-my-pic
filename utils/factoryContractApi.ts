@@ -5,9 +5,8 @@ import { PictureRequestSubmission } from '@/types/submission'
 import { EIP6963ProviderDetail } from '@/types/eip6963'
 import { PictureRequest } from '@/types/pictureRequest'
 import PictureRequestSchema from '@/public/artifacts/PictureRequest.json'
-import PurchaseManagerSchema from '@/public/artifacts/PurchaseManager.json'
 import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json'
-import PictureRequestFactorySchema from '@/public/artifacts/PictureRequestFactory.json'
+import FixMyPicFactorySchema from '@/public/artifacts/FixMyPicFactory.json'
 
 import { convertUsdToEthWithoutRate } from './currency'
 import { batchTasksAsync } from './batch'
@@ -16,16 +15,13 @@ import { SubmissionPurchase } from '@/types/purchase'
 
 interface CreatePictureRequestParams {
   title: string
-  description: string
-  imageId: string
   budget: number
+  imageId: string
+  expiresAt?: number
+  description: string
+
   account: string
   wallet: EIP6963ProviderDetail
-}
-
-interface GetPictureRequestParams {
-  address: string
-  refetch?: boolean
 }
 
 interface CreateSubmissionsParams {
@@ -39,76 +35,37 @@ interface CreateSubmissionsParams {
   watermarkedPictureId: string | undefined
 }
 
-interface GetSubmissionsParams {
-  requestAddress: string
-  refetch: boolean
-}
-
-interface GetSubmissionParams {
-  address: string
-  refetch: boolean
-}
-
 interface PurchaseSubmissionParams {
   account: string
   address: string
   wallet: EIP6963ProviderDetail
 }
 
-interface GetSubmissionPictureIdParams {
-  address: string
-  account: string
-  wallet: EIP6963ProviderDetail
-}
-
-interface GetPurchasesForAccountParams {
-  account: string
-  wallet: EIP6963ProviderDetail
-}
-
 export interface PictureRequestApi {
-  createPictureRequest(params: CreatePictureRequestParams): Promise<PictureRequest>
-  getPictureRequest(params: GetPictureRequestParams): Promise<PictureRequest>
-  getPictureRequests(): PictureRequest[]
-
-  createSubmission(params: CreateSubmissionsParams): Promise<PictureRequestSubmission>
-  getSubmission(params: GetSubmissionParams): Promise<PictureRequestSubmission>
-  getSubmissions(params: GetSubmissionsParams): Promise<PictureRequestSubmission[]>
-  purchaseSubmission(params: PurchaseSubmissionParams): Promise<SubmissionPurchase>
-  getSubmissionPictureId(params: GetSubmissionPictureIdParams): Promise<string>
-
-  getPurchasesForAccount(params: GetPurchasesForAccountParams): Promise<SubmissionPurchase[]>
+  createSubmission(params: CreateSubmissionsParams): Promise<boolean>
+  purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>
+  createPictureRequest(params: CreatePictureRequestParams): Promise<boolean>
 }
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
-const PICTURE_REQUEST_FACTORY_ADDRESS =
-  process.env.NEXT_PUBLIC_PICTURE_REQUEST_FACTORY_ADDRESS || ''
+const FIX_MY_PIC_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FIX_MY_PIC_FACTORY_ADDRESS || ''
 const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_PINATA_GATEWAY || ''
-const PURCHASE_MANAGER_ADDRESS = process.env.NEXT_PUBLIC_PURCHASE_MANAGER_ADDRESS || ''
 
 if (!RPC_URL) {
   process.exit('No RPC URL provided')
 }
-if (!PICTURE_REQUEST_FACTORY_ADDRESS) {
-  process.exit('No picture factory address provided')
-}
 if (!IMAGE_URL_ROOT) {
   process.exit('No image url root provided')
 }
-if (!PURCHASE_MANAGER_ADDRESS) {
-  process.exit('No purchase manager address provided')
+if (!FIX_MY_PIC_FACTORY_ADDRESS) {
+  process.exit('No picture factory address provided')
 }
 
-async function createPictureRequestApi(
-  _factoryAddress: string,
-  _purchaseManagerAddress: string
-): Promise<PictureRequestApi> {
+async function createPictureRequestApi(_factoryAddress: string): Promise<PictureRequestApi> {
   const provider = new Provider(RPC_URL)
 
   let factoryContract: Contract
-  let purchaseManagerContract: Contract
   let factoryAddress: string | Addressable = _factoryAddress
-  let purchaseManagerAddress: string | Addressable = _purchaseManagerAddress
 
   let pictureRequests: Record<string, PictureRequest> = {}
   let submissions: Record<string, PictureRequestSubmission> = {}
@@ -123,28 +80,12 @@ async function createPictureRequestApi(
       return
     }
 
-    factoryContract = new Contract(factoryAddress, PictureRequestFactorySchema.abi, provider)
+    factoryContract = new Contract(factoryAddress, FixMyPicFactorySchema.abi, provider)
 
     if (!factoryContract) {
-      throw new Error('Could not connect to the picture request factory!')
+      throw new Error('Could not connect to the fixmypic factory!')
     }
   }
-  const _initPurchaseManagerContract = async (): Promise<void> => {
-    if (purchaseManagerContract) {
-      return
-    }
-
-    purchaseManagerContract = new Contract(
-      purchaseManagerAddress,
-      PurchaseManagerSchema.abi,
-      provider
-    )
-
-    if (!purchaseManagerContract) {
-      throw new Error('Could not connect to the purchase manager!')
-    }
-  }
-
   const _fetchPictureRequestContract = async (address: string): Promise<PictureRequest> => {
     const pictureRequestContract = new ethers.Contract(address, PictureRequestSchema.abi, provider)
     const title = await pictureRequestContract.title()
@@ -219,12 +160,13 @@ async function createPictureRequestApi(
     description,
     imageId,
     budget,
+    expiresAt,
     wallet,
     account,
-  }: CreatePictureRequestParams): Promise<PictureRequest> => {
-    const pictureRequestFactory = new Contract(
+  }: CreatePictureRequestParams): Promise<boolean> => {
+    const fixMyPicFactory = new Contract(
       factoryAddress,
-      PictureRequestFactorySchema.abi,
+      FixMyPicFactorySchema.abi,
       await _getSigner(wallet, account)
     )
 
@@ -232,7 +174,7 @@ async function createPictureRequestApi(
     const budgetInWei = ethers.parseEther(budgetEth)
 
     try {
-      const tx = await pictureRequestFactory.createPictureRequest(
+      const tx = await fixMyPicFactory.createPictureRequest(
         title,
         description,
         imageId,
@@ -243,8 +185,7 @@ async function createPictureRequestApi(
       if (receipt.status !== 1 || !receipt.contractAddress) {
         throw new Error('Failed to create image request')
       }
-
-      return getPictureRequest({ address: receipt.contractAddress, refetch: true })
+      return true
     } catch (error) {
       console.error('Unable to create the image request:', error, typeof error)
       throw error
@@ -253,17 +194,6 @@ async function createPictureRequestApi(
 
   const getPictureRequests = (): PictureRequest[] => {
     return Object.values(pictureRequests)
-  }
-
-  const getPictureRequest = async ({
-    address,
-    refetch,
-  }: GetPictureRequestParams): Promise<PictureRequest> => {
-    if (refetch || !(address in pictureRequests)) {
-      pictureRequests[address] = await _fetchPictureRequestContract(address)
-    }
-
-    return pictureRequests[address]
   }
 
   const createSubmission = async ({
@@ -277,16 +207,16 @@ async function createPictureRequestApi(
     watermarkedPictureId,
   }: CreateSubmissionsParams): Promise<PictureRequestSubmission> => {
     try {
-      const pictureRequestContract = new Contract(
+      const fixMyPicFactory = new Contract(
         requestAddress,
-        PictureRequestSchema.abi,
+        FixMyPicFactorySchema.abi,
         await _getSigner(wallet, account)
       )
 
       const priceEth = await convertUsdToEthWithoutRate(price)
       const priceInWei = ethers.parseEther(priceEth)
 
-      const tx = await pictureRequestContract.createSubmission(
+      const tx = await fixMyPicFactory.createSubmission(
         account,
         description,
         watermarkedPictureId || '',

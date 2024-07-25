@@ -4,29 +4,19 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 
 contract BaseRequestComment is Initializable {
-  event CommentCreated(
-    address indexed commentId,
-    address indexed requestId,
-    string text,
-    address indexed creator,
-    uint256 createdAt
-  );
-
-  address public requestId;
+  address public request;
+  address public commenter;
   string public text;
-  address public creator;
   uint256 public createdAt;
 
   function initialize(
-    address _requestId,
+    address _request,
     string calldata _text,
-    address _creator
+    address _commenter
   ) external initializer {
-    requestId = _requestId;
+    request = _request;
     text = _text;
-    creator = _creator;
+    commenter = _commenter;
     createdAt = block.timestamp;
-
-    emit CommentCreated(address(this), _requestId, _text, _creator, block.timestamp);
   }
 }

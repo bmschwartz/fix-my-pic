@@ -4,17 +4,6 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 
 contract BasePictureRequest is Initializable {
-  event PictureRequestCreated(
-    address indexed requestId,
-    string title,
-    string description,
-    string imageId,
-    uint256 budget,
-    address indexed creator,
-    uint256 createdAt,
-    uint256 expiresAt
-  );
-
   string public title;
   string public description;
   string public imageId;
@@ -38,16 +27,5 @@ contract BasePictureRequest is Initializable {
     creator = _creator;
     createdAt = block.timestamp;
     expiresAt = _expiresAt;
-
-    emit PictureRequestCreated(
-      address(this),
-      _title,
-      _description,
-      _imageId,
-      _budget,
-      _creator,
-      block.timestamp,
-      _expiresAt
-    );
   }
 }

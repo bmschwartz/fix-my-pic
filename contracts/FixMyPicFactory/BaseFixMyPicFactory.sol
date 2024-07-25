@@ -8,7 +8,7 @@ import '../RequestComment.sol';
 
 contract BaseFixMyPicFactory is Initializable {
   event PictureRequestCreated(
-    address indexed requestId,
+    address indexed request,
     string title,
     string description,
     string imageId,
@@ -19,22 +19,22 @@ contract BaseFixMyPicFactory is Initializable {
   );
 
   event RequestSubmissionCreated(
-    address indexed submissionId,
-    address indexed requestId,
+    address indexed submission,
+    address indexed request,
     string description,
     uint256 price,
     string freeImageId,
     string watermarkedImageId,
     string encryptedImageId,
-    address indexed creator,
+    address indexed submitter,
     uint256 createdAt
   );
 
-  event CommentCreated(
-    address indexed commentId,
-    address indexed requestId,
+  event RequestCommentCreated(
+    address indexed comment,
+    address indexed request,
     string text,
-    address indexed creator,
+    address indexed commenter,
     uint256 createdAt
   );
 
@@ -63,16 +63,20 @@ contract BaseFixMyPicFactory is Initializable {
   }
 
   function createRequestSubmission(
-    address _requestId,
+    address _request,
     string calldata _description,
     uint256 _price,
     string calldata _freeImageId,
     string calldata _watermarkedImageId,
     string calldata _encryptedImageId
   ) external {
+    PictureRequest pictureRequest = PictureRequest(_request);
+    uint256 expiresAt = pictureRequest.expiresAt();
+    require(expiresAt == 0 || block.timestamp <= expiresAt, 'PictureRequest has expired');
+
     RequestSubmission requestSubmission = new RequestSubmission();
     requestSubmission.initialize(
-      _requestId,
+      _request,
       _description,
       _price,
       _freeImageId,
@@ -83,7 +87,7 @@ contract BaseFixMyPicFactory is Initializable {
 
     emit RequestSubmissionCreated(
       address(requestSubmission),
-      _requestId,
+      _request,
       _description,
       _price,
       _freeImageId,
@@ -94,10 +98,10 @@ contract BaseFixMyPicFactory is Initializable {
     );
   }
 
-  function createRequestComment(address _requestId, string calldata _text) external {
+  function createRequestComment(address _request, string calldata _text) external {
     RequestComment comment = new RequestComment();
-    comment.initialize(_requestId, _text, msg.sender);
+    comment.initialize(_request, _text, msg.sender);
 
-    emit CommentCreated(address(comment), _requestId, _text, msg.sender, block.timestamp);
+    emit RequestCommentCreated(address(comment), _request, _text, msg.sender, block.timestamp);
   }
 }
