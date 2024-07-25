@@ -180,7 +180,8 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
         title,
         description,
         imageId,
-        budgetInWei
+        budgetInWei,
+        expiresAt || 0
       )
       const receipt: ContractTransactionReceipt = await tx.wait()
 
@@ -194,9 +195,9 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
     }
   }
 
-  const getPictureRequests = (): PictureRequest[] => {
-    return Object.values(pictureRequests)
-  }
+  // const getPictureRequests = (): PictureRequest[] => {
+  //   return Object.values(pictureRequests)
+  // }
 
   const createSubmission = async ({
     price,
@@ -282,6 +283,8 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
 
     return true
   }
+
+  const create
 
   // const getPurchasesForAccount = async ({
   //   account,
