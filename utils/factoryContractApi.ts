@@ -26,22 +26,24 @@ interface CreatePictureRequestParams {
 
 interface CreateSubmissionsParams {
   price: number
-  account: string
   description: string
   requestAddress: string
-  wallet: EIP6963ProviderDetail
   freePictureId: string | undefined
   encryptedPictureId: string | undefined
   watermarkedPictureId: string | undefined
-}
 
-interface PurchaseSubmissionParams {
   account: string
-  address: string
   wallet: EIP6963ProviderDetail
 }
 
-export interface PictureRequestApi {
+interface PurchaseSubmissionParams {
+  address: string
+
+  account: string
+  wallet: EIP6963ProviderDetail
+}
+
+export interface FixMyPicApi {
   createSubmission(params: CreateSubmissionsParams): Promise<boolean>
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>
   createPictureRequest(params: CreatePictureRequestParams): Promise<boolean>
@@ -61,7 +63,7 @@ if (!FIX_MY_PIC_FACTORY_ADDRESS) {
   process.exit('No picture factory address provided')
 }
 
-async function createPictureRequestApi(_factoryAddress: string): Promise<PictureRequestApi> {
+async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> {
   const provider = new Provider(RPC_URL)
 
   let factoryContract: Contract
@@ -205,10 +207,10 @@ async function createPictureRequestApi(_factoryAddress: string): Promise<Picture
     freePictureId,
     encryptedPictureId,
     watermarkedPictureId,
-  }: CreateSubmissionsParams): Promise<PictureRequestSubmission> => {
+  }: CreateSubmissionsParams): Promise<boolean> => {
     try {
       const fixMyPicFactory = new Contract(
-        requestAddress,
+        factoryAddress,
         FixMyPicFactorySchema.abi,
         await _getSigner(wallet, account)
       )
@@ -217,12 +219,12 @@ async function createPictureRequestApi(_factoryAddress: string): Promise<Picture
       const priceInWei = ethers.parseEther(priceEth)
 
       const tx = await fixMyPicFactory.createSubmission(
-        account,
+        requestAddress,
         description,
-        watermarkedPictureId || '',
-        encryptedPictureId || '',
+        priceInWei,
         freePictureId || '',
-        priceInWei
+        watermarkedPictureId || '',
+        encryptedPictureId || ''
       )
       const receipt: ContractTransactionReceipt = await tx.wait()
 
@@ -230,37 +232,37 @@ async function createPictureRequestApi(_factoryAddress: string): Promise<Picture
         throw new Error(`Failed to create submission on picture request ${requestAddress}`)
       }
 
-      return getSubmission({ address: receipt.contractAddress, refetch: true })
+      return true
     } catch (error) {
       console.error('Unable to create the submission:', error)
       throw error
     }
   }
 
-  const getSubmissions = async ({
-    requestAddress,
-    refetch = false,
-  }: GetSubmissionsParams): Promise<PictureRequestSubmission[]> => {
-    const pictureRequest = await getPictureRequest({ address: requestAddress, refetch })
-    return pictureRequest.submissions
-  }
+  // const getSubmissions = async ({
+  //   requestAddress,
+  //   refetch = false,
+  // }: GetSubmissionsParams): Promise<PictureRequestSubmission[]> => {
+  //   const pictureRequest = await getPictureRequest({ address: requestAddress, refetch })
+  //   return pictureRequest.submissions
+  // }
 
-  const getSubmission = async ({
-    address,
-    refetch = false,
-  }: GetSubmissionParams): Promise<PictureRequestSubmission> => {
-    if (refetch) {
-      submissions[address] = await _fetchSubmissionContract(address)
-    }
+  // const getSubmission = async ({
+  //   address,
+  //   refetch = false,
+  // }: GetSubmissionParams): Promise<PictureRequestSubmission> => {
+  //   if (refetch) {
+  //     submissions[address] = await _fetchSubmissionContract(address)
+  //   }
 
-    return submissions[address]
-  }
+  //   return submissions[address]
+  // }
 
   const purchaseSubmission = async ({
+    address,
     wallet,
     account,
-    address,
-  }: PurchaseSubmissionParams): Promise<SubmissionPurchase> => {
+  }: PurchaseSubmissionParams): Promise<boolean> => {
     const submissionContract = new ethers.Contract(
       address,
       RequestSubmissionSchema.abi,
@@ -268,87 +270,74 @@ async function createPictureRequestApi(_factoryAddress: string): Promise<Picture
     )
     const price = await submissionContract.price()
 
-    const purchaseContract = new ethers.Contract(
-      purchaseManagerAddress,
-      PurchaseManagerSchema.abi,
-      await _getSigner(wallet, account)
-    )
-    const tx = await purchaseContract.purchaseSubmission(address, { value: price })
+    const tx = await submissionContract.purchaseSubmission({ value: price })
     const receipt: ContractTransactionReceipt = await tx.wait()
 
     const event = receipt.logs
-      .map((log) => purchaseContract.interface.parseLog(log))
+      .map((log) => submissionContract.interface.parseLog(log))
       .find((log) => log && log.name === 'SubmissionPurchased')
     if (!event) {
       throw new Error('SubmissionPurchased event not found')
     }
 
-    return {
-      price,
-      buyer: address,
-      submissionAddress: address,
-    }
+    return true
   }
 
-  const getPurchasesForAccount = async ({
-    account,
-    wallet,
-  }: GetPurchasesForAccountParams): Promise<SubmissionPurchase[]> => {
-    const purchaseContract = new ethers.Contract(
-      purchaseManagerAddress,
-      PurchaseManagerSchema.abi,
-      await _getSigner(wallet, account)
-    )
-    const purchases = await purchaseContract.getPurchases(account)
+  // const getPurchasesForAccount = async ({
+  //   account,
+  //   wallet,
+  // }: GetPurchasesForAccountParams): Promise<SubmissionPurchase[]> => {
+  //   const purchaseContract = new ethers.Contract(
+  //     purchaseManagerAddress,
+  //     PurchaseManagerSchema.abi,
+  //     await _getSigner(wallet, account)
+  //   )
+  //   const purchases = await purchaseContract.getPurchases(account)
 
-    return purchases.map((purchase: any) => ({
-      buyer: purchase.buyer,
-      submissionAddress: purchase.submissionAddress,
-      price: Number(ethers.formatEther(purchase.price)),
-    }))
-  }
+  //   return purchases.map((purchase: any) => ({
+  //     buyer: purchase.buyer,
+  //     submissionAddress: purchase.submissionAddress,
+  //     price: Number(ethers.formatEther(purchase.price)),
+  //   }))
+  // }
 
-  const getSubmissionPictureId = async ({
-    address,
-    wallet,
-    account,
-  }: GetSubmissionPictureIdParams): Promise<string> => {
-    const submissionContract = new ethers.Contract(
-      address,
-      RequestSubmissionSchema.abi,
-      await _getSigner(wallet, account)
-    )
+  // const getSubmissionPictureId = async ({
+  //   address,
+  //   wallet,
+  //   account,
+  // }: GetSubmissionPictureIdParams): Promise<string> => {
+  //   const submissionContract = new ethers.Contract(
+  //     address,
+  //     RequestSubmissionSchema.abi,
+  //     await _getSigner(wallet, account)
+  //   )
 
-    return submissionContract.getPictureId()
-  }
+  //   return submissionContract.getPictureId()
+  // }
 
   await _initFactoryContract()
-  await _initPurchaseManagerContract()
-  pictureRequests = await _fetchAllPictureRequests()
+  // pictureRequests = await _fetchAllPictureRequests()
 
   return {
     createPictureRequest,
-    getPictureRequest,
-    getPictureRequests,
+    // getPictureRequest,
+    // getPictureRequests,
     createSubmission,
-    getSubmission,
-    getSubmissions,
+    // getSubmission,
+    // getSubmissions,
     purchaseSubmission,
-    getPurchasesForAccount,
-    getSubmissionPictureId,
+    // getPurchasesForAccount,
+    // getSubmissionPictureId,
   }
 }
 
-let pictureRequestApiPromise: Promise<PictureRequestApi> | null = null
+let factoryApiPromise: Promise<FixMyPicApi> | null = null
 
-const getPictureRequestApi = async (): Promise<PictureRequestApi> => {
-  if (!pictureRequestApiPromise) {
-    pictureRequestApiPromise = createPictureRequestApi(
-      PICTURE_REQUEST_FACTORY_ADDRESS,
-      PURCHASE_MANAGER_ADDRESS
-    )
+const getFixMyPicApi = async (): Promise<FixMyPicApi> => {
+  if (!factoryApiPromise) {
+    factoryApiPromise = createFixMyPicApi(FIX_MY_PIC_FACTORY_ADDRESS)
   }
-  return pictureRequestApiPromise
+  return factoryApiPromise
 }
 
-export { getPictureRequestApi }
+export { getFixMyPicApi }
