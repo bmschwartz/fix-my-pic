@@ -43,10 +43,19 @@ interface PurchaseSubmissionParams {
   wallet: EIP6963ProviderDetail
 }
 
+interface CreateRequestCommentParams {
+  requestAddress: string
+  comment: string
+
+  account: string
+  wallet: EIP6963ProviderDetail
+}
+
 export interface FixMyPicApi {
   createSubmission(params: CreateSubmissionsParams): Promise<boolean>
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>
   createPictureRequest(params: CreatePictureRequestParams): Promise<boolean>
+  createRequestComment(params: CreateRequestCommentParams): Promise<boolean>
 }
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ''
@@ -88,74 +97,74 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
       throw new Error('Could not connect to the fixmypic factory!')
     }
   }
-  const _fetchPictureRequestContract = async (address: string): Promise<PictureRequest> => {
-    const pictureRequestContract = new ethers.Contract(address, PictureRequestSchema.abi, provider)
-    const title = await pictureRequestContract.title()
-    const budget = await pictureRequestContract.budget()
-    const imageId = await pictureRequestContract.imageId()
-    const description = await pictureRequestContract.description()
-    const submissionAddresses = await pictureRequestContract.getSubmissions()
-    const submissions = await _fetchPictureRequestSubmissions(submissionAddresses)
-    const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
+  // const _fetchPictureRequestContract = async (address: string): Promise<PictureRequest> => {
+  //   const pictureRequestContract = new ethers.Contract(address, PictureRequestSchema.abi, provider)
+  //   const title = await pictureRequestContract.title()
+  //   const budget = await pictureRequestContract.budget()
+  //   const imageId = await pictureRequestContract.imageId()
+  //   const description = await pictureRequestContract.description()
+  //   const submissionAddresses = await pictureRequestContract.getSubmissions()
+  //   const submissions = await _fetchPictureRequestSubmissions(submissionAddresses)
+  //   const imageUrl = `${IMAGE_URL_ROOT}/${imageId}`
 
-    return {
-      title,
-      address,
-      imageId,
-      imageUrl,
-      submissions,
-      description,
-      budget: Number(ethers.formatEther(budget)),
-    }
-  }
+  //   return {
+  //     title,
+  //     address,
+  //     imageId,
+  //     imageUrl,
+  //     submissions,
+  //     description,
+  //     budget: Number(ethers.formatEther(budget)),
+  //   }
+  // }
 
-  const _fetchAllPictureRequests = async (): Promise<Record<string, PictureRequest>> => {
-    const requestAddresses = await factoryContract.getPictureRequests()
-    let requestContracts: PictureRequest[] = await batchTasksAsync<PictureRequest>({
-      batchSize: 50,
-      tasks: requestAddresses,
-      mapFunction: _fetchPictureRequestContract,
-    })
+  // const _fetchAllPictureRequests = async (): Promise<Record<string, PictureRequest>> => {
+  //   const requestAddresses = await factoryContract.getPictureRequests()
+  //   let requestContracts: PictureRequest[] = await batchTasksAsync<PictureRequest>({
+  //     batchSize: 50,
+  //     tasks: requestAddresses,
+  //     mapFunction: _fetchPictureRequestContract,
+  //   })
 
-    return arrayToMap<PictureRequest>(requestContracts, 'address')
-  }
+  //   return arrayToMap<PictureRequest>(requestContracts, 'address')
+  // }
 
-  const _fetchPictureRequestSubmissions = async (
-    addresses: string[]
-  ): Promise<PictureRequestSubmission[]> => {
-    const requestSubmissions = await batchTasksAsync<PictureRequestSubmission>({
-      tasks: addresses,
-      mapFunction: _fetchSubmissionContract,
-    })
+  // const _fetchPictureRequestSubmissions = async (
+  //   addresses: string[]
+  // ): Promise<PictureRequestSubmission[]> => {
+  //   const requestSubmissions = await batchTasksAsync<PictureRequestSubmission>({
+  //     tasks: addresses,
+  //     mapFunction: _fetchSubmissionContract,
+  //   })
 
-    requestSubmissions.forEach((submission: PictureRequestSubmission) => {
-      submissions[submission.address] = submission
-    })
+  //   requestSubmissions.forEach((submission: PictureRequestSubmission) => {
+  //     submissions[submission.address] = submission
+  //   })
 
-    return requestSubmissions
-  }
+  //   return requestSubmissions
+  // }
 
-  const _fetchSubmissionContract = async (address: string): Promise<PictureRequestSubmission> => {
-    const submissionContract = new ethers.Contract(address, RequestSubmissionSchema.abi, provider)
-    const price = await submissionContract.price()
-    const submitter = await submissionContract.submitter()
-    const description = await submissionContract.description()
-    const purchasers = await submissionContract.getPurchaserList()
-    const freePictureId = await submissionContract.freePictureId()
-    const encryptedPictureId = await submissionContract.encryptedPictureId()
-    const watermarkedPictureId = await submissionContract.watermarkedPictureId()
+  // const _fetchSubmissionContract = async (address: string): Promise<PictureRequestSubmission> => {
+  //   const submissionContract = new ethers.Contract(address, RequestSubmissionSchema.abi, provider)
+  //   const price = await submissionContract.price()
+  //   const submitter = await submissionContract.submitter()
+  //   const description = await submissionContract.description()
+  //   const purchasers = await submissionContract.getPurchaserList()
+  //   const freePictureId = await submissionContract.freePictureId()
+  //   const encryptedPictureId = await submissionContract.encryptedPictureId()
+  //   const watermarkedPictureId = await submissionContract.watermarkedPictureId()
 
-    return {
-      address,
-      submitter,
-      purchasers,
-      description,
-      freePictureId,
-      encryptedPictureId,
-      watermarkedPictureId,
-      price: Number(ethers.formatEther(price)),
-    }
-  }
+  //   return {
+  //     address,
+  //     submitter,
+  //     purchasers,
+  //     description,
+  //     freePictureId,
+  //     encryptedPictureId,
+  //     watermarkedPictureId,
+  //     price: Number(ethers.formatEther(price)),
+  //   }
+  // }
 
   const createPictureRequest = async ({
     title,
@@ -194,10 +203,6 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
       throw error
     }
   }
-
-  // const getPictureRequests = (): PictureRequest[] => {
-  //   return Object.values(pictureRequests)
-  // }
 
   const createSubmission = async ({
     price,
@@ -240,25 +245,6 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
     }
   }
 
-  // const getSubmissions = async ({
-  //   requestAddress,
-  //   refetch = false,
-  // }: GetSubmissionsParams): Promise<PictureRequestSubmission[]> => {
-  //   const pictureRequest = await getPictureRequest({ address: requestAddress, refetch })
-  //   return pictureRequest.submissions
-  // }
-
-  // const getSubmission = async ({
-  //   address,
-  //   refetch = false,
-  // }: GetSubmissionParams): Promise<PictureRequestSubmission> => {
-  //   if (refetch) {
-  //     submissions[address] = await _fetchSubmissionContract(address)
-  //   }
-
-  //   return submissions[address]
-  // }
-
   const purchaseSubmission = async ({
     address,
     wallet,
@@ -284,53 +270,35 @@ async function createFixMyPicApi(_factoryAddress: string): Promise<FixMyPicApi> 
     return true
   }
 
-  const create
+  const createRequestComment = async ({
+    requestAddress,
+    comment,
+    wallet,
+    account,
+  }: CreateRequestCommentParams): Promise<boolean> => {
+    const fixMyPicFactory = new ethers.Contract(
+      factoryAddress,
+      FixMyPicFactorySchema.abi,
+      await _getSigner(wallet, account)
+    )
 
-  // const getPurchasesForAccount = async ({
-  //   account,
-  //   wallet,
-  // }: GetPurchasesForAccountParams): Promise<SubmissionPurchase[]> => {
-  //   const purchaseContract = new ethers.Contract(
-  //     purchaseManagerAddress,
-  //     PurchaseManagerSchema.abi,
-  //     await _getSigner(wallet, account)
-  //   )
-  //   const purchases = await purchaseContract.getPurchases(account)
+    const tx = await fixMyPicFactory.createRequestComment(requestAddress, comment)
+    const receipt: ContractTransactionReceipt = await tx.wait()
 
-  //   return purchases.map((purchase: any) => ({
-  //     buyer: purchase.buyer,
-  //     submissionAddress: purchase.submissionAddress,
-  //     price: Number(ethers.formatEther(purchase.price)),
-  //   }))
-  // }
+    if (receipt.status !== 1) {
+      throw new Error('Failed to create a comment')
+    }
 
-  // const getSubmissionPictureId = async ({
-  //   address,
-  //   wallet,
-  //   account,
-  // }: GetSubmissionPictureIdParams): Promise<string> => {
-  //   const submissionContract = new ethers.Contract(
-  //     address,
-  //     RequestSubmissionSchema.abi,
-  //     await _getSigner(wallet, account)
-  //   )
-
-  //   return submissionContract.getPictureId()
-  // }
+    return true
+  }
 
   await _initFactoryContract()
-  // pictureRequests = await _fetchAllPictureRequests()
 
   return {
-    createPictureRequest,
-    // getPictureRequest,
-    // getPictureRequests,
     createSubmission,
-    // getSubmission,
-    // getSubmissions,
     purchaseSubmission,
-    // getPurchasesForAccount,
-    // getSubmissionPictureId,
+    createPictureRequest,
+    createRequestComment,
   }
 }
 
