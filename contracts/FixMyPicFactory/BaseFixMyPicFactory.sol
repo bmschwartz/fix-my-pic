@@ -99,6 +99,9 @@ contract BaseFixMyPicFactory is Initializable {
   }
 
   function createRequestComment(address _request, string calldata _text) external {
+    // Verify the _request is a PictureRequest
+    require(PictureRequest(_request).isPictureRequest(), 'PictureRequest does not exist');
+
     RequestComment comment = new RequestComment();
     comment.initialize(_request, _text, msg.sender);
 

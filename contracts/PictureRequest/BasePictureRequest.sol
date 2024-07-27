@@ -28,4 +28,8 @@ contract BasePictureRequest is Initializable {
     createdAt = block.timestamp;
     expiresAt = _expiresAt;
   }
+
+  function isPictureRequest() external pure returns (bool) {
+    return true;
+  }
 }
