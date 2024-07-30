@@ -12,9 +12,9 @@
     }
   ],
   "impls": {
-    "021b5a7aeb0f9e7395e03e02fcdc95686078b65feea610dd3a30b791e617a77c": {
+    "926b7d90705c1e5efff727236d3264af4e860517608827841c384967b954bad9": {
       "address": "0x111C3E89Ce80e62EE88318C2804920D4c96f92bb",
-      "txHash": "0x62b1dedf0589d02636fb5b0a1a49c0e666407c4b4ad92a2f20e3aab14f01048a",
+      "txHash": "0x425e67a362cfa2572816fdfaec5e80c6dc1ae14ff328c294ad12ed9aa93b1b36",
       "layout": {
         "solcVersion": "0.8.24",
         "storage": [
