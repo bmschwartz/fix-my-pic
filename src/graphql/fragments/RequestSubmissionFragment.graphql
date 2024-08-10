@@ -1,0 +1,7 @@
+fragment RequestSubmissionFragment on RequestSubmission {
+  id
+  price
+  ipfsHash
+  submitter
+  createdAt
+}

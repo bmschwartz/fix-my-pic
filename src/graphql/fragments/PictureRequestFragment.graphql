@@ -1,0 +1,18 @@
+#import { CommentFragment } from './CommentFragment.graphql'
+#import { RequestSubmissionFragment } from './RequestSubmissionFragment.graphql'
+#import { SubmissionPurchaseFragment } from './SubmissionPurchaseFragment.graphql'
+
+fragment PictureRequestFragment on PictureRequest {
+  id
+  ipfsHash
+  budget
+  creator
+  createdAt
+  comments {
+    ...CommentFragment
+  }
+  submissions {
+    ...RequestSubmissionFragment
+    ...SubmissionPurchaseFragment
+  }
+}

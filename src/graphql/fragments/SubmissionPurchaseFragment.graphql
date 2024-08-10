@@ -1,0 +1,7 @@
+fragment SubmissionPurchaseFragment on RequestSubmission {
+  purchases {
+    id
+    purchaser
+    purchaseDate
+  }
+}
