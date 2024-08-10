@@ -93,6 +93,9 @@ importers:
       '@matterlabs/hardhat-zksync-ethers':
         specifier: 1.1.0
         version: 1.1.0(bufferutil@4.0.5)(encoding@0.1.13)(ethers@6.13.2(bufferutil@4.0.5)(utf-8-validate@5.0.7))(ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.7)(zksync-ethers@6.9.0(ethers@6.13.2(bufferutil@4.0.5)(utf-8-validate@5.0.7)))
+      '@matterlabs/hardhat-zksync-node':
+        specifier: 1.1.1
+        version: 1.1.1(encoding@0.1.13)(hardhat@2.22.6(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.7))
       '@matterlabs/hardhat-zksync-solc':
         specifier: 1.2.1
         version: 1.2.1(encoding@0.1.13)(hardhat@2.22.6(bufferutil@4.0.5)(ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.7))
