@@ -5,7 +5,7 @@ import { useWallet } from './useWallet';
 
 const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_IPFS_ENDPOINT || '';
 if (!IMAGE_URL_ROOT) {
-  process.exit('No image url root provided');
+  process.exit(1);
 }
 
 export const useImageStore = () => {
