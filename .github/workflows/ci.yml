@@ -45,7 +45,7 @@ jobs:
           if [ -d "src/graphql/client" ]; then
             pnpm type-check
           else
-            echo "Skipping type-check as src/graphql/client is missing"
+            echo "Skipping type-check as GraphQL file generation skipped"
           fi
 
       - name: Check linting
@@ -53,7 +53,7 @@ jobs:
           if [ -d "src/graphql/client" ]; then
             pnpm lint
           else
-            echo "Skipping lint as src/graphql/client is missing"
+            echo "Skipping lint as GraphQL file generation skipped"
           fi
 
       - name: Check commits messages
