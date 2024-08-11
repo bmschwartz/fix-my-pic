@@ -30,6 +30,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      # Compile GraphQL
+      - name: Compile GraphQL for develop
+        if: github.ref == 'refs/heads/develop'
+        run: pnpm run compile-gql-dev
+
+      - name: Compile GraphQL for preview
+        if: github.ref == 'refs/heads/preview'
+        run: pnpm run compile-gql-test
+
+      - name: Compile GraphQL for main
+        if: github.ref == 'refs/heads/main'
+        run: pnpm run compile-gql-prod
+
       - name: Check types
         run: pnpm type-check
 
