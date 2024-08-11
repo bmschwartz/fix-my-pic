@@ -45,10 +45,10 @@ const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || '';
 const FIX_MY_PIC_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FIX_MY_PIC_FACTORY_ADDRESS || '';
 
 if (!RPC_URL) {
-  process.exit('No RPC URL provided');
+  process.exit(1);
 }
 if (!FIX_MY_PIC_FACTORY_ADDRESS) {
-  process.exit('No picture factory address provided');
+  process.exit(1);
 }
 
 async function createFixMyPicContractService(factoryAddress: string): Promise<FixMyPicContractService> {
