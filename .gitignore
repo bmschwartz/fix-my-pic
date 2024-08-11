@@ -8,6 +8,8 @@
 # JetBrains IDE files
 .idea/
 
+.graphclientrc.yml
+
 # testing
 /coverage
 
