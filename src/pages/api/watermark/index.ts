@@ -1,5 +1,6 @@
 import { promises as fsPromises } from 'fs';
 import os from 'os';
+import path from 'path';
 import formidable, { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { addImageWatermark } from 'sharp-watermark';
@@ -48,13 +49,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Read the file into a buffer
     const imageFileBuffer = await fsPromises.readFile(originalImageFile.filepath);
-    let watermarkFileBuffer: Buffer;
 
-    try {
-      watermarkFileBuffer = await fsPromises.readFile('/watermark.png');
-    } catch (error) {
-      watermarkFileBuffer = await fsPromises.readFile('public/watermark.png');
-    }
+    const watermarkFilePath = process.env.VERCEL_ENV
+      ? path.join(process.cwd(), 'watermark.png')
+      : path.join(process.cwd(), 'public', 'watermark.png');
+
+    const watermarkFileBuffer: Buffer = await fsPromises.readFile(watermarkFilePath);
 
     const watermarkedImage = await addImageWatermark(imageFileBuffer, watermarkFileBuffer, {
       dpi: 600,
