@@ -8,6 +8,9 @@
 # JetBrains IDE files
 .idea/
 
+.graphclientrc.yml
+src/graphql/client
+
 # testing
 /coverage
 

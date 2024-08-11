@@ -1,8 +1,0 @@
-{
-  "75cda08e752f052c8c115f82a21648721b1112ba8b90b70151e6908b07c9e45c": "fragment CommentFragment on RequestComment {\n  id\n  ipfsHash\n  commenter\n  createdAt\n}",
-  "20a4880736ae7c66eed071073083301ee3b4d06614d6277d45f1a5da5325e956": "fragment PictureRequestFragment on PictureRequest {\n  id\n  ipfsHash\n  budget\n  creator\n  createdAt\n  comments {\n    ...CommentFragment\n  }\n  submissions {\n    ...RequestSubmissionFragment\n    ...SubmissionPurchaseFragment\n  }\n}",
-  "f4c8b2b10c1666dff05f132a1a093973e8063ac3e43c460568043841ed2fd16a": "fragment RequestSubmissionFragment on RequestSubmission {\n  id\n  price\n  ipfsHash\n  submitter\n  createdAt\n}",
-  "6400f7bb7f7af1c10993d7a69f233c864fb1db8f51c982f64de560560f31815d": "fragment SubmissionPurchaseFragment on RequestSubmission {\n  purchases {\n    id\n    purchaser\n    purchaseDate\n  }\n}",
-  "7d4ffd17e47b5e3852df435c39e0ff8a8d26888fff65e54ab3a97cce4938e3ac": "query GetPictureRequest($id: ID!) {\n  pictureRequest(id: $id) {\n    ...PictureRequestFragment\n  }\n}",
-  "8ac9617e059b57499d218e773b34cc906da473324ff1f386219b6eb557491108": "query GetPictureRequests {\n  pictureRequests {\n    ...PictureRequestFragment\n  }\n}"
-}
