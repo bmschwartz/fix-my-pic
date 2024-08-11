@@ -9,7 +9,7 @@
 .idea/
 
 .graphclientrc.yml
-src/graphql/client
+src/graphql/client/*
 
 # testing
 /coverage
