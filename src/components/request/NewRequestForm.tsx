@@ -5,8 +5,8 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 import { FMPButton, FMPTypography, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
 import { useIpfs } from '@/hooks/useIpfs';
+import { useRequests } from '@/hooks/useRequests';
 import { useWallet } from '@/hooks/useWallet';
 
 const NewRequestForm: React.FC = () => {
@@ -19,8 +19,8 @@ const NewRequestForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
-  const { uploadImage, uploadPictureRequest } = useIpfs();
-  const { contractService } = useContractService();
+  const { uploadImage } = useIpfs();
+  const { createPictureRequest } = useRequests();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,13 +45,15 @@ const NewRequestForm: React.FC = () => {
     try {
       setLoadingLabel('Uploading image...');
       const imageId = await uploadImage({ file: image });
-      const ipfsHash = await uploadPictureRequest({ title, description, imageId });
 
       setLoadingLabel('Creating smart contract...');
-      await contractService.createPictureRequest({
+
+      await createPictureRequest({
+        title,
         wallet,
         account,
-        ipfsHash,
+        imageId,
+        description,
         budget: parseFloat(budget),
       });
       router.push('/');

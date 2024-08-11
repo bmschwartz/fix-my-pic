@@ -7,28 +7,28 @@ import { EIP6963ProviderDetail } from '@/types/eip6963';
 import { convertUsdCentsToWei, getEthPrice } from '@/utils/currency';
 import { getUnixTimestampOneYearFromNow } from '@/utils/datetime';
 
-interface WalletParams {
+export interface WalletParams {
   account: string;
   wallet: EIP6963ProviderDetail;
 }
 
-interface CreatePictureRequestParams extends WalletParams {
+export interface CreatePictureRequestParams extends WalletParams {
   budget: number;
   expiresAt?: number;
   ipfsHash: string;
 }
 
-interface CreateSubmissionsParams extends WalletParams {
+export interface CreateSubmissionsParams extends WalletParams {
   price: number;
   ipfsHash: string;
   requestAddress: string;
 }
 
-interface PurchaseSubmissionParams extends WalletParams {
+export interface PurchaseSubmissionParams extends WalletParams {
   address: string;
 }
 
-interface CreateRequestCommentParams extends WalletParams {
+export interface CreateRequestCommentParams extends WalletParams {
   requestAddress: string;
   ipfsHash: string;
 }
