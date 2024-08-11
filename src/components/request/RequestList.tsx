@@ -4,6 +4,7 @@ import React from 'react';
 
 import { useRequests } from '@/hooks/useRequests';
 import { Request } from '@/types/request';
+import FullScreenLoader from '../common/FullScreenLoader';
 import RequestListItem from './RequestListItem';
 
 const EmptyState: React.FC = () => {
@@ -19,7 +20,7 @@ const EmptyState: React.FC = () => {
   );
 };
 const RequestList: React.FC = () => {
-  const { requests } = useRequests();
+  const { requests, loading: loadingRequests } = useRequests();
   const theme = useTheme();
 
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -32,6 +33,10 @@ const RequestList: React.FC = () => {
     if (isLargeScreen) return 3;
     return 1;
   };
+
+  if (loadingRequests) {
+    return <FullScreenLoader />;
+  }
 
   return (
     <>

@@ -21,6 +21,7 @@ export const useRequests = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchAndTransformData = async () => {
+    setLoading(true);
     const result = await execute(GetPictureRequestsDocument, {});
     const pictureRequests = result?.data?.pictureRequests || [];
 
@@ -50,6 +51,7 @@ export const useRequests = () => {
     );
 
     setRequests(requestsWithIPFSData);
+    setLoading(false);
   };
 
   const pollForNewRequest = async (id: string, retries = 10) => {
@@ -104,6 +106,7 @@ export const useRequests = () => {
 
   useEffect(() => {
     fetchAndTransformData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { requests, createPictureRequest, loading, getRequest: (id: string) => requests.find((r) => r.id === id) };
