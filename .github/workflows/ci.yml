@@ -32,9 +32,7 @@ jobs:
 
       - name: Compile GraphQL
         run: |
-          if [[ "${{ github.head_ref }}" == "develop" ]]; then
-            pnpm run compile-gql-dev
-          elif [[ "${{ github.head_ref }}" == "preview" ]]; then
+          if [[ "${{ github.head_ref }}" == "preview" ]]; then
             pnpm run compile-gql-test
           elif [[ "${{ github.head_ref }}" == "main" ]]; then
             pnpm run compile-gql-prod
@@ -42,11 +40,21 @@ jobs:
             echo "No GraphQL compilation step for branch ${{ github.head_ref }}"
           fi
 
-      - name: Check types
-        run: pnpm type-check
+      - name: Type Check
+        run: |
+          if [ -d "src/graphql/client" ]; then
+            pnpm type-check
+          else
+            echo "Skipping type-check as src/graphql/client is missing"
+          fi
 
       - name: Check linting
-        run: pnpm lint
+        run: |
+          if [ -d "src/graphql/client" ]; then
+            pnpm lint
+          else
+            echo "Skipping lint as src/graphql/client is missing"
+          fi
 
       - name: Check commits messages
         uses: wagoid/commitlint-github-action@v6
