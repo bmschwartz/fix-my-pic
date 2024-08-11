@@ -30,18 +30,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # Compile GraphQL
-      - name: Compile GraphQL for develop
-        if: github.ref == 'refs/heads/develop'
-        run: pnpm run compile-gql-dev
-
-      - name: Compile GraphQL for preview
-        if: github.ref == 'refs/heads/preview'
-        run: pnpm run compile-gql-test
-
-      - name: Compile GraphQL for main
-        if: github.ref == 'refs/heads/main'
-        run: pnpm run compile-gql-prod
+      - name: Compile GraphQL
+        run: |
+          if [[ "${{ github.head_ref }}" == "develop" ]]; then
+            pnpm run compile-gql-dev
+          elif [[ "${{ github.head_ref }}" == "preview" ]]; then
+            pnpm run compile-gql-test
+          elif [[ "${{ github.head_ref }}" == "main" ]]; then
+            pnpm run compile-gql-prod
+          else
+            echo "No GraphQL compilation step for branch ${{ github.head_ref }}"
+          fi
 
       - name: Check types
         run: pnpm type-check
