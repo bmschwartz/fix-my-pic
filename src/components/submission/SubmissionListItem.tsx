@@ -1,4 +1,6 @@
-import { Box } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import { Box, Chip } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
@@ -15,7 +17,6 @@ interface SubmissionListItemProps {
 
 const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, imageUrlToShow }) => {
   const router = useRouter();
-
   const { contractService } = useContractService();
   const { selectedWallet, selectedAccount } = useWallet();
 
@@ -23,8 +24,44 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+
   const isFree = submission.price === 0;
   const purchasedSubmission = submission.purchases.find((purchase) => purchase.buyer === selectedAccount);
+
+  const generateChip = () => {
+    let label: string;
+    let icon: React.ReactElement = <></>;
+    let backgroundColor = 'black';
+
+    if (purchasedSubmission) {
+      label = 'Purchased';
+      icon = <CheckCircleIcon />;
+      backgroundColor = 'success';
+    } else if (isFree) {
+      label = 'Free';
+    } else {
+      label = `$${submission.price}`;
+      icon = <MonetizationOnIcon color="inherit" />;
+    }
+
+    return (
+      <Chip
+        icon={icon}
+        label={label}
+        color={purchasedSubmission ? 'success' : 'default'}
+        size="medium"
+        sx={{
+          fontWeight: 600,
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          zIndex: 10,
+          color: 'white',
+          backgroundColor: backgroundColor || 'inherit',
+        }}
+      />
+    );
+  };
 
   const handleImageClick = () => {
     setIsOverlayOpen(true);
@@ -40,7 +77,7 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
 
   return (
     <>
-      <Box sx={{ cursor: 'pointer' }}>
+      <Box sx={{ position: 'relative', cursor: 'pointer' }}>
         <Image
           src={imageUrlToShow}
           alt="Submission"
@@ -50,14 +87,10 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
           objectFit="cover"
           onClick={handleImageClick}
         />
+        {generateChip()}
       </Box>
       <Box sx={{ padding: 0 }}>
-        <FMPTypography variant="body1">{!isFree ? `$${submission.price}` : 'Free'}</FMPTypography>
-        {!isFree && (
-          <FMPTypography variant="body1">
-            {submission.purchases.length} purchase{submission.purchases.length !== 1 && 's'}
-          </FMPTypography>
-        )}
+        <FMPTypography variant="body1"></FMPTypography>
       </Box>
       {isOverlayOpen && (
         <ImageOverlay

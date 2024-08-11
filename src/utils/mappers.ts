@@ -1,8 +1,7 @@
-import { PartialRequestComment } from '@/types/comment';
+import { RequestComment } from '@/types/comment';
 import { SubmissionPurchase } from '@/types/purchase';
-import { PartialRequest } from '@/types/request';
-import { PartialRequestSubmission } from '@/types/submission';
-import { removeNullishValues } from './object';
+import { Request } from '@/types/request';
+import { RequestSubmission } from '@/types/submission';
 
 import type { SubmissionPurchase as GqlSubmissionPurchase } from '@/graphql/client';
 
@@ -20,17 +19,17 @@ const mapSubmissionPurchase = (
   };
 };
 
-const mapRequestComment = (comment: any): PartialRequestComment => {
-  return removeNullishValues({
+const mapRequestComment = (comment: any): RequestComment => {
+  return {
     id: comment.id,
     text: comment.text,
     commenter: comment.commenter,
     createdAt: Number(comment.createdAt),
-  });
+  };
 };
 
-const mapRequestSubmission = (submission: any): PartialRequestSubmission => {
-  return removeNullishValues({
+const mapRequestSubmission = (submission: any): RequestSubmission => {
+  return {
     id: submission.id,
     price: Number(submission.price) / 100,
     submitter: submission.submitter,
@@ -42,20 +41,17 @@ const mapRequestSubmission = (submission: any): PartialRequestSubmission => {
       mapSubmissionPurchase(purchase, submission.id, submission.price)
     ),
     createdAt: Number(submission.createdAt),
-  });
+  };
 };
 
-export const mapPictureRequest = (request: any): PartialRequest => {
-  return removeNullishValues({
+export const mapPictureRequest = (request: any): Request => {
+  return {
     id: request.id,
     title: request.title,
     budget: request.budget / 100, // Convert from cents to dollars
-    creator: request.creator,
     imageId: request.imageId,
-    createdAt: Number(request.createdAt),
-    expiresAt: Number(request.expiresAt),
     description: request.description,
     comments: (request.comments ?? []).map(mapRequestComment),
     submissions: (request.submissions ?? []).map(mapRequestSubmission),
-  });
+  };
 };
