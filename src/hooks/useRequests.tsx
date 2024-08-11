@@ -4,7 +4,6 @@ import { execute, GetPictureRequestDocument, GetPictureRequestsDocument } from '
 import { useContractService } from '@/hooks/useContractService';
 import { CreatePictureRequestParams as ContractCreateRequestParams } from '@/services/contractService';
 import { Request } from '@/types/request';
-import { getLogger } from '@/utils/logging';
 import { mapPictureRequest } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
@@ -13,8 +12,6 @@ interface CreatePictureRequestParams extends Omit<ContractCreateRequestParams, '
   imageId: string;
   description: string;
 }
-
-const logger = getLogger('useRequests');
 
 export const useRequests = () => {
   const { fetchIPFSData, uploadPictureRequest } = useIpfs();
@@ -53,8 +50,6 @@ export const useRequests = () => {
       loadRequestSubmissions(request),
     ]);
 
-    logger.info('Loaded IPFS data for request:', request.id, commentsWithIPFSData, submissionsWithIPFSData);
-
     return mapPictureRequest({
       ...request,
       ...ipfsData,
@@ -64,29 +59,41 @@ export const useRequests = () => {
   };
 
   const fetchRequest = async (id: string): Promise<Request | undefined> => {
-    const result = await execute(GetPictureRequestDocument, { id });
-    const request = result?.data?.pictureRequest;
-    if (request) {
-      return loadIPFSAndTransform(request);
+    setLoading(true);
+    try {
+      const result = await execute(GetPictureRequestDocument, { id });
+      const request = result?.data?.pictureRequest;
+      if (request) {
+        return loadIPFSAndTransform(request);
+      }
+    } catch (e) {
+      console.error('Error fetching request:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchAllRequests = async (): Promise<void> => {
     setLoading(true);
-    const result = await execute(GetPictureRequestsDocument, {});
-    const pictureRequests = result?.data?.pictureRequests || [];
+    try {
+      const result = await execute(GetPictureRequestsDocument, {});
+      const pictureRequests = result?.data?.pictureRequests || [];
 
-    const transformedRequests = await Promise.all(pictureRequests.map(loadIPFSAndTransform));
+      const transformedRequests = await Promise.all(pictureRequests.map(loadIPFSAndTransform));
 
-    setRequests(transformedRequests);
-    setLoading(false);
+      setRequests(transformedRequests);
+    } catch (e) {
+      console.error('Error fetching requests:', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const pollForNewRequest = async (id: string, retries = 10) => {
     for (let i = 0; i < retries; i++) {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait before retry
+
       const request = await fetchRequest(id);
-      logger.info(`Polled for new request with id: ${id} [${i + 1}]:`, request);
       if (request) {
         const transformedRequest = await loadIPFSAndTransform(request);
         setRequests((prevRequests) => [...prevRequests, transformedRequest]);
