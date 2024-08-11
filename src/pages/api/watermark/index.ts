@@ -51,7 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let watermarkFileBuffer: Buffer;
 
     try {
-      watermarkFileBuffer = await fsPromises.readFile('watermark.png');
+      watermarkFileBuffer = await fsPromises.readFile('/watermark.png');
     } catch (error) {
       watermarkFileBuffer = await fsPromises.readFile('public/watermark.png');
     }
