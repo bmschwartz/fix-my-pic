@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    tsconfigPath: path.resolve(__dirname, 'tsconfig.build.json'),
-  },
   reactStrictMode: true,
   images: {
     remotePatterns: [

@@ -32,6 +32,7 @@
       "prettier --ignore-path .gitignore --write"
     ]
   },
+  "eslintIgnore": ["src/graphql/client"],
   "dependencies": {
     "@chainlink/contracts": "1.2.0",
     "@fontsource/roboto": "5.0.13",

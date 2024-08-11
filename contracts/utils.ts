@@ -11,7 +11,6 @@ import '@matterlabs/hardhat-zksync-verify/dist/src/type-extensions';
 dotenv.config();
 
 export const getProvider = () => {
-  // @ts-expect-error URL is not defined in the HardhatNetworkConfig
   const rpcUrl = hre.network.config.url;
   if (!rpcUrl)
     throw `⛔️ RPC URL wasn't found in "${hre.network.name}"! Please add a "url" field to the network config in hardhat.config.ts`;
