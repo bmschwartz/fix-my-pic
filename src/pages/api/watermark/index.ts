@@ -48,7 +48,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Read the file into a buffer
     const imageFileBuffer = await fsPromises.readFile(originalImageFile.filepath);
-    const watermarkFileBuffer = await fsPromises.readFile('public/watermark.png');
+    let watermarkFileBuffer: Buffer;
+
+    try {
+      watermarkFileBuffer = await fsPromises.readFile('watermark.png');
+    } catch (error) {
+      watermarkFileBuffer = await fsPromises.readFile('public/watermark.png');
+    }
 
     const watermarkedImage = await addImageWatermark(imageFileBuffer, watermarkFileBuffer, {
       dpi: 600,
