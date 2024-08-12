@@ -20,7 +20,6 @@ const mapSubmissionPurchase = (
 };
 
 export const mapRequestComment = (comment: any): RequestComment => {
-  console.log('mapRequestComment', comment);
   return {
     id: comment.id,
     text: comment.text,
@@ -30,7 +29,6 @@ export const mapRequestComment = (comment: any): RequestComment => {
 };
 
 export const mapRequestSubmission = (submission: any): RequestSubmission => {
-  console.log('mapRequestSubmission', submission);
   return {
     id: submission.id,
     price: Number(submission.price) / 100,
