@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { execute, GetRequestSubmissionDocument, GetRequestSubmissionsDocument } from '@/graphql/client';
 import { useContractService } from '@/hooks/useContractService';
 import { CreateRequestSubmissionParams as ContractCreateSubmissionParams } from '@/services/contractService';
-import { delay } from '@/utils/delay';
+import { pollWithRetry } from '@/utils/delay';
 import { mapRequestSubmission } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
@@ -34,17 +34,13 @@ export const useSubmissions = () => {
     return transformedSubmissions.map(mapRequestSubmission);
   };
 
-  const pollForNewSubmission = async (id: string, retries = 10): Promise<boolean> => {
-    for (let i = 0; i < retries; i++) {
-      await delay(2000); // Wait before retry
-
-      const result = await execute(GetRequestSubmissionDocument, { id });
-      const submission = result?.data?.requestSubmission;
-      if (submission) {
-        return true;
-      }
-    }
-    return false;
+  const pollForNewSubmission = async (id: string): Promise<void> => {
+    return pollWithRetry({
+      callback: async () => {
+        const result = await execute(GetRequestSubmissionDocument, { id });
+        return result?.data?.requestSubmission;
+      },
+    });
   };
 
   const createRequestSubmission = async ({
@@ -75,12 +71,16 @@ export const useSubmissions = () => {
         requestAddress: requestId,
       });
 
+      let created = false;
       if (requestSubmissionAddress) {
         // Try to fetch data from the subgraph until the new submission appears
         await pollForNewSubmission(requestSubmissionAddress);
+        created = true;
       }
-    } catch (e) {
-      console.error('Error creating request submission:', e);
+
+      if (!created) {
+        throw new Error('Failed to create request submission');
+      }
     } finally {
       setLoading(false);
     }

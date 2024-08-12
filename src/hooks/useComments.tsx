@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { execute, GetRequestCommentDocument, GetRequestCommentsDocument } from '@/graphql/client';
 import { useContractService } from '@/hooks/useContractService';
 import { CreateRequestCommentParams as ContractCreateCommentParams } from '@/services/contractService';
-import { delay } from '@/utils/delay';
+import { pollWithRetry } from '@/utils/delay';
 import { mapRequestComment } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
@@ -31,17 +31,13 @@ export const useComments = () => {
     return transformedComments.map(mapRequestComment);
   };
 
-  const pollForNewComment = async (id: string, retries = 10): Promise<boolean> => {
-    for (let i = 0; i < retries; i++) {
-      await delay(2000); // Wait before retry
-
-      const result = await execute(GetRequestCommentDocument, { id });
-      const comment = result?.data?.requestComment;
-      if (comment) {
-        return true;
-      }
-    }
-    return false;
+  const pollForNewComment = async (id: string): Promise<void> => {
+    return pollWithRetry({
+      callback: async () => {
+        const result = await execute(GetRequestCommentDocument, { id });
+        return result?.data?.requestComment || null;
+      },
+    });
   };
 
   const createRequestComment = async ({
@@ -65,7 +61,8 @@ export const useComments = () => {
       let created = false;
       if (requestCommentAddress) {
         // Try to fetch data from the subgraph until the new comment appears
-        created = await pollForNewComment(requestCommentAddress);
+        await pollForNewComment(requestCommentAddress);
+        created = true;
       }
 
       if (!created) {
