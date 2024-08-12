@@ -1,8 +1,12 @@
 import { Box, Divider } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { RequestDetailCommentTab, RequestDetailSubmissionTab, TabButton } from '@/components';
+import { FullScreenLoader, RequestDetailCommentTab, RequestDetailSubmissionTab, TabButton } from '@/components';
+import { useComments } from '@/hooks/useComments';
+import { useSubmissions } from '@/hooks/useSubmissions';
+import { RequestComment } from '@/types/comment';
 import { Request } from '@/types/request';
+import { RequestSubmission } from '@/types/submission';
 
 interface RequestDetailTabSectionProps {
   request: Request;
@@ -14,11 +18,37 @@ enum RequestDetailTab {
 }
 
 const RequestDetailTabSection: React.FC<RequestDetailTabSectionProps> = ({ request }) => {
+  const { fetchComments } = useComments();
+  const { fetchSubmissions } = useSubmissions();
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [comments, setComments] = useState<RequestComment[]>([]);
+  const [submissions, setSubmissions] = useState<RequestSubmission[]>([]);
   const [selectedTab, setSelectedTab] = useState<RequestDetailTab>(RequestDetailTab.Submissions);
+
+  useEffect(() => {
+    const loadComments = async () => {
+      const comments = await fetchComments(request.id);
+      setComments(comments);
+    };
+    const loadSubmissions = async () => {
+      const submissions = await fetchSubmissions(request.id);
+      setSubmissions(submissions);
+    };
+
+    loadComments();
+    loadSubmissions();
+    setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request.id]);
 
   const handleTabChange = (tab: RequestDetailTab) => {
     setSelectedTab(tab);
   };
+
+  if (loading) {
+    return <FullScreenLoader />;
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -27,18 +57,22 @@ const RequestDetailTabSection: React.FC<RequestDetailTabSectionProps> = ({ reque
           text="Submissions"
           selected={selectedTab === RequestDetailTab.Submissions}
           onClick={() => handleTabChange(RequestDetailTab.Submissions)}
-          badgeContent={String(request.submissions.length)}
+          badgeContent={String(submissions.length)}
         />
         <TabButton
           text="Comments"
           selected={selectedTab === RequestDetailTab.Comments}
           onClick={() => handleTabChange(RequestDetailTab.Comments)}
-          badgeContent={String(request.comments.length)}
+          badgeContent={String(comments.length)}
         />
       </Box>
       <Divider sx={{ my: 3 }} />
-      {selectedTab === RequestDetailTab.Submissions && <RequestDetailSubmissionTab request={request} />}
-      {selectedTab === RequestDetailTab.Comments && <RequestDetailCommentTab request={request} />}
+      {selectedTab === RequestDetailTab.Submissions && (
+        <RequestDetailSubmissionTab submissions={submissions} requestId={request.id} />
+      )}
+      {selectedTab === RequestDetailTab.Comments && (
+        <RequestDetailCommentTab requestId={request.id} comments={comments} />
+      )}
     </Box>
   );
 };

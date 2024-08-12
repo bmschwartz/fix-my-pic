@@ -1,0 +1,7 @@
+#import { RequestCommentFragment } from '../fragments/RequestCommentFragment.graphql'
+
+query GetRequestComment($id: ID!) {
+  requestComment(id: $id) {
+    ...RequestCommentFragment
+  }
+}

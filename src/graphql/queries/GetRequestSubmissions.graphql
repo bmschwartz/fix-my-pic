@@ -1,0 +1,7 @@
+#import { RequestSubmissionFragment } from '../fragments/RequestSubmissionFragment.graphql'
+
+query GetRequestSubmissions($requestId: String!) {
+  requestSubmissions(where: {request: $requestId}) {
+    ...RequestSubmissionFragment
+  }
+}

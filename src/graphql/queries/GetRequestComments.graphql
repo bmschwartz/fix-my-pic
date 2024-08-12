@@ -1,0 +1,7 @@
+#import { RequestCommentFragment } from '../fragments/RequestCommentFragment.graphql'
+
+query GetRequestComments($requestId: String!) {
+  requestComments(where: {request: $requestId}) {
+    ...RequestCommentFragment
+  }
+}

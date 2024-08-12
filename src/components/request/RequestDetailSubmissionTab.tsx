@@ -1,13 +1,13 @@
 import { Box, CircularProgress, Grid, Typography } from '@mui/material';
-import isEqual from 'lodash/isEqual';
 import React, { useEffect } from 'react';
 
 import { LinkButton, SubmissionListItem } from '@/components';
 import { useImageStore } from '@/hooks/useImageStore';
-import { Request } from '@/types/request';
+import { RequestSubmission } from '@/types/submission';
 
 interface RequestDetailSubmissionTabProps {
-  request: Request;
+  requestId: string;
+  submissions: RequestSubmission[];
 }
 
 const EmptyState: React.FC = () => {
@@ -23,23 +23,21 @@ const EmptyState: React.FC = () => {
   );
 };
 
-function useDeepCompareMemoize<T>(value: T): T {
-  const ref = React.useRef<T>(value);
+// function useDeepCompareMemoize<T>(value: T): T {
+//   const ref = React.useRef<T>(value);
 
-  if (!isEqual(value, ref.current)) {
-    ref.current = value;
-  }
+//   if (!isEqual(value, ref.current)) {
+//     ref.current = value;
+//   }
 
-  return ref.current;
-}
+//   return ref.current;
+// }
 
-const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ request }) => {
+const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ requestId, submissions }) => {
   const [loadingImageUrls, setLoadingImageUrls] = React.useState(true);
   const [loadedImages, setLoadedImages] = React.useState<boolean>(false);
   const [imageUrlsToShow, setImageUrlsToShow] = React.useState<Record<string, string>>({});
   const { getImageUrlToShow } = useImageStore();
-
-  const submissions = useDeepCompareMemoize(request.submissions);
 
   useEffect(() => {
     if (loadedImages) {
@@ -94,13 +92,13 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
         </Box>
       )}
       <Box sx={{ textAlign: 'right', mb: 3 }}>
-        <LinkButton text="New Submission" href={`/submission/new?request=${request.id}`} />
+        <LinkButton text="New Submission" href={`/submission/new?request=${requestId}`} />
       </Box>
-      {request.submissions.length === 0 ? (
+      {submissions.length === 0 ? (
         <EmptyState />
       ) : (
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          {request.submissions.map((submission) => (
+          {submissions.map((submission) => (
             <Grid item xs={12} sm={6} md={4} key={submission.id}>
               {imageUrlsToShow[submission.id] && (
                 <SubmissionListItem submission={submission} imageUrlToShow={imageUrlsToShow[submission.id]} />

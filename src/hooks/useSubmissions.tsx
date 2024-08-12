@@ -1,8 +1,9 @@
 import { useState } from 'react';
 
-import { execute, GetRequestSubmissionDocument } from '@/graphql/client';
+import { execute, GetRequestSubmissionDocument, GetRequestSubmissionsDocument } from '@/graphql/client';
 import { useContractService } from '@/hooks/useContractService';
 import { CreateRequestSubmissionParams as ContractCreateSubmissionParams } from '@/services/contractService';
+import { mapRequestSubmission } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
 interface CreateRequestSubmissionParams extends Omit<ContractCreateSubmissionParams, 'requestAddress' | 'ipfsHash'> {
@@ -14,10 +15,23 @@ interface CreateRequestSubmissionParams extends Omit<ContractCreateSubmissionPar
 }
 
 export const useSubmissions = () => {
+  const { fetchIPFSData } = useIpfs();
   const { uploadRequestSubmission } = useIpfs();
   const { contractService } = useContractService();
 
   const [loading, setLoading] = useState<boolean>(false);
+
+  const loadIPFSAndTransform = async (submission: any) => {
+    const ipfsData = await fetchIPFSData(submission.ipfsHash);
+    return { ...submission, ...ipfsData };
+  };
+
+  const fetchSubmissions = async (requestId: string) => {
+    const result = await execute(GetRequestSubmissionsDocument, { requestId });
+    const submissions = result?.data?.requestSubmissions || [];
+    const transformedSubmissions = await Promise.all(submissions.map(loadIPFSAndTransform));
+    return transformedSubmissions.map(mapRequestSubmission);
+  };
 
   const pollForNewSubmission = async (id: string, retries = 10): Promise<boolean> => {
     for (let i = 0; i < retries; i++) {
@@ -70,5 +84,5 @@ export const useSubmissions = () => {
     }
   };
 
-  return { createRequestSubmission, loading };
+  return { createRequestSubmission, fetchSubmissions, loading };
 };

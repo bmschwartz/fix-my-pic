@@ -19,7 +19,8 @@ const mapSubmissionPurchase = (
   };
 };
 
-const mapRequestComment = (comment: any): RequestComment => {
+export const mapRequestComment = (comment: any): RequestComment => {
+  console.log('mapRequestComment', comment);
   return {
     id: comment.id,
     text: comment.text,
@@ -28,7 +29,8 @@ const mapRequestComment = (comment: any): RequestComment => {
   };
 };
 
-const mapRequestSubmission = (submission: any): RequestSubmission => {
+export const mapRequestSubmission = (submission: any): RequestSubmission => {
+  console.log('mapRequestSubmission', submission);
   return {
     id: submission.id,
     price: Number(submission.price) / 100,
@@ -51,7 +53,5 @@ export const mapPictureRequest = (request: any): Request => {
     budget: request.budget / 100, // Convert from cents to dollars
     imageId: request.imageId,
     description: request.description,
-    comments: (request.comments ?? []).map(mapRequestComment),
-    submissions: (request.submissions ?? []).map(mapRequestSubmission),
   };
 };
