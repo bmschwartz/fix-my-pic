@@ -27,18 +27,17 @@ const RequestDetailTabSection: React.FC<RequestDetailTabSectionProps> = ({ reque
   const [selectedTab, setSelectedTab] = useState<RequestDetailTab>(RequestDetailTab.Submissions);
 
   useEffect(() => {
-    const loadComments = async () => {
+    const loadCommentsAndSubmissions = async () => {
       const comments = await fetchComments(request.id);
-      setComments(comments);
-    };
-    const loadSubmissions = async () => {
       const submissions = await fetchSubmissions(request.id);
+
+      setComments(comments);
       setSubmissions(submissions);
+
+      setLoading(false);
     };
 
-    loadComments();
-    loadSubmissions();
-    setLoading(false);
+    loadCommentsAndSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request.id]);
 
