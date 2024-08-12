@@ -17,9 +17,9 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 import { FMPButton, FMPTypography, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
 import { useImageStore } from '@/hooks/useImageStore';
 import { useIpfs } from '@/hooks/useIpfs';
+import { useSubmissions } from '@/hooks/useSubmissions';
 import { useWallet } from '@/hooks/useWallet';
 
 enum WatermarkOptions {
@@ -42,17 +42,29 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
   const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null);
   const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null);
   const [isFree, setIsFree] = useState<boolean>(false);
-
   const [loadingLabel, setLoadingLabel] = useState('');
 
-  const { uploadImage, uploadRequestSubmission } = useIpfs();
+  const { uploadImage } = useIpfs();
+  const { createRequestSubmission } = useSubmissions();
   const { createWatermarkedImage, encryptPictureId } = useImageStore();
-  const { contractService } = useContractService();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 
   if (!account || !wallet) {
     return null;
   }
+
+  const resetState = () => {
+    setDescription('');
+    setPrice('');
+    setOriginalPictureFile(null);
+    setPreview(null);
+    setWatermarkOption(WatermarkOptions.AUTOMATIC);
+    setWatermarkPictureFile(null);
+    setWatermarkPreview(null);
+    setIsFree(false);
+    setLoading(false);
+    setLoadingLabel('');
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isWatermarked: boolean = false) => {
     const file = event.target.files?.[0] || null;
@@ -104,20 +116,16 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         }
       }
 
-      const ipfsHash = await uploadRequestSubmission({
-        description,
-        freeImageId,
-        encryptedImageId,
-        watermarkedImageId,
-      });
-
       setLoadingLabel('Creating smart contract...');
 
-      await contractService.createSubmission({
+      await createRequestSubmission({
+        description,
         wallet,
         account,
-        ipfsHash,
-        requestAddress: requestId,
+        requestId,
+        freeImageId: freeImageId || '',
+        encryptedImageId: encryptedImageId || '',
+        watermarkedImageId: watermarkedImageId || '',
         price: isFree ? 0 : parseFloat(price || '0'),
       });
 
@@ -127,15 +135,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
       console.error(e);
       return;
     } finally {
-      setPrice('');
-      setDescription('');
-      setOriginalPictureFile(null);
-      setPreview(null);
-      setWatermarkOption(WatermarkOptions.AUTOMATIC);
-      setWatermarkPictureFile(null);
-      setWatermarkPreview(null);
-      setIsFree(false);
-      setLoadingLabel('');
+      resetState();
     }
   };
 

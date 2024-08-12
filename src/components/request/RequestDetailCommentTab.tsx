@@ -7,6 +7,7 @@ import { useContractService } from '@/hooks/useContractService';
 import { useIpfs } from '@/hooks/useIpfs';
 import { useWallet } from '@/hooks/useWallet';
 import { Request } from '@/types/request';
+import { getDateTimeFromUnixTimestamp } from '@/utils/datetime';
 
 interface RequestDetailCommentTabProps {
   request: Request;
@@ -64,7 +65,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
       {request.comments.map((comment) => (
         <Box key={comment.id} sx={{ mb: 2 }}>
           <Typography variant="body2" fontWeight="bold">
-            {comment.commenter} - {new Date(comment.createdAt).toLocaleString()}
+            {comment.commenter} - {getDateTimeFromUnixTimestamp(comment.createdAt)}
           </Typography>
           <Typography variant="body2">{comment.text}</Typography>
         </Box>

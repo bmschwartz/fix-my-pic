@@ -18,7 +18,7 @@ export interface CreatePictureRequestParams extends WalletParams {
   ipfsHash: string;
 }
 
-export interface CreateSubmissionsParams extends WalletParams {
+export interface CreateRequestSubmissionParams extends WalletParams {
   price: number;
   ipfsHash: string;
   requestAddress: string;
@@ -35,8 +35,8 @@ export interface CreateRequestCommentParams extends WalletParams {
 
 export interface FixMyPicContractService {
   createPictureRequest(params: CreatePictureRequestParams): Promise<string | null>;
-  createSubmission(params: CreateSubmissionsParams): Promise<boolean>;
-  createRequestComment(params: CreateRequestCommentParams): Promise<boolean>;
+  createRequestComment(params: CreateRequestCommentParams): Promise<string | null>;
+  createRequestSubmission(params: CreateRequestSubmissionParams): Promise<string | null>;
 
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>;
 }
@@ -94,13 +94,13 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     return pictureRequestAddress;
   };
 
-  const createSubmission = async ({
+  const createRequestSubmission = async ({
     price,
     wallet,
     account,
     ipfsHash,
     requestAddress,
-  }: CreateSubmissionsParams): Promise<boolean> => {
+  }: CreateRequestSubmissionParams): Promise<string | null> => {
     const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
 
     const tx = await fixMyPicFactory.createRequestSubmission(
@@ -114,7 +114,20 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
       throw new Error(`Failed to create submission on picture request ${requestAddress}`);
     }
 
-    return true;
+    const event = receipt.logs.find(
+      (log) =>
+        log.address === factoryAddress &&
+        log.topics[0] === ethers.id('RequestSubmissionCreated(address,address,string,uint256,address,uint256')
+    );
+
+    if (!event) {
+      return null;
+    }
+
+    const decodedEvent = fixMyPicFactory.interface.parseLog(event);
+    const submissionAddress: string | null = decodedEvent?.args.submission;
+
+    return submissionAddress;
   };
 
   const purchaseSubmission = async ({
@@ -151,7 +164,7 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     account,
     ipfsHash,
     requestAddress,
-  }: CreateRequestCommentParams): Promise<boolean> => {
+  }: CreateRequestCommentParams): Promise<string | null> => {
     const fixMyPicFactory = new ethers.Contract(
       factoryAddress,
       FixMyPicFactorySchema.abi,
@@ -165,10 +178,23 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
       throw new Error('Failed to create a comment');
     }
 
-    return true;
+    const event = receipt.logs.find(
+      (log) =>
+        log.address === factoryAddress &&
+        log.topics[0] === ethers.id('RequestCommentCreated(address,address,string,address,uint256')
+    );
+
+    if (!event) {
+      return null;
+    }
+
+    const decodedEvent = fixMyPicFactory.interface.parseLog(event);
+    const commentAddress: string | null = decodedEvent?.args.comment;
+
+    return commentAddress;
   };
 
-  return { createPictureRequest, createSubmission, purchaseSubmission, createRequestComment };
+  return { createPictureRequest, createRequestSubmission, purchaseSubmission, createRequestComment };
 }
 
 let contractServicePromise: Promise<FixMyPicContractService> | null = null;
