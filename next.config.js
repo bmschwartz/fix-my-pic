@@ -10,6 +10,11 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/watermark': ['./public/watermark.png'],
+    },
+  },
   webpack: (config, { isServer }) => {
     // Add custom file loader for .node files
     config.module.rules.push({
