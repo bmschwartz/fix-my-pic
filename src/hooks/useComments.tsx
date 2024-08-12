@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { execute, GetRequestCommentDocument, GetRequestCommentsDocument } from '@/graphql/client';
 import { useContractService } from '@/hooks/useContractService';
 import { CreateRequestCommentParams as ContractCreateCommentParams } from '@/services/contractService';
+import { delay } from '@/utils/delay';
 import { mapRequestComment } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
@@ -32,7 +33,8 @@ export const useComments = () => {
 
   const pollForNewComment = async (id: string, retries = 10): Promise<boolean> => {
     for (let i = 0; i < retries; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait before retry
+      await delay(2000); // Wait before retry
+
       const result = await execute(GetRequestCommentDocument, { id });
       const comment = result?.data?.requestComment;
       if (comment) {

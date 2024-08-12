@@ -4,6 +4,7 @@ import { execute, GetPictureRequestDocument, GetPictureRequestsDocument } from '
 import { useContractService } from '@/hooks/useContractService';
 import { CreatePictureRequestParams as ContractCreateRequestParams } from '@/services/contractService';
 import { Request } from '@/types/request';
+import { delay } from '@/utils/delay';
 import { mapPictureRequest } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
@@ -62,7 +63,7 @@ export const useRequests = () => {
 
   const pollForNewRequest = async (id: string, retries = 10) => {
     for (let i = 0; i < retries; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait before retry
+      await delay(2000); // Wait before retry
 
       const request = await fetchRequest(id);
       if (request) {
