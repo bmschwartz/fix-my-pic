@@ -50,9 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Read the file into a buffer
     const imageFileBuffer = await fsPromises.readFile(originalImageFile.filepath);
 
-    const watermarkFilePath = process.env.VERCEL_ENV
-      ? path.join(process.cwd(), 'watermark.png')
-      : path.join(process.cwd(), 'public', 'watermark.png');
+    const watermarkFilePath = path.join(process.cwd(), 'public', 'watermark.png');
 
     const watermarkFileBuffer: Buffer = await fsPromises.readFile(watermarkFilePath);
 
