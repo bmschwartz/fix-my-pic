@@ -1,7 +1,6 @@
 import { promises as fsPromises } from 'fs';
 import os from 'os';
 import path from 'path';
-import axios from 'axios';
 import formidable, { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { addImageWatermark } from 'sharp-watermark';
@@ -10,25 +9,6 @@ export const config = {
   api: {
     bodyParser: false,
   },
-};
-
-const getWatermarkBuffer = async (): Promise<Buffer> => {
-  let watermarkFileBuffer;
-
-  if (process.env.VERCEL_ENV) {
-    // Fetch the watermark image using axios in a Vercel serverless environment
-    const watermarkUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/watermark.png`;
-    const response = await axios.get(watermarkUrl, {
-      responseType: 'arraybuffer', // Ensures the response is returned as a buffer
-    });
-    watermarkFileBuffer = Buffer.from(response.data);
-  } else {
-    // Read the watermark image from the filesystem in a local environment
-    const watermarkPath = path.join(process.cwd(), 'public', 'watermark.png');
-    watermarkFileBuffer = await fsPromises.readFile(watermarkPath);
-  }
-
-  return watermarkFileBuffer;
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -70,7 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Read the file into a buffer
     const imageFileBuffer = await fsPromises.readFile(originalImageFile.filepath);
 
-    const watermarkFileBuffer: Buffer = await getWatermarkBuffer();
+    const watermarkFileBuffer: Buffer = await fsPromises.readFile(path.join(process.cwd(), 'public', 'watermark.png'));
 
     const watermarkedImage = await addImageWatermark(imageFileBuffer, watermarkFileBuffer, {
       dpi: 600,
