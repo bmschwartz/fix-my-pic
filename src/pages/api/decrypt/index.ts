@@ -1,10 +1,14 @@
 import { createDecipheriv, createHash } from 'crypto';
-import axios, { AxiosError } from 'axios';
+
+import { getBuiltGraphSDK } from '@/graphql/client';
+import { getLogger } from '@/utils/logging';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 const algorithm = 'aes-256-ctr';
 const secretKey = process.env.ENCRYPT_SECRET_KEY;
+
+const logger = getLogger('api/decrypt');
 
 const decrypt = (encryptedText: string) => {
   const key = createHash('sha256').update(String(secretKey)).digest('base64').substr(0, 32);
@@ -18,14 +22,15 @@ const decrypt = (encryptedText: string) => {
 
 const verifyPurchase = async (userAddress: string, submissionAddress: string): Promise<boolean> => {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/verifyPurchase`, {
-      userAddress,
-      submissionAddress,
+    const sdk = getBuiltGraphSDK();
+    const { submissionPurchases: purchases } = await sdk.GetSubmissionPurchase({
+      submission: submissionAddress,
+      purchaser: userAddress,
     });
-    return response.data.purchased;
+    logger.info('Purchases:', submissionAddress, userAddress, purchases);
+    return purchases.length > 0;
   } catch (error) {
-    const err = error as AxiosError;
-    console.error('Error verifying purchase:', err.response ? err.response.data : err.message);
+    logger.error('Error verifying purchase:', error);
     return false;
   }
 };
@@ -47,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const purchased = await verifyPurchase(userAddress, submissionAddress);
 
     if (!purchased) {
+      logger.error('User has not purchased this submission', userAddress, submissionAddress);
       res.status(403).json({ message: 'User has not purchased this submission' });
       return;
     }
@@ -54,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const decryptedImageId = decrypt(encryptedPictureId);
     res.status(200).json({ decryptedImageId });
   } catch (error) {
-    const err = error as AxiosError;
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    logger.error('Error decrypting image ID:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }
