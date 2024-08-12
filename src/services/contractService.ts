@@ -6,6 +6,7 @@ import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json';
 import { EIP6963ProviderDetail } from '@/types/eip6963';
 import { convertUsdCentsToWei, getEthPrice } from '@/utils/currency';
 import { getUnixTimestampOneYearFromNow } from '@/utils/datetime';
+import { getLogger } from '@/utils/logging';
 
 export interface WalletParams {
   account: string;
@@ -40,6 +41,8 @@ export interface FixMyPicContractService {
 
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>;
 }
+
+const logger = getLogger('services/contractService');
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || '';
 const FIX_MY_PIC_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FIX_MY_PIC_FACTORY_ADDRESS || '';
@@ -111,6 +114,7 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     const receipt: ContractTransactionReceipt = await tx.wait();
 
     if (receipt.status !== 1 || !receipt.contractAddress) {
+      logger.error('Failed to create submission', receipt);
       throw new Error(`Failed to create submission on picture request ${requestAddress}`);
     }
 
@@ -121,11 +125,17 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     );
 
     if (!event) {
+      logger.error('RequestSubmissionCreated event not found', receipt);
       return null;
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
+
+    logger.info('RequestSubmissionCreated event', decodedEvent);
+
     const submissionAddress: string | null = decodedEvent?.args.submission;
+
+    logger.info('Submission address', submissionAddress);
 
     return submissionAddress;
   };
@@ -175,6 +185,7 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     const receipt: ContractTransactionReceipt = await tx.wait();
 
     if (receipt.status !== 1) {
+      logger.error('Failed to create comment', receipt);
       throw new Error('Failed to create a comment');
     }
 
@@ -185,11 +196,16 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     );
 
     if (!event) {
+      logger.error('RequestCommentCreated event not found', receipt);
       return null;
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
+
+    logger.info('RequestCommentCreated event', decodedEvent);
     const commentAddress: string | null = decodedEvent?.args.comment;
+
+    logger.info('Comment address', commentAddress);
 
     return commentAddress;
   };
