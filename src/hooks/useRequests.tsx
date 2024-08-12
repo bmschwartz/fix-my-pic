@@ -4,7 +4,7 @@ import { execute, GetPictureRequestDocument, GetPictureRequestsDocument } from '
 import { useContractService } from '@/hooks/useContractService';
 import { CreatePictureRequestParams as ContractCreateRequestParams } from '@/services/contractService';
 import { Request } from '@/types/request';
-import { delay } from '@/utils/delay';
+import { pollWithRetry } from '@/utils/delay';
 import { mapPictureRequest } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
@@ -61,16 +61,16 @@ export const useRequests = () => {
     }
   };
 
-  const pollForNewRequest = async (id: string, retries = 10) => {
-    for (let i = 0; i < retries; i++) {
-      await delay(2000); // Wait before retry
+  const pollForNewRequest = async (id: string): Promise<void> => {
+    const request = await pollWithRetry({
+      callback: async () => {
+        return fetchRequest(id);
+      },
+    });
 
-      const request = await fetchRequest(id);
-      if (request) {
-        const transformedRequest = await loadIPFSAndTransform(request);
-        setRequests((prevRequests) => [...prevRequests, transformedRequest]);
-        break;
-      }
+    if (request) {
+      const transformedRequest = await loadIPFSAndTransform(request);
+      setRequests((prevRequests) => [...prevRequests, transformedRequest]);
     }
   };
 
@@ -87,6 +87,7 @@ export const useRequests = () => {
       const ipfsHash = await uploadPictureRequest({ title, description, imageId });
       const pictureRequestAddress = await contractService.createPictureRequest({ ipfsHash, budget, ...otherParams });
 
+      let created = false;
       if (pictureRequestAddress) {
         // Optimistically update the state
         const newRequest: Request = {
@@ -102,9 +103,12 @@ export const useRequests = () => {
 
         // Try to fetch data from the subgraph until the new request appears
         await pollForNewRequest(pictureRequestAddress);
+        created = true;
       }
-    } catch (e) {
-      console.error('Error creating picture request:', e);
+
+      if (!created) {
+        throw new Error('Failed to create picture request');
+      }
     } finally {
       setLoading(false);
     }
