@@ -1,6 +1,0 @@
-fragment CommentFragment on RequestComment {
-  id
-  ipfsHash
-  commenter
-  createdAt
-}

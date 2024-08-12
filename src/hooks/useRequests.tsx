@@ -20,41 +20,12 @@ export const useRequests = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const loadRequestComments = async (request: Request) => {
-    const commentsWithIPFSData = await Promise.all(
-      request.comments.map(async (comment: any) => {
-        const commentIpfsData = await fetchIPFSData(comment.ipfsHash);
-        return { ...comment, ...commentIpfsData };
-      })
-    );
-
-    return commentsWithIPFSData;
-  };
-
-  const loadRequestSubmissions = async (request: Request) => {
-    const submissionsWithIPFSData = await Promise.all(
-      request.submissions.map(async (submission: any) => {
-        const submissionIpfsData = await fetchIPFSData(submission.ipfsHash);
-        return { ...submission, ...submissionIpfsData };
-      })
-    );
-
-    return submissionsWithIPFSData;
-  };
-
   const loadIPFSAndTransform = async (request: any) => {
     const ipfsData = await fetchIPFSData(request.ipfsHash);
-
-    const [commentsWithIPFSData, submissionsWithIPFSData] = await Promise.all([
-      loadRequestComments(request),
-      loadRequestSubmissions(request),
-    ]);
 
     return mapPictureRequest({
       ...request,
       ...ipfsData,
-      comments: commentsWithIPFSData,
-      submissions: submissionsWithIPFSData,
     });
   };
 
@@ -123,8 +94,6 @@ export const useRequests = () => {
           budget,
           imageId,
           description,
-          comments: [],
-          submissions: [],
         };
 
         // Add a placeholder entry in `requests` to show it immediately

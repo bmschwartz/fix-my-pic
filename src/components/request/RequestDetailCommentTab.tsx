@@ -3,21 +3,20 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import { ConnectWalletDialog, FMPButton, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
-import { useIpfs } from '@/hooks/useIpfs';
+import { useComments } from '@/hooks/useComments';
 import { useWallet } from '@/hooks/useWallet';
-import { Request } from '@/types/request';
+import { RequestComment } from '@/types/comment';
 import { getDateTimeFromUnixTimestamp } from '@/utils/datetime';
 
 interface RequestDetailCommentTabProps {
-  request: Request;
+  requestId: string;
+  comments: RequestComment[];
 }
 
-const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ request }) => {
+const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ requestId, comments }) => {
   const router = useRouter();
   const { selectedAccount: account, selectedWallet } = useWallet();
-  const { uploadRequestComment } = useIpfs();
-  const { contractService } = useContractService();
+  const { createRequestComment } = useComments();
   const [commentText, setCommentText] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -44,12 +43,11 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
     }
     setSubmitting(true);
     try {
-      const ipfsHash = await uploadRequestComment({ text: commentText });
-      await contractService.createRequestComment({
+      await createRequestComment({
         account,
+        text: commentText,
+        requestId: requestId,
         wallet: selectedWallet,
-        ipfsHash,
-        requestAddress: request.id,
       });
       setCommentText('');
       router.reload();
@@ -62,7 +60,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
 
   return (
     <Box sx={{ mt: 3 }}>
-      {request.comments.map((comment) => (
+      {comments.map((comment) => (
         <Box key={comment.id} sx={{ mb: 2 }}>
           <Typography variant="body2" fontWeight="bold">
             {comment.commenter} - {getDateTimeFromUnixTimestamp(comment.createdAt)}
