@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 
-import { ConnectWalletDialog, FMPButton, FMPTypography } from '@/components';
+import { ConnectWalletButton, FMPTypography } from '@/components';
 import { useWallet } from '@/hooks/useWallet';
 
 interface RequireWalletProps {
@@ -11,15 +11,6 @@ interface RequireWalletProps {
 
 const RequireWallet: React.FC<RequireWalletProps> = ({ children, message }) => {
   const { selectedWallet, selectedAccount } = useWallet();
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleOpenDialog = () => {
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
 
   if (selectedAccount && selectedWallet) {
     return <>{children}</>;
@@ -40,11 +31,8 @@ const RequireWallet: React.FC<RequireWalletProps> = ({ children, message }) => {
         <FMPTypography variant="h6" gutterBottom>
           {message || 'You need to connect your Web3 wallet to access this content.'}
         </FMPTypography>
-        <FMPButton onClick={handleOpenDialog} sx={{ marginTop: '16px' }}>
-          Connect Wallet
-        </FMPButton>
+        <ConnectWalletButton />
       </Box>
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
     </Box>
   );
 };

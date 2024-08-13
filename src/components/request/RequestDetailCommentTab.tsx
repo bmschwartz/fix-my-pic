@@ -2,7 +2,7 @@ import { Box, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { ConnectWalletDialog, FMPButton, LoadingOverlay } from '@/components';
+import { FMPButton, LoadingOverlay } from '@/components';
 import { useComments } from '@/hooks/useComments';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestComment } from '@/types/comment';
@@ -18,7 +18,6 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
   const { selectedAccount: account, selectedWallet } = useWallet();
   const { createRequestComment } = useComments();
   const [commentText, setCommentText] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
@@ -26,12 +25,8 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
     setCommentText(event.target.value);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
   const connectWallet = () => {
-    setDialogOpen(true);
+    // TODO: Open the connect wallet dialog
   };
 
   const submitComment = async () => {
@@ -84,7 +79,6 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
       <FMPButton variant="contained" color="primary" onClick={account ? submitComment : connectWallet}>
         {account ? 'Submit' : 'Connect Wallet'}
       </FMPButton>
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
       <LoadingOverlay loading={submitting} label={loadingLabel} />
     </Box>
   );
