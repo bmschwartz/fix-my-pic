@@ -10,6 +10,7 @@ import { useIpfs } from './useIpfs';
 interface CreateRequestCommentParams extends Omit<ContractCreateCommentParams, 'requestAddress' | 'ipfsHash'> {
   text: string;
   requestId: string;
+  setStatus?: (status: string) => void;
 }
 
 export const useComments = () => {
@@ -41,16 +42,19 @@ export const useComments = () => {
   };
 
   const createRequestComment = async ({
+    text,
     wallet,
     account,
     requestId,
-    text,
+    setStatus,
   }: CreateRequestCommentParams): Promise<void> => {
     setLoading(true);
 
     try {
+      setStatus?.('Uploading comment...');
       const ipfsHash = await uploadRequestComment({ text });
 
+      setStatus?.('Creating smart contract...');
       const requestCommentAddress = await contractService.createRequestComment({
         wallet,
         account,
@@ -61,6 +65,7 @@ export const useComments = () => {
       let created = false;
       if (requestCommentAddress) {
         // Try to fetch data from the subgraph until the new comment appears
+        setStatus?.('Waiting for confirmation...');
         await pollForNewComment(requestCommentAddress);
         created = true;
       }
@@ -69,6 +74,7 @@ export const useComments = () => {
         throw new Error('Failed to create request comment');
       }
     } finally {
+      setStatus?.('');
       setLoading(false);
     }
   };

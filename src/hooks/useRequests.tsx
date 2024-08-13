@@ -10,13 +10,14 @@ import { useIpfs } from './useIpfs';
 
 interface CreatePictureRequestParams extends Omit<ContractCreateRequestParams, 'ipfsHash'> {
   title: string;
-  imageId: string;
+  image: File;
   description: string;
+  setStatus?: (status: string) => void;
 }
 
 export const useRequests = () => {
-  const { fetchIPFSData, uploadPictureRequest } = useIpfs();
   const { contractService } = useContractService();
+  const { fetchIPFSData, uploadPictureRequest, uploadImage } = useIpfs();
 
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -76,15 +77,22 @@ export const useRequests = () => {
 
   const createPictureRequest = async ({
     title,
-    description,
-    imageId,
+    image,
     budget,
+    setStatus,
+    description,
     ...otherParams
   }: CreatePictureRequestParams) => {
     setLoading(true);
 
     try {
+      setStatus?.('Uploading image...');
+      const imageId = await uploadImage({ file: image });
+
+      setStatus?.('Uploading metadata...');
       const ipfsHash = await uploadPictureRequest({ title, description, imageId });
+
+      setStatus?.('Creating smart contract...');
       const pictureRequestAddress = await contractService.createPictureRequest({ ipfsHash, budget, ...otherParams });
 
       let created = false;
@@ -102,6 +110,7 @@ export const useRequests = () => {
         setRequests((prevRequests) => [...prevRequests, newRequest as Request]);
 
         // Try to fetch data from the subgraph until the new request appears
+        setStatus?.('Waiting for confirmation...');
         await pollForNewRequest(pictureRequestAddress);
         created = true;
       }
@@ -110,6 +119,7 @@ export const useRequests = () => {
         throw new Error('Failed to create picture request');
       }
     } finally {
+      setStatus?.('');
       setLoading(false);
     }
   };

@@ -116,13 +116,12 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         }
       }
 
-      setLoadingLabel('Creating smart contract...');
-
       await createRequestSubmission({
         description,
         wallet,
         account,
         requestId,
+        setStatus: setLoadingLabel,
         freeImageId: freeImageId || '',
         encryptedImageId: encryptedImageId || '',
         watermarkedImageId: watermarkedImageId || '',

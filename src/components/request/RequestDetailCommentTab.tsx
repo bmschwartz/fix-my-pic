@@ -20,6 +20,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
   const [commentText, setCommentText] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState('');
 
   const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCommentText(event.target.value);
@@ -41,6 +42,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
     if (!commentText.trim()) {
       return;
     }
+
     setSubmitting(true);
     try {
       await createRequestComment({
@@ -48,6 +50,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
         text: commentText,
         requestId: requestId,
         wallet: selectedWallet,
+        setStatus: setLoadingLabel,
       });
       setCommentText('');
       router.reload();
@@ -82,7 +85,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
         {account ? 'Submit' : 'Connect Wallet'}
       </FMPButton>
       <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
-      <LoadingOverlay loading={submitting} label={`Submitting comment`} />
+      <LoadingOverlay loading={submitting} label={loadingLabel} />
     </Box>
   );
 };
