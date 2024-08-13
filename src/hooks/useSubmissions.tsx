@@ -13,6 +13,7 @@ interface CreateRequestSubmissionParams extends Omit<ContractCreateSubmissionPar
   freeImageId: string;
   encryptedImageId: string;
   watermarkedImageId: string;
+  setStatus?: (status: string) => void;
 }
 
 export const useSubmissions = () => {
@@ -48,6 +49,7 @@ export const useSubmissions = () => {
     wallet,
     account,
     price,
+    setStatus,
     requestId,
     freeImageId,
     encryptedImageId,
@@ -56,6 +58,7 @@ export const useSubmissions = () => {
     setLoading(true);
 
     try {
+      setStatus?.('Uploading metadata...');
       const ipfsHash = await uploadRequestSubmission({
         description,
         freeImageId,
@@ -63,6 +66,7 @@ export const useSubmissions = () => {
         watermarkedImageId,
       });
 
+      setStatus?.('Creating smart contract...');
       const requestSubmissionAddress = await contractService.createRequestSubmission({
         price,
         wallet,
@@ -74,6 +78,7 @@ export const useSubmissions = () => {
       let created = false;
       if (requestSubmissionAddress) {
         // Try to fetch data from the subgraph until the new submission appears
+        setStatus?.('Waiting for confirmation...');
         await pollForNewSubmission(requestSubmissionAddress);
         created = true;
       }
@@ -82,6 +87,7 @@ export const useSubmissions = () => {
         throw new Error('Failed to create request submission');
       }
     } finally {
+      setStatus?.('');
       setLoading(false);
     }
   };
