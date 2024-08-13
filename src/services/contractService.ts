@@ -77,24 +77,28 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     const receipt: ContractTransactionReceipt = await tx.wait();
 
     if (receipt.status !== 1) {
+      logger.error('Failed to create image request', receipt);
       throw new Error('Failed to create image request');
     }
 
     const event = receipt.logs.find(
       (log) =>
         log.address === factoryAddress &&
-        log.topics[0] ===
-          ethers.id('PictureRequestCreated(address,string,string,string,uint256,address,uint256,uint256)')
+        log.topics[0] === ethers.id('PictureRequestCreated(address,string,uint256,address,uint256,uint256)')
     );
 
     if (!event) {
+      logger.error('PictureRequestCreated event not found', receipt);
       return null;
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
-    const pictureRequestAddress: string | null = decodedEvent?.args.request;
+    if (!decodedEvent) {
+      logger.error('Failed to decode PictureRequestCreated event', receipt);
+      return null;
+    }
 
-    return pictureRequestAddress;
+    return decodedEvent.args.request;
   };
 
   const createRequestSubmission = async ({
@@ -130,9 +134,13 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
-    const submissionAddress: string | null = decodedEvent?.args.submission;
 
-    return submissionAddress;
+    if (!decodedEvent) {
+      logger.error('Failed to decode RequestSubmissionCreated event', receipt);
+      return null;
+    }
+
+    return decodedEvent.args.submission;
   };
 
   const purchaseSubmission = async ({
@@ -198,9 +206,12 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
-    const commentAddress: string | null = decodedEvent?.args.comment;
+    if (!decodedEvent) {
+      logger.error('Failed to decode RequestCommentCreated event', receipt);
+      return null;
+    }
 
-    return commentAddress;
+    return decodedEvent?.args.comment;
   };
 
   return { createPictureRequest, createRequestSubmission, purchaseSubmission, createRequestComment };
