@@ -121,7 +121,7 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     const event = receipt.logs.find(
       (log) =>
         log.address === factoryAddress &&
-        log.topics[0] === ethers.id('RequestSubmissionCreated(address,address,string,uint256,address,uint256')
+        log.topics[0] === ethers.id('RequestSubmissionCreated(address,address,string,uint256,address,uint256)')
     );
 
     if (!event) {
@@ -130,12 +130,7 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
-
-    logger.info('RequestSubmissionCreated event', decodedEvent);
-
     const submissionAddress: string | null = decodedEvent?.args.submission;
-
-    logger.info('Submission address', submissionAddress);
 
     return submissionAddress;
   };
@@ -162,7 +157,9 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     const event = receipt.logs
       .map((log) => fixMyPicFactory.interface.parseLog(log))
       .find((log) => log && log.name === 'SubmissionPurchased');
+
     if (!event) {
+      logger.error('SubmissionPurchased event not found', receipt, submissionAddress, account);
       throw new Error('SubmissionPurchased event not found');
     }
 
@@ -185,14 +182,14 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     const receipt: ContractTransactionReceipt = await tx.wait();
 
     if (receipt.status !== 1) {
-      logger.error('Failed to create comment', receipt);
+      logger.error('Failed to create comment', receipt, requestAddress, account);
       throw new Error('Failed to create a comment');
     }
 
     const event = receipt.logs.find(
       (log) =>
         log.address === factoryAddress &&
-        log.topics[0] === ethers.id('RequestCommentCreated(address,address,string,address,uint256')
+        log.topics[0] === ethers.id('RequestCommentCreated(address,address,string,address,uint256)')
     );
 
     if (!event) {
@@ -201,11 +198,7 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     }
 
     const decodedEvent = fixMyPicFactory.interface.parseLog(event);
-
-    logger.info('RequestCommentCreated event', decodedEvent);
     const commentAddress: string | null = decodedEvent?.args.comment;
-
-    logger.info('Comment address', commentAddress);
 
     return commentAddress;
   };

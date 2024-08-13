@@ -27,7 +27,6 @@ const verifyPurchase = async (userAddress: string, submissionAddress: string): P
       submission: submissionAddress,
       purchaser: userAddress,
     });
-    logger.info('Purchases:', submissionAddress, userAddress, purchases);
     return purchases.length > 0;
   } catch (error) {
     logger.error('Error verifying purchase:', error);
