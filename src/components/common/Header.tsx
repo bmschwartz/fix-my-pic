@@ -2,9 +2,9 @@ import { AppBar, Avatar, Box, Toolbar, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React from 'react';
 
-import { ConnectWalletDialog } from '@/components';
+import { ConnectWalletButton } from '@/components';
 import { useWallet } from '@/hooks/useWallet';
 import FMPButton from './FMPButton';
 
@@ -12,15 +12,6 @@ const Header: React.FC = () => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { selectedWallet, selectedAccount, disconnectWallet } = useWallet();
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleOpenDialog = () => {
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
 
   return (
     <>
@@ -43,21 +34,20 @@ const Header: React.FC = () => {
                 onClick={disconnectWallet}
                 startIcon={
                   <Avatar
-                    src={selectedWallet.info.icon}
-                    alt={selectedWallet.info.name}
+                    src={selectedWallet.info?.icon}
+                    alt={selectedWallet.info?.name}
                     sx={{ width: 24, height: 24, marginRight: 1 }}
                   />
                 }
               >
-                Disconnect {selectedWallet.info.name}
+                Disconnect {selectedWallet.info?.name}
               </FMPButton>
             ) : (
-              <FMPButton onClick={handleOpenDialog}>Connect Wallet</FMPButton>
+              <ConnectWalletButton />
             )}
           </Toolbar>
         </Box>
       </AppBar>
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
     </>
   );
 };

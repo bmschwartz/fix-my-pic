@@ -9,7 +9,6 @@ import { useRequests } from '@/hooks/useRequests';
 import { useWallet } from '@/hooks/useWallet';
 
 const NewRequestForm: React.FC = () => {
-  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
@@ -18,6 +17,7 @@ const NewRequestForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
+  const router = useRouter();
   const { createPictureRequest } = useRequests();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 

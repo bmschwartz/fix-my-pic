@@ -25,6 +25,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "hardhat.config.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "hardhat.config.ts", "src/contexts/WalletContext.tsx.old"],
   "exclude": ["node_modules"]
 }

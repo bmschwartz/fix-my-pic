@@ -3,14 +3,15 @@ import { BrowserProvider, Contract, Signer } from 'zksync-ethers';
 
 import FixMyPicFactorySchema from '@/public/artifacts/FixMyPicFactory.json';
 import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json';
-import { EIP6963ProviderDetail } from '@/types/eip6963';
 import { convertUsdCentsToWei, getEthPrice } from '@/utils/currency';
 import { getUnixTimestampOneYearFromNow } from '@/utils/datetime';
 import { getLogger } from '@/utils/logging';
 
+import type { WalletDetail } from '@/contexts/WalletContext';
+
 export interface WalletParams {
   account: string;
-  wallet: EIP6963ProviderDetail;
+  wallet: WalletDetail;
 }
 
 export interface CreatePictureRequestParams extends WalletParams {
@@ -55,7 +56,10 @@ if (!FIX_MY_PIC_FACTORY_ADDRESS) {
 }
 
 async function createFixMyPicContractService(factoryAddress: string): Promise<FixMyPicContractService> {
-  const _getSigner = (wallet: EIP6963ProviderDetail, account: string): Promise<Signer> => {
+  const _getSigner = (wallet: WalletDetail, account: string): Promise<Signer> => {
+    if (!wallet.provider) {
+      throw new Error('Wallet provider not found');
+    }
     const provider = new BrowserProvider(wallet.provider);
     return provider.getSigner(account);
   };
@@ -103,8 +107,8 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
 
   const createRequestSubmission = async ({
     price,
-    wallet,
     account,
+    wallet,
     ipfsHash,
     requestAddress,
   }: CreateRequestSubmissionParams): Promise<string | null> => {
@@ -175,8 +179,8 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
   };
 
   const createRequestComment = async ({
-    wallet,
     account,
+    wallet,
     ipfsHash,
     requestAddress,
   }: CreateRequestCommentParams): Promise<string | null> => {

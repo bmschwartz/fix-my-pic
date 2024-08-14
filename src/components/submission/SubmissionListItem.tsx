@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
-import { ConnectWalletDialog, FMPTypography, ImageOverlay, LoadingOverlay } from '@/components';
+import { FMPTypography, ImageOverlay, LoadingOverlay } from '@/components';
 import { useContractService } from '@/hooks/useContractService';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestSubmission } from '@/types/submission';
@@ -20,7 +20,6 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
   const { contractService } = useContractService();
   const { selectedWallet, selectedAccount } = useWallet();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -71,10 +70,6 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
     setIsOverlayOpen(false);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
   return (
     <>
       <Box sx={{ position: 'relative', cursor: 'pointer' }}>
@@ -105,7 +100,7 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
             }
 
             if (!selectedWallet || !selectedAccount) {
-              setDialogOpen(true);
+              // TODO: Open the connect wallet dialog
               return;
             }
 
@@ -132,7 +127,6 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
         />
       )}
       <LoadingOverlay loading={loading} label={loadingLabel} />
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
     </>
   );
 };
