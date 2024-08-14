@@ -1,5 +1,6 @@
 import { PhotoCamera } from '@mui/icons-material';
 import { Box, Divider, InputAdornment, TextField } from '@mui/material';
+import { useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
@@ -9,7 +10,6 @@ import { useRequests } from '@/hooks/useRequests';
 import { useWallet } from '@/hooks/useWallet';
 
 const NewRequestForm: React.FC = () => {
-  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
@@ -18,7 +18,10 @@ const NewRequestForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
+  const router = useRouter();
   const { createPictureRequest } = useRequests();
+  const { isConnected } = useWeb3ModalAccount();
+  const { walletProvider } = useWeb3ModalProvider();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

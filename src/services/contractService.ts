@@ -3,14 +3,13 @@ import { BrowserProvider, Contract, Signer } from 'zksync-ethers';
 
 import FixMyPicFactorySchema from '@/public/artifacts/FixMyPicFactory.json';
 import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json';
-import { EIP6963ProviderDetail } from '@/types/eip6963';
 import { convertUsdCentsToWei, getEthPrice } from '@/utils/currency';
 import { getUnixTimestampOneYearFromNow } from '@/utils/datetime';
 import { getLogger } from '@/utils/logging';
 
 export interface WalletParams {
   account: string;
-  wallet: EIP6963ProviderDetail;
+  provider: ethers.Eip1193Provider;
 }
 
 export interface CreatePictureRequestParams extends WalletParams {
@@ -55,8 +54,8 @@ if (!FIX_MY_PIC_FACTORY_ADDRESS) {
 }
 
 async function createFixMyPicContractService(factoryAddress: string): Promise<FixMyPicContractService> {
-  const _getSigner = (wallet: EIP6963ProviderDetail, account: string): Promise<Signer> => {
-    const provider = new BrowserProvider(wallet.provider);
+  const _getSigner = (walletProvider: ethers.Eip1193Provider, account: string): Promise<Signer> => {
+    const provider = new BrowserProvider(walletProvider);
     return provider.getSigner(account);
   };
 
@@ -64,10 +63,14 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     ipfsHash,
     budget,
     expiresAt,
-    wallet,
+    provider,
     account,
   }: CreatePictureRequestParams): Promise<string | null> => {
-    const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
+    const fixMyPicFactory = new Contract(
+      factoryAddress,
+      FixMyPicFactorySchema.abi,
+      await _getSigner(provider, account)
+    );
 
     const tx = await fixMyPicFactory.createPictureRequest(
       ipfsHash,
@@ -103,12 +106,16 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
 
   const createRequestSubmission = async ({
     price,
-    wallet,
     account,
+    provider,
     ipfsHash,
     requestAddress,
   }: CreateRequestSubmissionParams): Promise<string | null> => {
-    const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
+    const fixMyPicFactory = new Contract(
+      factoryAddress,
+      FixMyPicFactorySchema.abi,
+      await _getSigner(provider, account)
+    );
 
     const tx = await fixMyPicFactory.createRequestSubmission(
       requestAddress,
@@ -145,19 +152,23 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
 
   const purchaseSubmission = async ({
     address: submissionAddress,
-    wallet,
+    provider,
     account,
   }: PurchaseSubmissionParams): Promise<boolean> => {
     const submissionContract = new ethers.Contract(
       submissionAddress,
       RequestSubmissionSchema.abi,
-      await _getSigner(wallet, account)
+      await _getSigner(provider, account)
     );
     const priceInCents = await submissionContract.price();
     const ethPrice = await getEthPrice();
     const priceInWei = convertUsdCentsToWei(priceInCents, ethPrice);
 
-    const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
+    const fixMyPicFactory = new Contract(
+      factoryAddress,
+      FixMyPicFactorySchema.abi,
+      await _getSigner(provider, account)
+    );
 
     const tx = await fixMyPicFactory.purchaseSubmission(submissionAddress, { value: priceInWei });
     const receipt: ContractTransactionReceipt = await tx.wait();
@@ -175,15 +186,15 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
   };
 
   const createRequestComment = async ({
-    wallet,
     account,
+    provider,
     ipfsHash,
     requestAddress,
   }: CreateRequestCommentParams): Promise<string | null> => {
     const fixMyPicFactory = new ethers.Contract(
       factoryAddress,
       FixMyPicFactorySchema.abi,
-      await _getSigner(wallet, account)
+      await _getSigner(provider, account)
     );
 
     const tx = await fixMyPicFactory.createRequestComment(requestAddress, ipfsHash);

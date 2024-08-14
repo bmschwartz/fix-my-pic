@@ -3,7 +3,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { FullScreenLoader } from '@/components';
 import { FixMyPicContractService, getFixMyPicContractService } from '@/services/contractService';
 import { ContractServiceProvider } from './ContractServiceContext';
-import { WalletProvider } from './WalletContext';
+import { WalletProvider } from './WalletContext.tsx.old';
 
 interface AppProvidersProps {
   children: ReactNode;

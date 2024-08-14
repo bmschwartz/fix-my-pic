@@ -1,26 +1,14 @@
+import { useWeb3Modal } from '@web3modal/ethers/react';
+import { ethers } from 'ethers';
 import { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
 
-import { EIP6963AnnounceProviderEvent, EIP6963ProviderDetail, WalletError } from '@/types/eip6963';
-
-// Type alias for a record where the keys are wallet identifiers and the values are account
-// addresses or null.
-type SelectedAccountByWallet = Record<string, string | null>;
-
-// Context interface for the EIP-6963 provider.
 export interface WalletProviderContextType {
-  wallets: Record<string, EIP6963ProviderDetail>; // A list of wallets.
-  selectedWallet: EIP6963ProviderDetail | null; // The selected wallet.
+  walletProvider: ethers.Eip1193Provider | undefined; // The selected wallet provider.
   selectedAccount: string | null; // The selected account address.
-  errorMessage: string | null; // An error message.
-  connectWallet: (walletUuid: string) => Promise<void>; // Function to connect wallets.
+  isConnected: boolean; // Whether the wallet is connected.
+  connectWallet: () => Promise<void>; // Function to connect wallets.
   disconnectWallet: () => void; // Function to disconnect wallets.
   clearError: () => void;
-}
-
-declare global {
-  interface WindowEventMap {
-    'eip6963:announceProvider': CustomEvent;
-  }
 }
 
 interface WalletProviderProps {
@@ -32,102 +20,17 @@ export const WalletProviderContext = createContext<WalletProviderContextType | u
 // The WalletProvider component wraps all other components in the dapp, providing them with the
 // necessary data and functions related to wallets.
 export const WalletProvider = ({ children }: WalletProviderProps) => {
-  const [wallets, setWallets] = useState<Record<string, EIP6963ProviderDetail>>({});
-  const [selectedWalletRdns, setSelectedWalletRdns] = useState<string | null>(null);
-  const [selectedAccountByWalletRdns, setSelectedAccountByWalletRdns] = useState<SelectedAccountByWallet>({});
-
-  const [errorMessage, setErrorMessage] = useState('');
-  const clearError = () => setErrorMessage('');
-  const setError = (error: string) => setErrorMessage(error);
-
-  useEffect(() => {
-    const savedSelectedWalletRdns = localStorage.getItem('selectedWalletRdns');
-    const savedSelectedAccountByWalletRdns = localStorage.getItem('selectedAccountByWalletRdns');
-
-    if (savedSelectedAccountByWalletRdns) {
-      setSelectedAccountByWalletRdns(JSON.parse(savedSelectedAccountByWalletRdns));
-    }
-
-    function onAnnouncement(event: EIP6963AnnounceProviderEvent) {
-      setWallets((currentWallets) => ({
-        ...currentWallets,
-        [event.detail.info.rdns]: event.detail,
-      }));
-
-      if (savedSelectedWalletRdns && event.detail.info.rdns === savedSelectedWalletRdns) {
-        setSelectedWalletRdns(savedSelectedWalletRdns);
-      }
-    }
-
-    window.addEventListener('eip6963:announceProvider', onAnnouncement);
-    window.dispatchEvent(new Event('eip6963:requestProvider'));
-
-    return () => window.removeEventListener('eip6963:announceProvider', onAnnouncement);
-  }, []);
-
-  const connectWallet = useCallback(
-    async (walletRdns: string) => {
-      try {
-        const wallet = wallets[walletRdns];
-        const accounts = (await wallet.provider.request({
-          method: 'eth_requestAccounts',
-        })) as string[];
-
-        if (accounts?.[0]) {
-          setSelectedWalletRdns(wallet.info.rdns);
-          setSelectedAccountByWalletRdns((currentAccounts) => ({
-            ...currentAccounts,
-            [wallet.info.rdns]: accounts[0],
-          }));
-
-          localStorage.setItem('selectedWalletRdns', wallet.info.rdns);
-          localStorage.setItem(
-            'selectedAccountByWalletRdns',
-            JSON.stringify({
-              ...selectedAccountByWalletRdns,
-              [wallet.info.rdns]: accounts[0],
-            })
-          );
-        }
-      } catch (error) {
-        console.error('Failed to connect to provider:', error);
-        const walletError: WalletError = error as WalletError;
-        setError(`Code: ${walletError.code} \nError Message: ${walletError.message}`);
-      }
-    },
-    [wallets, selectedAccountByWalletRdns]
-  );
-
-  const disconnectWallet = useCallback(async () => {
-    if (selectedWalletRdns) {
-      setSelectedAccountByWalletRdns((currentAccounts) => ({
-        ...currentAccounts,
-        [selectedWalletRdns]: null,
-      }));
-
-      const wallet = wallets[selectedWalletRdns];
-      setSelectedWalletRdns(null);
-      localStorage.removeItem('selectedWalletRdns');
-
-      try {
-        await wallet.provider.request({
-          method: 'wallet_revokePermissions',
-          params: [{ eth_accounts: {} }],
-        });
-      } catch (error) {
-        console.error('Failed to revoke permissions:', error);
-      }
-    }
-  }, [selectedWalletRdns, wallets]);
+  const { open: connectWallet } = useWeb3Modal();
 
   const contextValue: WalletProviderContextType = {
-    wallets,
-    selectedWallet: selectedWalletRdns === null ? null : wallets[selectedWalletRdns],
-    selectedAccount: selectedWalletRdns === null ? null : selectedAccountByWalletRdns[selectedWalletRdns],
-    errorMessage,
+    // wallets,
+    // selectedWallet: selectedWalletRdns === null ? null : wallets[selectedWalletRdns],
+    // selectedAccount: selectedWalletRdns === null ? null : selectedAccountByWalletRdns[selectedWalletRdns],
+    // errorMessage,
     connectWallet,
-    disconnectWallet,
-    clearError,
+
+    // disconnectWallet,
+    // clearError,
   };
 
   return <WalletProviderContext.Provider value={contextValue}>{children}</WalletProviderContext.Provider>;
