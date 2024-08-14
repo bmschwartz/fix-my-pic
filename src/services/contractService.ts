@@ -7,9 +7,11 @@ import { convertUsdCentsToWei, getEthPrice } from '@/utils/currency';
 import { getUnixTimestampOneYearFromNow } from '@/utils/datetime';
 import { getLogger } from '@/utils/logging';
 
+import type { WalletDetail } from '@/contexts/WalletContext';
+
 export interface WalletParams {
   account: string;
-  provider: ethers.Eip1193Provider;
+  wallet: WalletDetail;
 }
 
 export interface CreatePictureRequestParams extends WalletParams {
@@ -54,8 +56,11 @@ if (!FIX_MY_PIC_FACTORY_ADDRESS) {
 }
 
 async function createFixMyPicContractService(factoryAddress: string): Promise<FixMyPicContractService> {
-  const _getSigner = (walletProvider: ethers.Eip1193Provider, account: string): Promise<Signer> => {
-    const provider = new BrowserProvider(walletProvider);
+  const _getSigner = (wallet: WalletDetail, account: string): Promise<Signer> => {
+    if (!wallet.provider) {
+      throw new Error('Wallet provider not found');
+    }
+    const provider = new BrowserProvider(wallet.provider);
     return provider.getSigner(account);
   };
 
@@ -63,14 +68,10 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     ipfsHash,
     budget,
     expiresAt,
-    provider,
+    wallet,
     account,
   }: CreatePictureRequestParams): Promise<string | null> => {
-    const fixMyPicFactory = new Contract(
-      factoryAddress,
-      FixMyPicFactorySchema.abi,
-      await _getSigner(provider, account)
-    );
+    const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
 
     const tx = await fixMyPicFactory.createPictureRequest(
       ipfsHash,
@@ -107,15 +108,11 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
   const createRequestSubmission = async ({
     price,
     account,
-    provider,
+    wallet,
     ipfsHash,
     requestAddress,
   }: CreateRequestSubmissionParams): Promise<string | null> => {
-    const fixMyPicFactory = new Contract(
-      factoryAddress,
-      FixMyPicFactorySchema.abi,
-      await _getSigner(provider, account)
-    );
+    const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
 
     const tx = await fixMyPicFactory.createRequestSubmission(
       requestAddress,
@@ -152,23 +149,19 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
 
   const purchaseSubmission = async ({
     address: submissionAddress,
-    provider,
+    wallet,
     account,
   }: PurchaseSubmissionParams): Promise<boolean> => {
     const submissionContract = new ethers.Contract(
       submissionAddress,
       RequestSubmissionSchema.abi,
-      await _getSigner(provider, account)
+      await _getSigner(wallet, account)
     );
     const priceInCents = await submissionContract.price();
     const ethPrice = await getEthPrice();
     const priceInWei = convertUsdCentsToWei(priceInCents, ethPrice);
 
-    const fixMyPicFactory = new Contract(
-      factoryAddress,
-      FixMyPicFactorySchema.abi,
-      await _getSigner(provider, account)
-    );
+    const fixMyPicFactory = new Contract(factoryAddress, FixMyPicFactorySchema.abi, await _getSigner(wallet, account));
 
     const tx = await fixMyPicFactory.purchaseSubmission(submissionAddress, { value: priceInWei });
     const receipt: ContractTransactionReceipt = await tx.wait();
@@ -187,14 +180,14 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
 
   const createRequestComment = async ({
     account,
-    provider,
+    wallet,
     ipfsHash,
     requestAddress,
   }: CreateRequestCommentParams): Promise<string | null> => {
     const fixMyPicFactory = new ethers.Contract(
       factoryAddress,
       FixMyPicFactorySchema.abi,
-      await _getSigner(provider, account)
+      await _getSigner(wallet, account)
     );
 
     const tx = await fixMyPicFactory.createRequestComment(requestAddress, ipfsHash);

@@ -34,13 +34,13 @@ const Header: React.FC = () => {
                 onClick={disconnectWallet}
                 startIcon={
                   <Avatar
-                    src={selectedWallet.info.icon}
-                    alt={selectedWallet.info.name}
+                    src={selectedWallet.info?.icon}
+                    alt={selectedWallet.info?.name}
                     sx={{ width: 24, height: 24, marginRight: 1 }}
                   />
                 }
               >
-                Disconnect {selectedWallet.info.name}
+                Disconnect {selectedWallet.info?.name}
               </FMPButton>
             ) : (
               <ConnectWalletButton />
