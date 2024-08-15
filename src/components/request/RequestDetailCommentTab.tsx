@@ -1,32 +1,26 @@
 import { Box, TextField, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import { FMPButton, LoadingOverlay } from '@/components';
-import { useComments } from '@/hooks/useComments';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestComment } from '@/types/comment';
-import { getDateTimeFromUnixTimestamp } from '@/utils/datetime';
+import { getTimeSince } from '@/utils/datetime';
 
 interface RequestDetailCommentTabProps {
   requestId: string;
   comments: RequestComment[];
 }
 
-const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ requestId, comments }) => {
-  const router = useRouter();
-  const { selectedAccount: account, selectedWallet } = useWallet();
-  const { createRequestComment } = useComments();
+const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ requestId }) => {
+  const { selectedAccount: account, selectedWallet, connectWallet } = useWallet();
+  const { createComment, comments } = useRequestDetail();
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
   const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCommentText(event.target.value);
-  };
-
-  const connectWallet = () => {
-    // TODO: Open the connect wallet dialog
   };
 
   const submitComment = async () => {
@@ -40,7 +34,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
 
     setSubmitting(true);
     try {
-      await createRequestComment({
+      await createComment({
         account,
         text: commentText,
         requestId: requestId,
@@ -48,7 +42,6 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
         setStatus: setLoadingLabel,
       });
       setCommentText('');
-      router.reload();
     } catch (error) {
       console.error('Failed to submit comment:', error);
     } finally {
@@ -59,13 +52,26 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
   return (
     <Box sx={{ mt: 3 }}>
       {comments.map((comment) => (
-        <Box key={comment.id} sx={{ mb: 2 }}>
-          <Typography variant="body2" fontWeight="bold">
-            {comment.commenter} - {getDateTimeFromUnixTimestamp(comment.createdAt)}
+        <Box
+          key={comment.id}
+          sx={{
+            mb: 2,
+            padding: 2,
+            borderRadius: 2,
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            transition: 'background-color 0.3s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+            {comment.commenter.slice(0, 8)}... - {getTimeSince(comment.createdAt)}
           </Typography>
-          <Typography variant="body2">{comment.text}</Typography>
+          <Typography variant="body1">{comment.text}</Typography>
         </Box>
       ))}
+
       <TextField
         fullWidth
         multiline
