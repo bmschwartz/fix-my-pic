@@ -23,16 +23,6 @@ const EmptyState: React.FC = () => {
   );
 };
 
-// function useDeepCompareMemoize<T>(value: T): T {
-//   const ref = React.useRef<T>(value);
-
-//   if (!isEqual(value, ref.current)) {
-//     ref.current = value;
-//   }
-
-//   return ref.current;
-// }
-
 const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ requestId, submissions }) => {
   const [loadingImageUrls, setLoadingImageUrls] = React.useState(true);
   const [loadedImages, setLoadedImages] = React.useState<boolean>(false);
