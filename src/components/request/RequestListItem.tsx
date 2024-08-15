@@ -22,13 +22,14 @@ const RequestListItem: React.FC<RequestListItemProps> = ({ pictureRequest }) => 
           position: 'relative',
           overflow: 'hidden',
           transition: 'transform 0.3s ease',
+          borderRadius: 4,
           '&:hover': {
-            transform: 'scale(1.05)', // Slightly grow the component on hover
-            transformOrigin: 'center', // Transform from the center to keep it within bounds
-            zIndex: 1, // Ensure the element is above others when scaled
+            transform: 'scale(1.05)',
+            transformOrigin: 'center',
+            zIndex: 1,
           },
           '&:hover .overlay': {
-            opacity: 1, // Show the overlay when hovering over the entire item
+            opacity: 1,
           },
         }}
       >

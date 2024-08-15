@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
-import { FMPTypography, ImageOverlay, LoadingOverlay } from '@/components';
+import { ImageOverlay, LoadingOverlay } from '@/components';
 import { useContractService } from '@/hooks/useContractService';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestSubmission } from '@/types/submission';
@@ -18,7 +18,7 @@ interface SubmissionListItemProps {
 const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, imageUrlToShow }) => {
   const router = useRouter();
   const { contractService } = useContractService();
-  const { selectedWallet, selectedAccount } = useWallet();
+  const { selectedWallet, selectedAccount, connectWallet } = useWallet();
 
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
@@ -74,7 +74,23 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
 
   return (
     <>
-      <Box sx={{ position: 'relative', cursor: 'pointer' }}>
+      <Box
+        sx={{
+          position: 'relative',
+          cursor: 'pointer',
+          overflow: 'hidden',
+          transition: 'transform 0.3s ease',
+          borderRadius: 4,
+          '&:hover': {
+            transform: 'scale(1.05)', // Slightly grow the component on hover
+            transformOrigin: 'center', // Transform from the center to keep it within bounds
+            zIndex: 1, // Ensure the element is above others when scaled
+          },
+          '&:hover .overlay': {
+            opacity: 1, // Show the overlay when hovering over the entire item
+          },
+        }}
+      >
         <Image
           src={imageUrlToShow}
           alt="Submission"
@@ -85,9 +101,6 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
           onClick={handleImageClick}
         />
         {generateChip()}
-      </Box>
-      <Box sx={{ padding: 0 }}>
-        <FMPTypography variant="body1"></FMPTypography>
       </Box>
       {isOverlayOpen && (
         <ImageOverlay
@@ -102,7 +115,8 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
             }
 
             if (!selectedWallet || !selectedAccount) {
-              // TODO: Open the connect wallet dialog
+              handleOverlayClose();
+              connectWallet();
               return;
             }
 
