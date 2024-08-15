@@ -1,9 +1,8 @@
 import { Box, TextField, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import { FMPButton, LoadingOverlay } from '@/components';
-import { useComments } from '@/hooks/useComments';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestComment } from '@/types/comment';
 import { getDateTimeFromUnixTimestamp } from '@/utils/datetime';
@@ -13,20 +12,15 @@ interface RequestDetailCommentTabProps {
   comments: RequestComment[];
 }
 
-const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ requestId, comments }) => {
-  const router = useRouter();
-  const { selectedAccount: account, selectedWallet } = useWallet();
-  const { createRequestComment } = useComments();
+const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ requestId }) => {
+  const { selectedAccount: account, selectedWallet, connectWallet } = useWallet();
+  const { createComment, comments } = useRequestDetail();
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
   const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCommentText(event.target.value);
-  };
-
-  const connectWallet = () => {
-    // TODO: Open the connect wallet dialog
   };
 
   const submitComment = async () => {
@@ -40,7 +34,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
 
     setSubmitting(true);
     try {
-      await createRequestComment({
+      await createComment({
         account,
         text: commentText,
         requestId: requestId,
@@ -48,7 +42,6 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
         setStatus: setLoadingLabel,
       });
       setCommentText('');
-      router.reload();
     } catch (error) {
       console.error('Failed to submit comment:', error);
     } finally {
