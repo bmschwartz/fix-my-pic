@@ -15,10 +15,8 @@ interface ImageOverlayProps {
 }
 
 const ImageOverlay: React.FC<ImageOverlayProps> = ({ imageUrl, onClose, onDownload, description, price }) => {
-  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).dataset.overlay) {
-      onClose();
-    }
+  const handleOverlayClick = () => {
+    onClose();
   };
 
   return (
