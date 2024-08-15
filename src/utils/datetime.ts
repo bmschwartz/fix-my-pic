@@ -8,7 +8,7 @@ export function getDateTimeFromUnixTimestamp(timestamp: number): string {
   const date = new Date(timestamp * 1000); // multiply by 1000 to convert from seconds to milliseconds
   return date.toLocaleString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',

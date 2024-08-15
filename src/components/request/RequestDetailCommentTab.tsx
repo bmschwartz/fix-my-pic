@@ -1,4 +1,4 @@
-import { Box, TextField, Typography } from '@mui/material';
+import { Box, Divider, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
 import { FMPButton, LoadingOverlay } from '@/components';
@@ -54,9 +54,10 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
       {comments.map((comment) => (
         <Box key={comment.id} sx={{ mb: 2 }}>
           <Typography variant="body2" fontWeight="bold">
-            {comment.commenter} - {getDateTimeFromUnixTimestamp(comment.createdAt)}
+            {comment.commenter.slice(0, 8)}... - {getDateTimeFromUnixTimestamp(comment.createdAt)}
           </Typography>
           <Typography variant="body2">{comment.text}</Typography>
+          <Divider sx={{ mt: 2 }} />
         </Box>
       ))}
       <TextField
