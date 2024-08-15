@@ -10,7 +10,7 @@ interface PollWithRetryOptions<T> {
 
 export const pollWithRetry = async <T>({
   callback,
-  retries = 10,
+  retries = 20,
   delayTime = 2000,
 }: PollWithRetryOptions<T>): Promise<T | null> => {
   for (let i = 0; i < retries; i++) {
