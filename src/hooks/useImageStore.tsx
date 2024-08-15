@@ -55,7 +55,6 @@ export const useImageStore = () => {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/decrypt`, {
         submissionAddress,
         encryptedPictureId,
-        userAddress: account,
       });
       const { decryptedImageId } = response.data;
       return `${IMAGE_URL_ROOT}/${decryptedImageId}`;
@@ -65,7 +64,7 @@ export const useImageStore = () => {
   };
 
   const getImageUrlToShow = (submission: RequestSubmission): Promise<string> => {
-    const purchased = submission.purchases.some((purchase) => purchase.buyer === account);
+    const purchased = submission.purchases.some((purchase) => purchase.buyer.toLowerCase() === account?.toLowerCase());
 
     if (submission.price === 0 || !purchased) {
       const pictureId = submission.freePictureId || (submission.watermarkedPictureId as string);

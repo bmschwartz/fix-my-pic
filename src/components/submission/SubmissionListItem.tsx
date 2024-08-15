@@ -25,7 +25,9 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   const isFree = submission.price === 0;
-  const purchasedSubmission = submission.purchases.find((purchase) => purchase.buyer === selectedAccount);
+  const purchasedSubmission = submission.purchases.find(
+    (purchase) => purchase.buyer.toLowerCase() === selectedAccount?.toLowerCase()
+  );
 
   const generateChip = () => {
     let label: string;
