@@ -25,7 +25,7 @@ export const useSubmissions = () => {
     return { ...submission, ...ipfsData };
   };
 
-  const fetchSubmissions = async (requestId: string) => {
+  const fetchSubmissions = async (requestId: string): Promise<RequestSubmission[]> => {
     try {
       const result = await execute(GetRequestSubmissionsDocument, { requestId });
       const submissions = result?.data?.requestSubmissions || [];
@@ -37,7 +37,10 @@ export const useSubmissions = () => {
     }
   };
 
-  const pollForNewSubmission = async (id: string): Promise<RequestSubmission | null> => {
+  const pollForNewSubmission = async (
+    id: string,
+    onSubmissionFound: (submission: RequestSubmission) => void
+  ): Promise<void> => {
     const fetchedSubmission = await pollWithRetry({
       callback: async () => {
         const result = await execute(GetRequestSubmissionDocument, { id });
@@ -46,11 +49,13 @@ export const useSubmissions = () => {
     });
 
     if (!fetchedSubmission) {
-      return null;
+      return;
     }
 
     const submissionWithIpfsData = await loadIPFSAndTransform(fetchedSubmission);
-    return mapRequestSubmission(submissionWithIpfsData);
+    const finalSubmission = mapRequestSubmission(submissionWithIpfsData);
+
+    onSubmissionFound(finalSubmission);
   };
 
   const createRequestSubmission = async ({

@@ -60,7 +60,9 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
           fetchSubmissions(requestId),
         ]);
 
-        setRequest(request);
+        if (request) {
+          setRequest(request);
+        }
         setComments(comments);
         setSubmissions(submissions);
         setLoading(false);
@@ -73,14 +75,26 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
   const createSubmission = async (params: CreateRequestSubmissionParams): Promise<RequestSubmission> => {
     const optimisticSubmission = await createRequestSubmission(params);
     setSubmissions((prevSubmissions) => [...prevSubmissions, optimisticSubmission]);
-    pollForNewSubmission(optimisticSubmission.id);
+
+    pollForNewSubmission(optimisticSubmission.id, (polledSubmission: RequestSubmission) => {
+      setSubmissions((prevSubmissions) =>
+        prevSubmissions.map((submission) => (submission.id === optimisticSubmission.id ? polledSubmission : submission))
+      );
+    });
+
     return optimisticSubmission;
   };
 
   const createComment = async (params: CreateRequestCommentParams): Promise<RequestComment> => {
     const optimisticComment = await createRequestComment(params);
     setComments((prevComments) => [...prevComments, optimisticComment]);
-    pollForNewComment(optimisticComment.id);
+
+    pollForNewComment(optimisticComment.id, (polledComment: RequestComment) => {
+      setComments((prevComments) =>
+        prevComments.map((comment) => (comment.id === optimisticComment.id ? polledComment : comment))
+      );
+    });
+
     return optimisticComment;
   };
 
