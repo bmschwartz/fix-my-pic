@@ -1,7 +1,10 @@
 import { createDecipheriv, createHash } from 'crypto';
+import { ethers } from 'ethers';
+import { getServerSession } from 'next-auth';
 
-import { getBuiltGraphSDK } from '@/graphql/client';
+import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json';
 import { getLogger } from '@/utils/logging';
+import { authOptions } from '../auth/[...nextauth]';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
@@ -22,12 +25,11 @@ const decrypt = (encryptedText: string) => {
 
 const verifyPurchase = async (userAddress: string, submissionAddress: string): Promise<boolean> => {
   try {
-    const sdk = getBuiltGraphSDK();
-    const { submissionPurchases: purchases } = await sdk.GetSubmissionPurchase({
-      submission: submissionAddress,
-      purchaser: userAddress,
-    });
-    return purchases.length > 0;
+    const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+    const contract = new ethers.Contract(submissionAddress, RequestSubmissionSchema.abi, provider);
+
+    const hasPurchased = await contract.hasPurchased(userAddress);
+    return hasPurchased;
   } catch (error) {
     logger.error('Error verifying purchase:', error);
     return false;
@@ -40,14 +42,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const { encryptedPictureId, userAddress, submissionAddress } = req.body;
+  // Retrieve the authenticated session
+  const session = await getServerSession(req, res, authOptions);
 
-  if (!encryptedPictureId || !userAddress || !submissionAddress) {
-    res.status(400).json({ message: 'Encrypted Picture ID, User Address, and Submission Address are required' });
+  if (!session || !session.address) {
+    res.status(401).json({ message: 'Not authenticated' });
+    return;
+  }
+
+  const { encryptedPictureId, submissionAddress } = req.body;
+
+  if (!encryptedPictureId || !submissionAddress) {
+    res.status(400).json({ message: 'Encrypted Picture ID and Submission Address are required' });
     return;
   }
 
   try {
+    // Use the authenticated user's address from the session
+    const userAddress = session.address;
+
     const purchased = await verifyPurchase(userAddress, submissionAddress);
 
     if (!purchased) {

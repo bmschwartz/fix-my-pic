@@ -1,5 +1,5 @@
 import { getAddressFromMessage, getChainIdFromMessage, verifySignature } from '@web3modal/siwe';
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import credentialsProvider from 'next-auth/providers/credentials';
 
 import type { SIWESession } from '@web3modal/siwe';
@@ -61,8 +61,7 @@ const providers = [
   }),
 ];
 
-const handler = NextAuth({
-  // https://next-auth.js.org/configuration/providers/oauth
+export const authOptions: NextAuthOptions = {
   secret: nextAuthSecret,
   providers,
   session: {
@@ -83,6 +82,8 @@ const handler = NextAuth({
       return session;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export default handler;
