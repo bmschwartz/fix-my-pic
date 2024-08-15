@@ -1,44 +1,54 @@
-import { useState } from 'react';
-
 import { execute, GetRequestCommentDocument, GetRequestCommentsDocument } from '@/graphql/client';
 import { useContractService } from '@/hooks/useContractService';
 import { CreateRequestCommentParams as ContractCreateCommentParams } from '@/services/contractService';
+import { RequestComment } from '@/types/comment';
 import { pollWithRetry } from '@/utils/delay';
 import { mapRequestComment } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
-interface CreateRequestCommentParams extends Omit<ContractCreateCommentParams, 'requestAddress' | 'ipfsHash'> {
+export interface CreateRequestCommentParams extends Omit<ContractCreateCommentParams, 'requestAddress' | 'ipfsHash'> {
   text: string;
   requestId: string;
   setStatus?: (status: string) => void;
 }
 
 export const useComments = () => {
-  const { fetchIPFSData } = useIpfs();
-  const { uploadRequestComment } = useIpfs();
   const { contractService } = useContractService();
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const { fetchIPFSData, uploadRequestComment } = useIpfs();
 
   const loadIPFSAndTransform = async (comment: any) => {
     const ipfsData = await fetchIPFSData(comment.ipfsHash);
     return { ...comment, ...ipfsData };
   };
 
-  const fetchComments = async (requestId: string) => {
-    const result = await execute(GetRequestCommentsDocument, { requestId });
-    const comments = result?.data?.requestComments || [];
-    const transformedComments = await Promise.all(comments.map(loadIPFSAndTransform));
-    return transformedComments.map(mapRequestComment);
+  const fetchComments = async (requestId: string): Promise<RequestComment[]> => {
+    try {
+      const result = await execute(GetRequestCommentsDocument, { requestId });
+      const comments = result?.data?.requestComments || [];
+      const transformedComments = await Promise.all(comments.map(loadIPFSAndTransform));
+      return transformedComments.map(mapRequestComment);
+    } catch (e) {
+      console.error('Error fetching comments:', e);
+      return [];
+    }
   };
 
-  const pollForNewComment = async (id: string): Promise<void> => {
-    return pollWithRetry({
+  const pollForNewComment = async (id: string, onCommentFound: (comment: RequestComment) => void): Promise<void> => {
+    const fetchedComment = await pollWithRetry({
       callback: async () => {
         const result = await execute(GetRequestCommentDocument, { id });
         return result?.data?.requestComment || null;
       },
     });
+
+    if (!fetchedComment) {
+      return;
+    }
+
+    const commentWithIpfData = await loadIPFSAndTransform(fetchedComment);
+    const finalComment = mapRequestComment(commentWithIpfData);
+
+    onCommentFound(finalComment);
   };
 
   const createRequestComment = async ({
@@ -47,9 +57,7 @@ export const useComments = () => {
     account,
     requestId,
     setStatus,
-  }: CreateRequestCommentParams): Promise<void> => {
-    setLoading(true);
-
+  }: CreateRequestCommentParams): Promise<RequestComment> => {
     try {
       setStatus?.('Uploading comment...');
       const ipfsHash = await uploadRequestComment({ text });
@@ -62,22 +70,22 @@ export const useComments = () => {
         requestAddress: requestId,
       });
 
-      let created = false;
-      if (requestCommentAddress) {
-        // Try to fetch data from the subgraph until the new comment appears
-        setStatus?.('Waiting for confirmation...');
-        await pollForNewComment(requestCommentAddress);
-        created = true;
-      }
-
-      if (!created) {
+      if (!requestCommentAddress) {
         throw new Error('Failed to create request comment');
       }
+
+      const optimisticComment: RequestComment = {
+        id: requestCommentAddress,
+        text,
+        commenter: account,
+        createdAt: Math.floor(Date.now() / 1000),
+      };
+
+      return optimisticComment;
     } finally {
       setStatus?.('');
-      setLoading(false);
     }
   };
 
-  return { createRequestComment, fetchComments, loading };
+  return { createRequestComment, fetchComments, pollForNewComment };
 };

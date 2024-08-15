@@ -1,13 +1,13 @@
-import { useState } from 'react';
-
 import { execute, GetRequestSubmissionDocument, GetRequestSubmissionsDocument } from '@/graphql/client';
 import { useContractService } from '@/hooks/useContractService';
 import { CreateRequestSubmissionParams as ContractCreateSubmissionParams } from '@/services/contractService';
+import { RequestSubmission } from '@/types/submission';
 import { pollWithRetry } from '@/utils/delay';
 import { mapRequestSubmission } from '@/utils/mappers';
 import { useIpfs } from './useIpfs';
 
-interface CreateRequestSubmissionParams extends Omit<ContractCreateSubmissionParams, 'requestAddress' | 'ipfsHash'> {
+export interface CreateRequestSubmissionParams
+  extends Omit<ContractCreateSubmissionParams, 'requestAddress' | 'ipfsHash'> {
   requestId: string;
   description: string;
   freeImageId: string;
@@ -17,31 +17,45 @@ interface CreateRequestSubmissionParams extends Omit<ContractCreateSubmissionPar
 }
 
 export const useSubmissions = () => {
-  const { fetchIPFSData } = useIpfs();
-  const { uploadRequestSubmission } = useIpfs();
   const { contractService } = useContractService();
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const { fetchIPFSData, uploadRequestSubmission } = useIpfs();
 
   const loadIPFSAndTransform = async (submission: any) => {
     const ipfsData = await fetchIPFSData(submission.ipfsHash);
     return { ...submission, ...ipfsData };
   };
 
-  const fetchSubmissions = async (requestId: string) => {
-    const result = await execute(GetRequestSubmissionsDocument, { requestId });
-    const submissions = result?.data?.requestSubmissions || [];
-    const transformedSubmissions = await Promise.all(submissions.map(loadIPFSAndTransform));
-    return transformedSubmissions.map(mapRequestSubmission);
+  const fetchSubmissions = async (requestId: string): Promise<RequestSubmission[]> => {
+    try {
+      const result = await execute(GetRequestSubmissionsDocument, { requestId });
+      const submissions = result?.data?.requestSubmissions || [];
+      const transformedSubmissions = await Promise.all(submissions.map(loadIPFSAndTransform));
+      return transformedSubmissions.map(mapRequestSubmission);
+    } catch (e) {
+      console.error('Error fetching submissions:', e);
+      return [];
+    }
   };
 
-  const pollForNewSubmission = async (id: string): Promise<void> => {
-    return pollWithRetry({
+  const pollForNewSubmission = async (
+    id: string,
+    onSubmissionFound: (submission: RequestSubmission) => void
+  ): Promise<void> => {
+    const fetchedSubmission = await pollWithRetry({
       callback: async () => {
         const result = await execute(GetRequestSubmissionDocument, { id });
         return result?.data?.requestSubmission;
       },
     });
+
+    if (!fetchedSubmission) {
+      return;
+    }
+
+    const submissionWithIpfsData = await loadIPFSAndTransform(fetchedSubmission);
+    const finalSubmission = mapRequestSubmission(submissionWithIpfsData);
+
+    onSubmissionFound(finalSubmission);
   };
 
   const createRequestSubmission = async ({
@@ -55,8 +69,6 @@ export const useSubmissions = () => {
     encryptedImageId,
     watermarkedImageId,
   }: CreateRequestSubmissionParams) => {
-    setLoading(true);
-
     try {
       setStatus?.('Uploading metadata...');
       const ipfsHash = await uploadRequestSubmission({
@@ -75,22 +87,27 @@ export const useSubmissions = () => {
         requestAddress: requestId,
       });
 
-      let created = false;
-      if (requestSubmissionAddress) {
-        // Try to fetch data from the subgraph until the new submission appears
-        setStatus?.('Waiting for confirmation...');
-        await pollForNewSubmission(requestSubmissionAddress);
-        created = true;
+      if (!requestSubmissionAddress) {
+        throw new Error('Failed to create request comment');
       }
 
-      if (!created) {
-        throw new Error('Failed to create request submission');
-      }
+      const optimisticSubmission: RequestSubmission = {
+        id: requestSubmissionAddress,
+        description,
+        price,
+        purchases: [],
+        submitter: account,
+        freePictureId: freeImageId,
+        encryptedPictureId: encryptedImageId,
+        watermarkedPictureId: watermarkedImageId,
+        createdAt: Math.floor(Date.now() / 1000),
+      };
+
+      return optimisticSubmission;
     } finally {
       setStatus?.('');
-      setLoading(false);
     }
   };
 
-  return { createRequestSubmission, fetchSubmissions, loading };
+  return { createRequestSubmission, pollForNewSubmission, fetchSubmissions };
 };

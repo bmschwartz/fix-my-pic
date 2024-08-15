@@ -1,36 +1,13 @@
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { FullScreenLoader } from '@/components';
-import { useRequests } from '@/hooks/useRequests';
-import { Request } from '@/types/request';
+import { RequestDetailProvider } from '@/contexts/RequestDetailContext';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import RequestDetailView from '@/views/request/RequestDetailView';
 
-const RequestDetailsPage: React.FC = () => {
-  const router = useRouter();
-  const { fetchRequest } = useRequests();
-
-  const [request, setRequest] = useState<Request | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const requestId = router.query.id as string;
-
-  useEffect(() => {
-    if (requestId) {
-      const loadRequest = async () => {
-        setLoading(true); // Set loading to true when starting to load the request
-        const fetchedRequest = await fetchRequest(requestId);
-        if (fetchedRequest) {
-          setRequest(fetchedRequest);
-        }
-        setLoading(false); // Set loading to false after fetching the request
-      };
-
-      loadRequest();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestId]);
-
+const RequestDetailPageContainer: React.FC = () => {
+  const { loading, request } = useRequestDetail();
   if (loading) {
     return <FullScreenLoader />;
   }
@@ -42,4 +19,14 @@ const RequestDetailsPage: React.FC = () => {
   return <RequestDetailView request={request} />;
 };
 
-export default RequestDetailsPage;
+const RequestDetailPage: React.FC = () => {
+  const router = useRouter();
+
+  return (
+    <RequestDetailProvider requestId={router.query.id as string}>
+      <RequestDetailPageContainer />
+    </RequestDetailProvider>
+  );
+};
+
+export default RequestDetailPage;
