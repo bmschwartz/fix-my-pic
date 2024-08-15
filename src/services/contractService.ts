@@ -45,14 +45,9 @@ export interface FixMyPicContractService {
 
 const logger = getLogger('services/contractService');
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || '';
 const FIX_MY_PIC_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FIX_MY_PIC_FACTORY_ADDRESS || '';
-
-if (!RPC_URL) {
-  process.exit(1);
-}
 if (!FIX_MY_PIC_FACTORY_ADDRESS) {
-  process.exit(1);
+  throw new Error('FIX_MY_PIC_FACTORY_ADDRESS is not set');
 }
 
 async function createFixMyPicContractService(factoryAddress: string): Promise<FixMyPicContractService> {
