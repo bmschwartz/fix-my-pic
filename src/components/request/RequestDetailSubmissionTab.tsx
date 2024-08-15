@@ -1,13 +1,13 @@
 import { Box, ImageList, ImageListItem, Typography, useMediaQuery, useTheme } from '@mui/material';
 import React, { useEffect } from 'react';
 
-import { LinkButton, SubmissionListItem } from '@/components';
+import { FMPButton, SubmissionListItem } from '@/components';
 import { useImageStore } from '@/hooks/useImageStore';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestSubmission } from '@/types/submission';
 
 interface RequestDetailSubmissionTabProps {
-  requestId: string;
   submissions: RequestSubmission[];
 }
 
@@ -24,12 +24,14 @@ const EmptyState: React.FC = () => {
   );
 };
 
-const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ requestId, submissions }) => {
+const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ submissions }) => {
+  const theme = useTheme();
   const { selectedAccount } = useWallet();
+  const { getImageUrlToShow } = useImageStore();
+  const { setIsCreatingNewSubmission } = useRequestDetail();
+
   const [loadedImages, setLoadedImages] = React.useState<boolean>(false);
   const [imageUrlsToShow, setImageUrlsToShow] = React.useState<Record<string, string>>({});
-  const { getImageUrlToShow } = useImageStore();
-  const theme = useTheme();
 
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
@@ -86,7 +88,9 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
   return (
     <Box sx={{ mt: 3, position: 'relative' }}>
       <Box sx={{ textAlign: 'right', mb: 3 }}>
-        <LinkButton text="New Submission" href={`/submission/new?request=${requestId}`} />
+        <FMPButton type="button" variant="contained" color="primary" onClick={() => setIsCreatingNewSubmission(true)}>
+          New Submission
+        </FMPButton>
       </Box>
       {submissionsWithPurchasedFirst.length === 0 ? (
         <EmptyState />

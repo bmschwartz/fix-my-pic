@@ -5,9 +5,10 @@ import { FullScreenLoader } from '@/components';
 import { RequestDetailProvider } from '@/contexts/RequestDetailContext';
 import { useRequestDetail } from '@/hooks/useRequestDetail';
 import RequestDetailView from '@/views/request/RequestDetailView';
+import NewSubmissionView from '@/views/submission/NewSubmissionView';
 
 const RequestDetailPageContainer: React.FC = () => {
-  const { loading, request } = useRequestDetail();
+  const { loading, request, isCreatingNewSubmission } = useRequestDetail();
   if (loading) {
     return <FullScreenLoader />;
   }
@@ -16,7 +17,7 @@ const RequestDetailPageContainer: React.FC = () => {
     return <div>Request not found</div>;
   }
 
-  return <RequestDetailView request={request} />;
+  return isCreatingNewSubmission ? <NewSubmissionView request={request} /> : <RequestDetailView request={request} />;
 };
 
 const RequestDetailPage: React.FC = () => {

@@ -14,7 +14,9 @@ export interface RequestDetailContextType {
   comments: RequestComment[];
   submissions: RequestSubmission[];
   loading: boolean;
+  isCreatingNewSubmission: boolean;
   fetchRequest: (id: string) => void;
+  setIsCreatingNewSubmission: (isCreatingNewSubmission: boolean) => void;
   createComment: (params: CreateRequestCommentParams) => Promise<RequestComment>;
   createSubmission: (params: CreateRequestSubmissionParams) => Promise<RequestSubmission>;
 }
@@ -31,6 +33,7 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
   const [request, setRequest] = useState<Request | null>(null);
   const [comments, setComments] = useState<RequestComment[]>([]);
   const [submissions, setSubmissions] = useState<RequestSubmission[]>([]);
+  const [isCreatingNewSubmission, setIsCreatingNewSubmission] = useState<boolean>(false);
 
   const { fetchIPFSData } = useIpfs();
   const { createRequestComment, pollForNewComment, fetchComments } = useComments();
@@ -100,7 +103,17 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
 
   return (
     <RequestDetailContext.Provider
-      value={{ request, comments, submissions, loading, createComment, createSubmission, fetchRequest }}
+      value={{
+        request,
+        loading,
+        comments,
+        submissions,
+        isCreatingNewSubmission,
+        fetchRequest,
+        createComment,
+        createSubmission,
+        setIsCreatingNewSubmission,
+      }}
     >
       {children}
     </RequestDetailContext.Provider>

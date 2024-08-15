@@ -1,17 +1,21 @@
 import { Box } from '@mui/material';
-import { useRouter } from 'next/router';
 import React from 'react';
 
 import { BackButton, NewSubmissionForm } from '@/components';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
+import { Request } from '@/types/request';
 
-const NewSubmissionView: React.FC = () => {
-  const router = useRouter();
-  const requestId = router.query.request as string;
+interface NewSubmissionViewProps {
+  request: Request;
+}
+
+const NewSubmissionView: React.FC<NewSubmissionViewProps> = ({ request }) => {
+  const { setIsCreatingNewSubmission } = useRequestDetail();
 
   return (
     <Box sx={{ my: 4 }}>
-      <BackButton href={`/request/${requestId}`} sx={{ mb: 4 }} />
-      <NewSubmissionForm requestId={requestId} />
+      <BackButton onClick={() => setIsCreatingNewSubmission(false)} sx={{ mb: 4 }} />
+      <NewSubmissionForm requestId={request.id} />
     </Box>
   );
 };
