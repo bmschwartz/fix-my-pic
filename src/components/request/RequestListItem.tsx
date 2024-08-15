@@ -20,13 +20,19 @@ const RequestListItem: React.FC<RequestListItemProps> = ({ pictureRequest }) => 
           display: 'block',
           textDecoration: 'none',
           position: 'relative',
-          '&:hover .overlay': {
-            opacity: 1,
-          },
           overflow: 'hidden',
+          transition: 'transform 0.3s ease',
+          '&:hover': {
+            transform: 'scale(1.05)', // Slightly grow the component on hover
+            transformOrigin: 'center', // Transform from the center to keep it within bounds
+            zIndex: 1, // Ensure the element is above others when scaled
+          },
+          '&:hover .overlay': {
+            opacity: 1, // Show the overlay when hovering over the entire item
+          },
         }}
       >
-        <ImageListItem sx={{ width: '100%', height: 'auto' }}>
+        <ImageListItem sx={{ width: '100%', height: 'auto', overflow: 'hidden', position: 'relative' }}>
           <Box sx={{ position: 'relative', width: '100%', height: 'auto' }}>
             <Image
               src={imageUrl}
@@ -49,11 +55,12 @@ const RequestListItem: React.FC<RequestListItemProps> = ({ pictureRequest }) => 
               color: 'white',
               opacity: 0,
               transition: 'opacity 0.3s ease',
-              padding: '10px',
+              padding: '12px',
+              paddingTop: '4px',
+              zIndex: 2,
             }}
           >
             <Typography variant="h6">{pictureRequest.title}</Typography>
-            <Typography variant="subtitle1">${pictureRequest.budget}</Typography>
           </Box>
         </ImageListItem>
       </Box>

@@ -41,9 +41,17 @@ const RequestList: React.FC = () => {
   return (
     <>
       {requests.length === 0 ? (
-        <EmptyState /> // Render the empty state if there are no requests
+        <EmptyState />
       ) : (
-        <ImageList variant="masonry" cols={getCols()} gap={24}>
+        <ImageList
+          variant="masonry"
+          cols={getCols()}
+          gap={24}
+          sx={{
+            padding: '16px',
+            overflow: 'hidden',
+          }}
+        >
           {requests.map((request: Request) => (
             <RequestListItem key={request.id} pictureRequest={request} />
           ))}
