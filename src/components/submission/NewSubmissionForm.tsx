@@ -13,13 +13,12 @@ import {
   Typography,
 } from '@mui/material';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 import { FMPButton, FMPTypography, LoadingOverlay } from '@/components';
 import { useImageStore } from '@/hooks/useImageStore';
 import { useIpfs } from '@/hooks/useIpfs';
-import { useSubmissions } from '@/hooks/useSubmissions';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
 
 enum WatermarkOptions {
@@ -32,20 +31,20 @@ interface NewSubmissionFormProps {
 }
 
 const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
-  const router = useRouter();
-  const [description, setDescription] = useState<string>('');
-  const [price, setPrice] = useState<string>('');
-  const [originalPictureFile, setOriginalPictureFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [watermarkOption, setWatermarkOption] = useState<WatermarkOptions>(WatermarkOptions.AUTOMATIC);
-  const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null);
-  const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null);
+  const [price, setPrice] = useState<string>('');
   const [isFree, setIsFree] = useState<boolean>(false);
   const [loadingLabel, setLoadingLabel] = useState('');
+  const [description, setDescription] = useState<string>('');
+  const [preview, setPreview] = useState<string | null>(null);
+  const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null);
+  const [originalPictureFile, setOriginalPictureFile] = useState<File | null>(null);
+  const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null);
+  const [watermarkOption, setWatermarkOption] = useState<WatermarkOptions>(WatermarkOptions.AUTOMATIC);
 
   const { uploadImage } = useIpfs();
-  const { createRequestSubmission } = useSubmissions();
+  const { createSubmission } = useRequestDetail();
+  const { setIsCreatingNewSubmission } = useRequestDetail();
   const { createWatermarkedImage, encryptPictureId } = useImageStore();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 
@@ -54,16 +53,16 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
   }
 
   const resetState = () => {
-    setDescription('');
     setPrice('');
-    setOriginalPictureFile(null);
-    setPreview(null);
-    setWatermarkOption(WatermarkOptions.AUTOMATIC);
-    setWatermarkPictureFile(null);
-    setWatermarkPreview(null);
     setIsFree(false);
+    setPreview(null);
     setLoading(false);
+    setDescription('');
     setLoadingLabel('');
+    setWatermarkPreview(null);
+    setOriginalPictureFile(null);
+    setWatermarkPictureFile(null);
+    setWatermarkOption(WatermarkOptions.AUTOMATIC);
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isWatermarked: boolean = false) => {
@@ -116,7 +115,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         }
       }
 
-      await createRequestSubmission({
+      await createSubmission({
         description,
         wallet,
         account,
@@ -128,7 +127,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         price: isFree ? 0 : parseFloat(price || '0'),
       });
 
-      router.push(`/request/${requestId}`);
+      setIsCreatingNewSubmission(false);
       return;
     } catch (e) {
       console.error(e);

@@ -40,9 +40,7 @@ const RequestDetailTabSection: React.FC<RequestDetailTabSectionProps> = ({ reque
         />
       </Box>
       <Divider sx={{ my: 3 }} />
-      {selectedTab === RequestDetailTab.Submissions && (
-        <RequestDetailSubmissionTab requestId={request.id} submissions={submissions} />
-      )}
+      {selectedTab === RequestDetailTab.Submissions && <RequestDetailSubmissionTab submissions={submissions} />}
       {selectedTab === RequestDetailTab.Comments && (
         <RequestDetailCommentTab requestId={request.id} comments={comments} />
       )}
