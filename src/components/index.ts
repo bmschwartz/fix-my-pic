@@ -10,6 +10,7 @@ export { default as FullScreenLoader } from './common/FullScreenLoader';
 
 export { default as RequireWallet } from './wallet/RequireWallet';
 export { default as ConnectWalletDialog } from './wallet/ConnectWalletDialog';
+export { default as ConnectWalletButton } from './wallet/ConnectWalletButton';
 
 export { default as RequestList } from './request/RequestList';
 export { default as NewRequestForm } from './request/NewRequestForm';

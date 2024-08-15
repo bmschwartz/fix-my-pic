@@ -296,7 +296,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
             <FormControlLabel
               value={WatermarkOptions.AUTOMATIC}
               control={<Radio />}
-              label="Automatically Add Watermark"
+              label='Use "Fix My Pic" Watermark'
             />
             <FormControlLabel value={WatermarkOptions.UPLOAD} control={<Radio />} label="Upload Watermarked Picture" />
           </RadioGroup>

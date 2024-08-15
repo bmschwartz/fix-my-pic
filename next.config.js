@@ -16,6 +16,7 @@ const nextConfig = {
     },
   },
   webpack: (config, { isServer }) => {
+    config.externals.push('pino-pretty', 'lokijs', 'encoding');
     // Add custom file loader for .node files
     config.module.rules.push({
       test: /\.node$/,
