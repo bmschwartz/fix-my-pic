@@ -1,4 +1,4 @@
-import { Box, Divider, TextField, Typography } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
 import { FMPButton, LoadingOverlay } from '@/components';
@@ -52,14 +52,26 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
   return (
     <Box sx={{ mt: 3 }}>
       {comments.map((comment) => (
-        <Box key={comment.id} sx={{ mb: 2 }}>
-          <Typography variant="body2">
+        <Box
+          key={comment.id}
+          sx={{
+            mb: 2,
+            padding: 2,
+            borderRadius: 2,
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            transition: 'background-color 0.3s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
             {comment.commenter.slice(0, 8)}... - {getTimeSince(comment.createdAt)}
           </Typography>
           <Typography variant="body1">{comment.text}</Typography>
-          <Divider sx={{ mt: 2 }} />
         </Box>
       ))}
+
       <TextField
         fullWidth
         multiline

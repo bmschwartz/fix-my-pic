@@ -175,6 +175,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         disabled={loading}
         onChange={(e) => setDescription(e.target.value)}
         required
+        inputProps={{ maxLength: 100 }}
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 1,

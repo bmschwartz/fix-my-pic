@@ -103,6 +103,7 @@ const NewRequestForm: React.FC = () => {
         disabled={loading}
         onChange={(e) => setTitle(e.target.value)}
         required
+        inputProps={{ maxLength: 100 }}
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 1,
@@ -128,6 +129,7 @@ const NewRequestForm: React.FC = () => {
         disabled={loading}
         onChange={(e) => setDescription(e.target.value)}
         required
+        inputProps={{ maxLength: 350 }}
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 1,
