@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 
 import { LinkButton, SubmissionListItem } from '@/components';
 import { useImageStore } from '@/hooks/useImageStore';
+import { useWallet } from '@/hooks/useWallet';
 import { RequestSubmission } from '@/types/submission';
 
 interface RequestDetailSubmissionTabProps {
@@ -24,6 +25,7 @@ const EmptyState: React.FC = () => {
 };
 
 const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ requestId, submissions }) => {
+  const { selectedAccount } = useWallet();
   const [loadedImages, setLoadedImages] = React.useState<boolean>(false);
   const [imageUrlsToShow, setImageUrlsToShow] = React.useState<Record<string, string>>({});
   const { getImageUrlToShow } = useImageStore();
@@ -32,6 +34,20 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
+
+  const hasPurchased = (submission: RequestSubmission) => {
+    return submission.purchases.some((purchase) => purchase.buyer.toLowerCase() === selectedAccount?.toLowerCase());
+  };
+
+  const submissionsWithPurchasedFirst = submissions.sort((a, b) => {
+    if (hasPurchased(a) && !hasPurchased(b)) {
+      return -1;
+    }
+    if (!hasPurchased(a) && hasPurchased(b)) {
+      return 1;
+    }
+    return 0;
+  });
 
   useEffect(() => {
     if (loadedImages) {
@@ -72,7 +88,7 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
       <Box sx={{ textAlign: 'right', mb: 3 }}>
         <LinkButton text="New Submission" href={`/submission/new?request=${requestId}`} />
       </Box>
-      {submissions.length === 0 ? (
+      {submissionsWithPurchasedFirst.length === 0 ? (
         <EmptyState />
       ) : (
         <ImageList
@@ -84,7 +100,7 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
             overflow: 'hidden',
           }}
         >
-          {submissions.map((submission) => (
+          {submissionsWithPurchasedFirst.map((submission) => (
             <ImageListItem key={submission.id}>
               {imageUrlsToShow[submission.id] && (
                 <SubmissionListItem submission={submission} imageUrlToShow={imageUrlsToShow[submission.id]} />
