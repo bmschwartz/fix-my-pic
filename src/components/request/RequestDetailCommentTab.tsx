@@ -5,7 +5,7 @@ import { FMPButton, LoadingOverlay } from '@/components';
 import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestComment } from '@/types/comment';
-import { getDateTimeFromUnixTimestamp } from '@/utils/datetime';
+import { getTimeSince } from '@/utils/datetime';
 
 interface RequestDetailCommentTabProps {
   requestId: string;
@@ -53,10 +53,10 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
     <Box sx={{ mt: 3 }}>
       {comments.map((comment) => (
         <Box key={comment.id} sx={{ mb: 2 }}>
-          <Typography variant="body2" fontWeight="bold">
-            {comment.commenter.slice(0, 8)}... - {getDateTimeFromUnixTimestamp(comment.createdAt)}
+          <Typography variant="body2">
+            {comment.commenter.slice(0, 8)}... - {getTimeSince(comment.createdAt)}
           </Typography>
-          <Typography variant="body2">{comment.text}</Typography>
+          <Typography variant="body1">{comment.text}</Typography>
           <Divider sx={{ mt: 2 }} />
         </Box>
       ))}
