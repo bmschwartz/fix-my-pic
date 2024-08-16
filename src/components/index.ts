@@ -8,8 +8,7 @@ export { default as FMPTypography } from './common/FMPTypography';
 export { default as LoadingOverlay } from './common/LoadingOverlay';
 export { default as FullScreenLoader } from './common/FullScreenLoader';
 
-export { default as RequireWallet } from './wallet/RequireWallet';
-export { default as ConnectWalletButton } from './wallet/ConnectWalletButton';
+export { default as AccountMenu } from './menu/AccountMenu';
 
 export { default as RequestList } from './request/RequestList';
 export { default as NewRequestForm } from './request/NewRequestForm';
@@ -21,3 +20,6 @@ export { default as RequestDetailSubmissionTab } from './request/RequestDetailSu
 
 export { default as NewSubmissionForm } from './submission/NewSubmissionForm';
 export { default as SubmissionListItem } from './submission/SubmissionListItem';
+
+export { default as RequireWallet } from './wallet/RequireWallet';
+export { default as ConnectWalletButton } from './wallet/ConnectWalletButton';
