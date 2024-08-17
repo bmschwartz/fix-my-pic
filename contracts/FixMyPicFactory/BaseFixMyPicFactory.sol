@@ -2,13 +2,15 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
+import '../FixMyPicNFT.sol';
 import '../PictureRequest.sol';
 import '../RequestSubmission.sol';
 import '../RequestComment.sol';
 import '../PriceOracle.sol';
 
-contract BaseFixMyPicFactory is Initializable, ReentrancyGuardUpgradeable {
+contract BaseFixMyPicFactory is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
   event PictureRequestCreated(
     address indexed request,
     string ipfsHash,
@@ -37,12 +39,22 @@ contract BaseFixMyPicFactory is Initializable, ReentrancyGuardUpgradeable {
 
   event SubmissionPurchased(address indexed submission, address indexed purchaser, uint256 price, uint256 purchaseDate);
 
+  event FixMyPicNFTMinted(
+    uint256 indexed tokenId,
+    address indexed submission,
+    address indexed purchaser,
+    string tokenURI,
+    uint256 purchasePrice
+  );
+
   error InsufficientPayment(uint256 required, uint256 provided);
 
   address public priceOracle;
+  FixMyPicNFT public nftContract;
 
-  function initialize(address _priceOracle) public initializer {
+  function initialize(address _priceOracle, address _nftContract) public initializer {
     priceOracle = _priceOracle;
+    nftContract = FixMyPicNFT(_nftContract);
   }
 
   function createPictureRequest(string calldata _ipfsHash, uint256 _budget, uint256 _expiresAt) external {
@@ -89,5 +101,18 @@ contract BaseFixMyPicFactory is Initializable, ReentrancyGuardUpgradeable {
     require(success, 'Payment failed');
 
     emit SubmissionPurchased(_submission, msg.sender, msg.value, block.timestamp);
+  }
+
+  function mintNFTForSubmission(address _purchaser, address _submission, string calldata _tokenURI) external onlyOwner {
+    require(_purchaser != address(0), 'Invalid purchaser address');
+    require(_submission != address(0), 'Invalid submission address');
+
+    RequestSubmission requestSubmission = RequestSubmission(_submission);
+    require(requestSubmission.hasPurchased(_purchaser), 'Submission has not been purchased');
+
+    uint256 purchasePrice = requestSubmission.getPrice();
+    uint256 tokenId = nftContract.mintNFT(_purchaser, _tokenURI, purchasePrice);
+
+    emit FixMyPicNFTMinted(tokenId, _submission, _purchaser, _tokenURI, purchasePrice);
   }
 }
