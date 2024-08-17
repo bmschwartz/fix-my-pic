@@ -97,7 +97,6 @@ export const useRequests = () => {
 
       let created = false;
       if (pictureRequestAddress) {
-        // Optimistically update the state
         const newRequest: Request = {
           id: pictureRequestAddress,
           title,
@@ -106,10 +105,8 @@ export const useRequests = () => {
           description,
         };
 
-        // Add a placeholder entry in `requests` to show it immediately
         setRequests((prevRequests) => [...prevRequests, newRequest as Request]);
 
-        // Try to fetch data from the subgraph until the new request appears
         setStatus?.('Waiting for confirmation...');
         await pollForNewRequest(pictureRequestAddress);
         created = true;
