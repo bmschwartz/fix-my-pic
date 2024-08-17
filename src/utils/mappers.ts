@@ -5,7 +5,7 @@ import { RequestSubmission } from '@/types/submission';
 
 import type { SubmissionPurchase as GqlSubmissionPurchase } from '@/graphql/client';
 
-const mapSubmissionPurchase = (
+export const mapSubmissionPurchase = (
   purchase: GqlSubmissionPurchase,
   submissionAddress: string,
   price: string
