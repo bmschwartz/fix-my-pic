@@ -26,7 +26,7 @@ const EmptyState: React.FC = () => {
 
 const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ submissions }) => {
   const theme = useTheme();
-  const { selectedAccount } = useWallet();
+  const { selectedAccount, isConnected, connectWallet } = useWallet();
   const { getImageUrlToShow } = useImageStore();
   const { setIsCreatingNewSubmission } = useRequestDetail();
 
@@ -88,7 +88,18 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
   return (
     <Box sx={{ mt: 3, position: 'relative' }}>
       <Box sx={{ textAlign: 'right', mb: 3 }}>
-        <FMPButton type="button" variant="contained" color="primary" onClick={() => setIsCreatingNewSubmission(true)}>
+        <FMPButton
+          type="button"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            if (!isConnected) {
+              connectWallet();
+              return;
+            }
+            setIsCreatingNewSubmission(true);
+          }}
+        >
           New Submission
         </FMPButton>
       </Box>

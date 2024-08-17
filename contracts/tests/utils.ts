@@ -47,7 +47,19 @@ export async function deployPriceOracle(account: Account): Promise<Contract> {
   return deployContract(contractName, [], { wallet, asProxy: true, proxyConstructorArgs: [ZERO_ADDRESS] });
 }
 
-export async function deployFixMyPicFactory(account: Account, priceOracleAddress: string): Promise<Contract> {
+export async function deployFixMyPicNFT(account: Account): Promise<Contract> {
+  const wallet = getWallet(account.key);
+
+  const contractName = 'FixMyPicNFT';
+
+  return deployContract(contractName, [], { wallet, asProxy: true });
+}
+
+export async function deployFixMyPicFactory(
+  account: Account,
+  priceOracleAddress: string,
+  fixMyPicNFTAddress: string
+): Promise<Contract> {
   const wallet = getWallet(account.key);
 
   const contractName = 'FixMyPicFactory';
@@ -55,7 +67,7 @@ export async function deployFixMyPicFactory(account: Account, priceOracleAddress
   return deployContract(contractName, [], {
     wallet,
     asProxy: true,
-    proxyConstructorArgs: [priceOracleAddress],
+    proxyConstructorArgs: [priceOracleAddress, fixMyPicNFTAddress],
   });
 }
 

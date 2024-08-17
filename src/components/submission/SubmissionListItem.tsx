@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 import { ImageOverlay, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
+import { usePurchases } from '@/hooks/usePurchases';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestSubmission } from '@/types/submission';
 
@@ -17,7 +17,7 @@ interface SubmissionListItemProps {
 
 const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, imageUrlToShow }) => {
   const router = useRouter();
-  const { contractService } = useContractService();
+  const { purchaseSubmission } = usePurchases();
   const { selectedWallet, selectedAccount, connectWallet } = useWallet();
 
   const [loading, setLoading] = useState(false);
@@ -82,22 +82,21 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
           transition: 'transform 0.3s ease',
           borderRadius: 4,
           '&:hover': {
-            transform: 'scale(1.05)', // Slightly grow the component on hover
-            transformOrigin: 'center', // Transform from the center to keep it within bounds
-            zIndex: 1, // Ensure the element is above others when scaled
+            transform: 'scale(1.05)',
+            transformOrigin: 'center',
+            zIndex: 1,
           },
           '&:hover .overlay': {
-            opacity: 1, // Show the overlay when hovering over the entire item
+            opacity: 1,
           },
         }}
       >
         <Image
           src={imageUrlToShow}
           alt="Submission"
-          layout="responsive"
           width={150}
           height={150}
-          objectFit="cover"
+          style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
           onClick={handleImageClick}
         />
         {generateChip()}
@@ -122,15 +121,14 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
 
             setLoading(true);
             setIsOverlayOpen(false);
-            setLoadingLabel('Purchasing image...');
 
             try {
-              await contractService.purchaseSubmission({
-                account: selectedAccount,
+              await purchaseSubmission({
                 wallet: selectedWallet,
-                address: submission.id,
+                account: selectedAccount,
+                submission,
+                setStatus: setLoadingLabel,
               });
-
               router.reload();
             } catch (error) {
               console.error('Error purchasing image:', error);

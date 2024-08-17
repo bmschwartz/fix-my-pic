@@ -42,7 +42,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  // Retrieve the authenticated session
   const session = await getServerSession(req, res, authOptions);
 
   if (!session || !session.address) {
@@ -58,7 +57,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Use the authenticated user's address from the session
     const userAddress = session.address;
 
     const purchased = await verifyPurchase(userAddress, submissionAddress);

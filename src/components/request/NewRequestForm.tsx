@@ -197,7 +197,7 @@ const NewRequestForm: React.FC = () => {
               position: 'relative',
             }}
           >
-            <Image src={preview} alt="Image preview" layout="fill" objectFit="contain" />
+            <Image src={preview} alt="Image preview" fill style={{ objectFit: 'contain' }} />
           </Box>
         ) : (
           <Box

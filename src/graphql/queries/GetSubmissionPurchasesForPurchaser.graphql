@@ -1,0 +1,12 @@
+query GetSubmissionPurchasesForPurchaser($purchaser: Bytes!) {
+  submissionPurchases(where: {purchaser: $purchaser}) {
+    id
+    price
+    purchaser
+    purchaseDate
+    submission {
+      id
+      ipfsHash
+    }
+  }
+}

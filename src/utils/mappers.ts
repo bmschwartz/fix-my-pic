@@ -5,7 +5,7 @@ import { RequestSubmission } from '@/types/submission';
 
 import type { SubmissionPurchase as GqlSubmissionPurchase } from '@/graphql/client';
 
-const mapSubmissionPurchase = (
+export const mapSubmissionPurchase = (
   purchase: GqlSubmissionPurchase,
   submissionAddress: string,
   price: string
@@ -31,9 +31,10 @@ export const mapRequestComment = (comment: any): RequestComment => {
 export const mapRequestSubmission = (submission: any): RequestSubmission => {
   return {
     id: submission.id,
-    price: Number(submission.price) / 100,
+    ipfsHash: submission.ipfsHash,
     submitter: submission.submitter,
     description: submission.description,
+    price: Number(submission.price) / 100,
     freePictureId: submission.freeImageId,
     encryptedPictureId: submission.encryptedImageId,
     watermarkedPictureId: submission.watermarkedImageId,

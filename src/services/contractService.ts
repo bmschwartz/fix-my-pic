@@ -35,12 +35,20 @@ export interface CreateRequestCommentParams extends WalletParams {
   ipfsHash: string;
 }
 
+export interface MintNFTForSubmissionProps {
+  submissionAddress: string;
+  tokenURI: string;
+  userAddress: string;
+  wallet: ethers.Wallet;
+}
+
 export interface FixMyPicContractService {
   createPictureRequest(params: CreatePictureRequestParams): Promise<string | null>;
   createRequestComment(params: CreateRequestCommentParams): Promise<string | null>;
   createRequestSubmission(params: CreateRequestSubmissionParams): Promise<string | null>;
 
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>;
+  mintNFTForSubmission(params: MintNFTForSubmissionProps): Promise<string | null>;
 }
 
 const logger = getLogger('services/contractService');
@@ -213,7 +221,49 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     return decodedEvent?.args.comment;
   };
 
-  return { createPictureRequest, createRequestSubmission, purchaseSubmission, createRequestComment };
+  const mintNFTForSubmission = async ({
+    wallet,
+    tokenURI,
+    userAddress,
+    submissionAddress,
+  }: MintNFTForSubmissionProps): Promise<string | null> => {
+    const fixMyPicFactory = new ethers.Contract(factoryAddress, FixMyPicFactorySchema.abi, wallet);
+
+    const tx = await fixMyPicFactory.mintNFTForSubmission(userAddress, submissionAddress, tokenURI);
+    const receipt: ContractTransactionReceipt = await tx.wait();
+
+    if (receipt.status !== 1) {
+      logger.error('Failed to mint NFT', receipt, submissionAddress, userAddress, tokenURI);
+      throw new Error(`Failed to mint NFT: ${submissionAddress} for ${userAddress}`);
+    }
+
+    const event = receipt.logs.find(
+      (log) =>
+        log.address === factoryAddress &&
+        log.topics[0] === ethers.id('FixMyPicNFTMinted(uint256,address,address,string,uint256)')
+    );
+
+    if (!event) {
+      logger.error('FixMyPicNFTMinted event not found', receipt);
+      return null;
+    }
+
+    const decodedEvent = fixMyPicFactory.interface.parseLog(event);
+    if (!decodedEvent) {
+      logger.error('Failed to decode FixMyPicNFTMinted event', receipt);
+      return null;
+    }
+
+    return decodedEvent.args.tokenId;
+  };
+
+  return {
+    createPictureRequest,
+    createRequestSubmission,
+    purchaseSubmission,
+    createRequestComment,
+    mintNFTForSubmission,
+  };
 }
 
 let contractServicePromise: Promise<FixMyPicContractService> | null = null;

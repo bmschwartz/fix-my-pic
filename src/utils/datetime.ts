@@ -16,11 +16,6 @@ export function getDateTimeFromUnixTimestamp(timestamp: number): string {
 }
 
 export function getTimeSince(timestamp: number): string {
-  // get the seconds, minutes, hours, or days ago.
-  // return 'just now' if the timestamp is less than 1 minute ago
-  // return 'x minutes ago' if the timestamp is less than 1 hour ago
-  // return 'x hours ago' if the timestamp is less than 1 day ago
-  // return 'x days ago' if the timestamp is more than 1 day ago
   const seconds = Math.floor(Date.now() / 1000 - timestamp);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);

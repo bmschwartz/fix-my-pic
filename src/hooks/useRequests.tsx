@@ -34,7 +34,7 @@ export const useRequests = () => {
   const fetchRequest = async (id: string): Promise<Request | undefined> => {
     setLoading(true);
     try {
-      const result = await execute(GetPictureRequestDocument, { id });
+      const result = await execute(GetPictureRequestDocument, { id: id.toLowerCase() });
       const request = result?.data?.pictureRequest;
       if (request) {
         return loadIPFSAndTransform(request);
@@ -62,17 +62,18 @@ export const useRequests = () => {
     }
   };
 
-  const pollForNewRequest = async (id: string): Promise<void> => {
+  const pollForNewRequest = async (id: string, onRequestFound: (request: Request) => void): Promise<void> => {
     const request = await pollWithRetry({
       callback: async () => {
         return fetchRequest(id);
       },
     });
 
-    if (request) {
-      const transformedRequest = await loadIPFSAndTransform(request);
-      setRequests((prevRequests) => [...prevRequests, transformedRequest]);
+    if (!request) {
+      return;
     }
+
+    onRequestFound(request);
   };
 
   const createPictureRequest = async ({
@@ -95,29 +96,25 @@ export const useRequests = () => {
       setStatus?.('Creating smart contract...');
       const pictureRequestAddress = await contractService.createPictureRequest({ ipfsHash, budget, ...otherParams });
 
-      let created = false;
-      if (pictureRequestAddress) {
-        // Optimistically update the state
-        const newRequest: Request = {
-          id: pictureRequestAddress,
-          title,
-          budget,
-          imageId,
-          description,
-        };
-
-        // Add a placeholder entry in `requests` to show it immediately
-        setRequests((prevRequests) => [...prevRequests, newRequest as Request]);
-
-        // Try to fetch data from the subgraph until the new request appears
-        setStatus?.('Waiting for confirmation...');
-        await pollForNewRequest(pictureRequestAddress);
-        created = true;
-      }
-
-      if (!created) {
+      if (!pictureRequestAddress) {
         throw new Error('Failed to create picture request');
       }
+
+      const optimisticRequest: Request = {
+        id: pictureRequestAddress.toLowerCase(),
+        title,
+        budget,
+        imageId,
+        description,
+      };
+
+      setRequests((prevRequests) => [...prevRequests, optimisticRequest as Request]);
+
+      pollForNewRequest(pictureRequestAddress, (polledRequest) => {
+        setRequests((prevRequests) =>
+          prevRequests.map((prevRequest) => (prevRequest.id === polledRequest.id ? polledRequest : prevRequest))
+        );
+      });
     } finally {
       setStatus?.('');
       setLoading(false);
@@ -129,5 +126,5 @@ export const useRequests = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { requests, createPictureRequest, loading, fetchRequest };
+  return { requests, createPictureRequest, loading, fetchRequest, pollForNewRequest };
 };

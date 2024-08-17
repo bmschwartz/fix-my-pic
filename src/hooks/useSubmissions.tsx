@@ -43,7 +43,7 @@ export const useSubmissions = () => {
   ): Promise<void> => {
     const fetchedSubmission = await pollWithRetry({
       callback: async () => {
-        const result = await execute(GetRequestSubmissionDocument, { id });
+        const result = await execute(GetRequestSubmissionDocument, { id: id.toLowerCase() });
         return result?.data?.requestSubmission;
       },
     });
@@ -92,9 +92,10 @@ export const useSubmissions = () => {
       }
 
       const optimisticSubmission: RequestSubmission = {
-        id: requestSubmissionAddress,
-        description,
+        id: requestSubmissionAddress.toLowerCase(),
         price,
+        ipfsHash,
+        description,
         purchases: [],
         submitter: account,
         freePictureId: freeImageId,

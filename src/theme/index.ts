@@ -3,16 +3,16 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     background: {
-      default: '#f0f4f8', // grayish blue color
+      default: '#f0f4f8',
     },
     primary: {
-      main: '#000000', // Set primary color to black
+      main: '#000000',
     },
     secondary: {
-      main: '#ffffff', // Optional: Set secondary color to white or any other color
+      main: '#ffffff',
     },
     info: {
-      main: '#e7e7e7', // Optional: Set info color to black or any other color
+      main: '#e7e7e7',
     },
   },
 });

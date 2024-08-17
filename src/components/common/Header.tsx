@@ -1,17 +1,16 @@
-import { AppBar, Avatar, Box, Toolbar, useMediaQuery } from '@mui/material';
+import { AppBar, Box, Toolbar, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-import { ConnectWalletButton } from '@/components';
+import { AccountMenu, ConnectWalletButton } from '@/components';
 import { useWallet } from '@/hooks/useWallet';
-import FMPButton from './FMPButton';
 
 const Header: React.FC = () => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-  const { selectedWallet, selectedAccount, disconnectWallet } = useWallet();
+  const { selectedWallet, selectedAccount } = useWallet();
 
   return (
     <>
@@ -29,22 +28,7 @@ const Header: React.FC = () => {
                 </Box>
               </Link>
             </Box>
-            {selectedWallet && selectedAccount ? (
-              <FMPButton
-                onClick={disconnectWallet}
-                startIcon={
-                  <Avatar
-                    src={selectedWallet.info?.icon}
-                    alt={selectedWallet.info?.name}
-                    sx={{ width: 24, height: 24, marginRight: 1 }}
-                  />
-                }
-              >
-                Disconnect {selectedWallet.info?.name}
-              </FMPButton>
-            ) : (
-              <ConnectWalletButton />
-            )}
+            {selectedWallet && selectedAccount ? <AccountMenu /> : <ConnectWalletButton />}
           </Toolbar>
         </Box>
       </AppBar>

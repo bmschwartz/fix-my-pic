@@ -44,9 +44,7 @@ export const useImageStore = () => {
     }
   };
 
-  const getDecryptedImageUrl = async (submission: RequestSubmission): Promise<string> => {
-    const { id: submissionAddress, encryptedPictureId } = submission;
-
+  const getDecryptedImageUrl = async (submissionAddress: string, encryptedPictureId: string): Promise<string> => {
     if (!account || !encryptedPictureId) {
       return '';
     }
@@ -71,7 +69,7 @@ export const useImageStore = () => {
       return Promise.resolve(`${IMAGE_URL_ROOT}/${pictureId}`);
     }
 
-    return getDecryptedImageUrl(submission);
+    return getDecryptedImageUrl(submission.id, submission.encryptedPictureId as string);
   };
 
   return { createWatermarkedImage, getImageUrlToShow, getDecryptedImageUrl, encryptPictureId };

@@ -14,11 +14,11 @@ export interface WalletDetail {
 }
 
 export interface WalletProviderContextType {
-  selectedWallet: WalletDetail; // The selected wallet detail.
-  selectedAccount: string | null; // The selected account address.
-  isConnected: boolean; // Whether the wallet is connected.
-  connectWallet: () => Promise<void>; // Function to connect wallets.
-  disconnectWallet: () => void; // Function to disconnect wallets.
+  selectedWallet: WalletDetail;
+  selectedAccount: string | null;
+  isConnected: boolean;
+  connectWallet: () => Promise<void>;
+  disconnectWallet: () => void;
 }
 
 interface WalletProviderProps {

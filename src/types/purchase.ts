@@ -4,6 +4,8 @@ export interface SubmissionPurchase {
   price: number;
   purchaseDate: number;
   submissionAddress: string;
+  encryptedPictureId?: string;
+  submissionDescription?: string;
 }
 
 export type PartialSubmissionPurchase = Partial<SubmissionPurchase>;
