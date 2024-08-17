@@ -97,7 +97,7 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
           layout="responsive"
           width={150}
           height={150}
-          objectFit="cover"
+          style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
           onClick={handleImageClick}
         />
         {generateChip()}

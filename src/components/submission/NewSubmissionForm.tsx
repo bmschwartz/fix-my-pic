@@ -259,7 +259,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
               position: 'relative',
             }}
           >
-            <Image src={preview} alt="Image preview" layout="fill" objectFit="contain" />
+            <Image src={preview} alt="Image preview" fill style={{ objectFit: 'contain' }} />
           </Box>
         ) : (
           <Box
@@ -324,7 +324,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
                 position: 'relative',
               }}
             >
-              <Image src={watermarkPreview} alt="Watermarked image preview" layout="fill" objectFit="contain" />
+              <Image src={watermarkPreview} alt="Watermarked image preview" fill style={{ objectFit: 'contain' }} />
             </Box>
           ) : (
             <Box

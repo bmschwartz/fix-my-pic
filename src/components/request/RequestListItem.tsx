@@ -70,11 +70,9 @@ const RequestListItem: React.FC<RequestListItemProps> = ({ pictureRequest }) => 
             <Image
               src={imageUrl}
               alt={pictureRequest.title}
-              layout="responsive"
               width={248}
               height={248}
-              objectFit="contain"
-              style={{ width: '100%', height: 'auto' }}
+              style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
             />
             {generateChip()}
           </Box>

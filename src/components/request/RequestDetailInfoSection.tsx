@@ -53,7 +53,7 @@ const RequestDetailInfoSection: React.FC<RequestDetailInfoSectionProps> = ({ req
               minHeight: 300,
             }}
           >
-            <Image src={imageUrl} alt={request.title} layout="fill" objectFit="cover" />
+            <Image src={imageUrl} alt={request.title} fill style={{ objectFit: 'cover', borderRadius: '4px' }} />
           </Box>
         </Box>
         <Box

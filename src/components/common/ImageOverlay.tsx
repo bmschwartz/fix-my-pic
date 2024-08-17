@@ -60,7 +60,7 @@ const ImageOverlay: React.FC<ImageOverlayProps> = ({ imageUrl, onClose, onDownlo
             zIndex: 20,
           }}
         >
-          <Image src={imageUrl} alt="Overlay Image" layout="fill" objectFit="contain" style={{ borderRadius: '8px' }} />
+          <Image src={imageUrl} alt="Overlay Image" fill style={{ objectFit: 'contain', borderRadius: '8px' }} />
         </Box>
         {description && (
           <FMPTypography variant="h6" sx={{ mt: 1, mx: 2, maxWidth: 500, color: 'white', textAlign: 'center' }}>
