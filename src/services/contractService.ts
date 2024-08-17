@@ -270,7 +270,6 @@ let contractServicePromise: Promise<FixMyPicContractService> | null = null;
 
 const getFixMyPicContractService = async (): Promise<FixMyPicContractService> => {
   if (!contractServicePromise) {
-    console.log('DEBUG: Creating contract service');
     contractServicePromise = createFixMyPicContractService(FIX_MY_PIC_FACTORY_ADDRESS);
   }
   return contractServicePromise;

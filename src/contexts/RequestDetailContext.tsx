@@ -80,11 +80,6 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
     setSubmissions((prevSubmissions) => [...prevSubmissions, optimisticSubmission]);
 
     pollForNewSubmission(optimisticSubmission.id, (polledSubmission: RequestSubmission) => {
-      console.log(
-        'DEBUG - polledSubmission',
-        polledSubmission as RequestSubmission,
-        optimisticSubmission as RequestSubmission
-      );
       setSubmissions((prevSubmissions) =>
         prevSubmissions.map((submission) => (submission.id === optimisticSubmission.id ? polledSubmission : submission))
       );
@@ -98,7 +93,6 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
     setComments((prevComments) => [...prevComments, optimisticComment]);
 
     pollForNewComment(optimisticComment.id, (polledComment: RequestComment) => {
-      console.log('DEBUG - polledComment', polledComment);
       setComments((prevComments) =>
         prevComments.map((comment) => (comment.id === optimisticComment.id ? polledComment : comment))
       );
