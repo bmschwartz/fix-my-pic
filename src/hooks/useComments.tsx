@@ -75,7 +75,7 @@ export const useComments = () => {
       }
 
       const optimisticComment: RequestComment = {
-        id: requestCommentAddress,
+        id: requestCommentAddress.toLowerCase(),
         text,
         commenter: account,
         createdAt: Math.floor(Date.now() / 1000),

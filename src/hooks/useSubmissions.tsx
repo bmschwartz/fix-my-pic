@@ -92,7 +92,7 @@ export const useSubmissions = () => {
       }
 
       const optimisticSubmission: RequestSubmission = {
-        id: requestSubmissionAddress,
+        id: requestSubmissionAddress.toLowerCase(),
         price,
         ipfsHash,
         description,

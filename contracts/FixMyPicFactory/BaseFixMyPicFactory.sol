@@ -53,6 +53,8 @@ contract BaseFixMyPicFactory is Initializable, ReentrancyGuardUpgradeable, Ownab
   FixMyPicNFT public nftContract;
 
   function initialize(address _priceOracle, address _nftContract) public initializer {
+    __Ownable_init();
+
     priceOracle = _priceOracle;
     nftContract = FixMyPicNFT(_nftContract);
   }

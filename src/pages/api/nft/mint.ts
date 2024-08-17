@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    res.status(200).json({ tokenId });
+    res.status(200).json({ tokenId: Number(tokenId) });
   } catch (error) {
     logger.error('Error minting NFT:', error);
     res.status(500).json({ message: 'Internal Server Error' });

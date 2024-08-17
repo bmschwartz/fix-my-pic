@@ -101,7 +101,7 @@ export const useRequests = () => {
       }
 
       const optimisticRequest: Request = {
-        id: pictureRequestAddress,
+        id: pictureRequestAddress.toLowerCase(),
         title,
         budget,
         imageId,
@@ -111,6 +111,7 @@ export const useRequests = () => {
       setRequests((prevRequests) => [...prevRequests, optimisticRequest as Request]);
 
       pollForNewRequest(pictureRequestAddress, (polledRequest) => {
+        console.log('DEBUG - polledRequest', polledRequest);
         setRequests((prevRequests) =>
           prevRequests.map((prevRequest) => (prevRequest.id === polledRequest.id ? polledRequest : prevRequest))
         );
