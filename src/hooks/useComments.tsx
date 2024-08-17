@@ -36,7 +36,7 @@ export const useComments = () => {
   const pollForNewComment = async (id: string, onCommentFound: (comment: RequestComment) => void): Promise<void> => {
     const fetchedComment = await pollWithRetry({
       callback: async () => {
-        const result = await execute(GetRequestCommentDocument, { id });
+        const result = await execute(GetRequestCommentDocument, { id: id.toLowerCase() });
         return result?.data?.requestComment || null;
       },
     });

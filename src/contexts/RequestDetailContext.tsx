@@ -41,7 +41,7 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
 
   const fetchRequest = async (id: string) => {
     try {
-      const result = await execute(GetPictureRequestDocument, { id });
+      const result = await execute(GetPictureRequestDocument, { id: id.toLowerCase() });
       const request = result?.data?.pictureRequest;
       if (request) {
         const ipfsData = await fetchIPFSData(request.ipfsHash);

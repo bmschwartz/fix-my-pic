@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 
 import { WalletDetail } from '@/contexts/WalletContext';
@@ -77,7 +78,7 @@ export const usePurchases = () => {
       setLoadedPurchases(true);
       fetchPurchases();
     }
-  }, [selectedAccount]);
+  }, [selectedAccount, loadedPurchases, fetchPurchases]);
 
   const purchaseSubmission = useCallback(
     async ({ wallet, account, submission, setStatus }: PurchaseSubmissionParams) => {
@@ -97,17 +98,18 @@ export const usePurchases = () => {
       setStatus?.('Minting FixMyPic NFT...');
 
       try {
-        // await contractService.mintNFTForSubmission({
-        //   submission,
-        //   userAddress: account,
-        // });
         console.log('DEBUG: Minting NFT for submission:', submission);
+        const result = await axios.post('/api/nft/mint', {
+          submissionAddress: submission.id,
+          tokenURI: submission.ipfsHash,
+        });
+        console.log('DEBUG: Minted NFT:', result.data);
       } catch (error) {
         console.error('Error minting NFT:', error);
         return;
       }
     },
-    []
+    [contractService]
   );
 
   return { loading, purchases, purchaseSubmission };
