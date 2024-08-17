@@ -29,6 +29,36 @@
       "address": "0x4768d649Da9927a8b3842108117eC0ca7Bc6953f",
       "txHash": "0xf54442de5309456de272b014f19b810a6cad430436daeda8f1f17c710a7181fc",
       "kind": "transparent"
+    },
+    {
+      "address": "0x22F4D93be0E8C0C081e74c0d5e697B64eEA007FF",
+      "txHash": "0x409bd6c43f441f4b26a79ee90d6e0ef3fcb233e7014721d927090874e415bd7e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xe4C7fBB0a626ed208021ccabA6Be1566905E2dFc",
+      "txHash": "0x2f3cf2cdd9529010e1dfb15b35d1b8c521e05149343995eb49255648fb0e6634",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x97b985951FD3e0C1d996421CC783d46c12d00082",
+      "txHash": "0x5b284058e3d72a99ab4fd45ddea55d4059c09c3a8f6f37280043c99dfff70f91",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x23ceE3FB585b1e5092b7CFB222e8e873B05E9519",
+      "txHash": "0x3eb9ea02254f9d9488a53652640cc08eb319689ec4486300a6ed80b6f6e789cc",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xEBf9D3ead9A8c2bb8cEa438B8Dfa9f1AFf44bfa7",
+      "txHash": "0xff957ee05e8a1614fad04887094dc0cd634839737d53d3c8ab0dc1e3aacce9d6",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xE015ADD43D2C41e8Af4e9238e389101884853896",
+      "txHash": "0xd71c73ab1f4bd99c47b076fc0c08704d8b35f106f91fdfbc87217d81d41e0979",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -356,6 +386,119 @@
             "numberOfBytes": "1"
           },
           "t_contract(FixMyPicNFT)3753": {
+            "label": "contract FixMyPicNFT",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {}
+      }
+    },
+    "1dfa8105bed605c2df092c9ebb050cc2ce3862f70be02c8e90a760afca628d60": {
+      "address": "0xf43624d811c5DC9eF91cF237ab9B8eE220D438eE",
+      "txHash": "0x5b9cb71005ee87454368e24b65bade671460ab90d89a17a59133064904c06753",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:88"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "priceOracle",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_address",
+            "contract": "BaseFixMyPicFactory",
+            "src": "contracts/FixMyPicFactory/BaseFixMyPicFactory.sol:52"
+          },
+          {
+            "label": "nftContract",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_contract(FixMyPicNFT)3800",
+            "contract": "BaseFixMyPicFactory",
+            "src": "contracts/FixMyPicFactory/BaseFixMyPicFactory.sol:53"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(FixMyPicNFT)3800": {
             "label": "contract FixMyPicNFT",
             "numberOfBytes": "20"
           },

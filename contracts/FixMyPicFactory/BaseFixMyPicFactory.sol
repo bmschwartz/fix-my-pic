@@ -110,8 +110,8 @@ contract BaseFixMyPicFactory is Initializable, ReentrancyGuardUpgradeable, Ownab
     RequestSubmission requestSubmission = RequestSubmission(_submission);
     require(requestSubmission.hasPurchased(_purchaser), 'Submission has not been purchased');
 
-    uint256 purchasePrice = requestSubmission.getPrice();
-    uint256 tokenId = nftContract.mintNFT(_purchaser, _tokenURI, purchasePrice);
+    uint256 purchasePrice = requestSubmission.price();
+    uint256 tokenId = nftContract.mintNFT(_purchaser, _tokenURI);
 
     emit FixMyPicNFTMinted(tokenId, _submission, _purchaser, _tokenURI, purchasePrice);
   }
