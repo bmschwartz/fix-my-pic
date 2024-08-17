@@ -3,6 +3,7 @@ import { SubmissionPurchase } from './purchase';
 export interface RequestSubmission {
   id: string;
   price: number;
+  ipfsHash: string;
   createdAt: number;
   submitter: string;
   description: string;

@@ -64,7 +64,6 @@ const PurchaseListItem: React.FC<PurchaseListItemProps> = ({ purchase, imageUrlT
         <Image
           src={imageUrlToShow}
           alt="Purchase"
-          layout="responsive"
           width={150}
           height={150}
           style={{ width: '100%', height: 'auto', objectFit: 'cover' }}

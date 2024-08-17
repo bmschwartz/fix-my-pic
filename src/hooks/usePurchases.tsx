@@ -1,20 +1,33 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { WalletDetail } from '@/contexts/WalletContext';
 import {
   execute,
   GetSubmissionPurchasesForPurchaserDocument,
   SubmissionPurchase as GqlSubmissionPurchase,
 } from '@/graphql/client';
 import { SubmissionPurchase } from '@/types/purchase';
+import { RequestSubmission } from '@/types/submission';
 import { mapSubmissionPurchase } from '@/utils/mappers';
+import { useContractService } from './useContractService';
 import { useIpfs } from './useIpfs';
 import { useWallet } from './useWallet';
 
+export interface PurchaseSubmissionParams {
+  account: string;
+  wallet: WalletDetail;
+  submission: RequestSubmission;
+  setStatus?: (status: string) => void;
+}
+
 export const usePurchases = () => {
   const [loading, setLoading] = useState(true);
+  const [loadedPurchases, setLoadedPurchases] = useState(false);
   const [purchases, setPurchases] = useState<SubmissionPurchase[]>([]);
+
   const { fetchIPFSData } = useIpfs();
   const { selectedAccount } = useWallet();
+  const { contractService } = useContractService();
 
   const loadIPFSData = useCallback(
     async (purchase: SubmissionPurchase, ipfsHash: string): Promise<SubmissionPurchase> => {
@@ -60,10 +73,42 @@ export const usePurchases = () => {
   }, [selectedAccount, loadIPFSData]);
 
   useEffect(() => {
-    if (selectedAccount) {
+    if (selectedAccount && !loadedPurchases) {
+      setLoadedPurchases(true);
       fetchPurchases();
     }
-  }, [selectedAccount, fetchPurchases]);
+  }, [selectedAccount]);
 
-  return { loading, purchases };
+  const purchaseSubmission = useCallback(
+    async ({ wallet, account, submission, setStatus }: PurchaseSubmissionParams) => {
+      setStatus?.('Purchasing image...');
+
+      try {
+        await contractService.purchaseSubmission({
+          wallet,
+          account,
+          address: submission.id,
+        });
+      } catch (error) {
+        console.error('Error purchasing submission:', error);
+        return;
+      }
+
+      setStatus?.('Minting FixMyPic NFT...');
+
+      try {
+        // await contractService.mintNFTForSubmission({
+        //   submission,
+        //   userAddress: account,
+        // });
+        console.log('DEBUG: Minting NFT for submission:', submission);
+      } catch (error) {
+        console.error('Error minting NFT:', error);
+        return;
+      }
+    },
+    []
+  );
+
+  return { loading, purchases, purchaseSubmission };
 };

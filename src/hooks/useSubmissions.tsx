@@ -93,8 +93,9 @@ export const useSubmissions = () => {
 
       const optimisticSubmission: RequestSubmission = {
         id: requestSubmissionAddress,
-        description,
         price,
+        ipfsHash,
+        description,
         purchases: [],
         submitter: account,
         freePictureId: freeImageId,

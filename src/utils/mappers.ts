@@ -31,9 +31,10 @@ export const mapRequestComment = (comment: any): RequestComment => {
 export const mapRequestSubmission = (submission: any): RequestSubmission => {
   return {
     id: submission.id,
-    price: Number(submission.price) / 100,
+    ipfsHash: submission.ipfsHash,
     submitter: submission.submitter,
     description: submission.description,
+    price: Number(submission.price) / 100,
     freePictureId: submission.freeImageId,
     encryptedPictureId: submission.encryptedImageId,
     watermarkedPictureId: submission.watermarkedImageId,

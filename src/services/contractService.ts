@@ -1,8 +1,9 @@
 import { ContractTransactionReceipt, ethers } from 'ethers';
-import { BrowserProvider, Contract, Signer } from 'zksync-ethers';
+import { BrowserProvider, Contract, Signer, Wallet } from 'zksync-ethers';
 
 import FixMyPicFactorySchema from '@/public/artifacts/FixMyPicFactory.json';
 import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json';
+import { RequestSubmission } from '@/types/submission';
 import { convertUsdCentsToWei, getEthPrice } from '@/utils/currency';
 import { getUnixTimestampOneYearFromNow } from '@/utils/datetime';
 import { getLogger } from '@/utils/logging';
@@ -35,12 +36,19 @@ export interface CreateRequestCommentParams extends WalletParams {
   ipfsHash: string;
 }
 
+export interface MintNFTForSubmissionProps {
+  submission: RequestSubmission;
+  userAddress: string;
+  wallet: Wallet;
+}
+
 export interface FixMyPicContractService {
   createPictureRequest(params: CreatePictureRequestParams): Promise<string | null>;
   createRequestComment(params: CreateRequestCommentParams): Promise<string | null>;
   createRequestSubmission(params: CreateRequestSubmissionParams): Promise<string | null>;
 
   purchaseSubmission(params: PurchaseSubmissionParams): Promise<boolean>;
+  mintNFTForSubmission(params: MintNFTForSubmissionProps): Promise<string | null>;
 }
 
 const logger = getLogger('services/contractService');
@@ -48,6 +56,11 @@ const logger = getLogger('services/contractService');
 const FIX_MY_PIC_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FIX_MY_PIC_FACTORY_ADDRESS || '';
 if (!FIX_MY_PIC_FACTORY_ADDRESS) {
   throw new Error('FIX_MY_PIC_FACTORY_ADDRESS is not set');
+}
+
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || '';
+if (!RPC_URL) {
+  throw new Error('RPC_URL is not set');
 }
 
 async function createFixMyPicContractService(factoryAddress: string): Promise<FixMyPicContractService> {
@@ -213,7 +226,52 @@ async function createFixMyPicContractService(factoryAddress: string): Promise<Fi
     return decodedEvent?.args.comment;
   };
 
-  return { createPictureRequest, createRequestSubmission, purchaseSubmission, createRequestComment };
+  const mintNFTForSubmission = async ({
+    wallet,
+    submission,
+    userAddress,
+  }: MintNFTForSubmissionProps): Promise<string | null> => {
+    const fixMyPicFactory = new ethers.Contract(
+      factoryAddress,
+      FixMyPicFactorySchema.abi,
+      await _getSigner(wallet.provider, wallet.address)
+    );
+
+    const tx = await fixMyPicFactory.mintNFTForSubmission(userAddress, submission.id, submission.ipfsHash);
+    const receipt: ContractTransactionReceipt = await tx.wait();
+
+    if (receipt.status !== 1) {
+      logger.error('Failed to mint NFT', receipt, submission, userAddress);
+      throw new Error(`Failed to mint NFT: ${submission.id} for ${userAddress}`);
+    }
+
+    const event = receipt.logs.find(
+      (log) =>
+        log.address === factoryAddress &&
+        log.topics[0] === ethers.id('FixMyPicNFTMinted(uint256,address,address,string,uint256)')
+    );
+
+    if (!event) {
+      logger.error('FixMyPicNFTMinted event not found', receipt);
+      return null;
+    }
+
+    const decodedEvent = fixMyPicFactory.interface.parseLog(event);
+    if (!decodedEvent) {
+      logger.error('Failed to decode FixMyPicNFTMinted event', receipt);
+      return null;
+    }
+
+    return decodedEvent.args.tokenId;
+  };
+
+  return {
+    createPictureRequest,
+    createRequestSubmission,
+    purchaseSubmission,
+    createRequestComment,
+    mintNFTForSubmission,
+  };
 }
 
 let contractServicePromise: Promise<FixMyPicContractService> | null = null;
