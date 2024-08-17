@@ -10,6 +10,9 @@ export { default as FullScreenLoader } from './common/FullScreenLoader';
 
 export { default as AccountMenu } from './menu/AccountMenu';
 
+export { default as PurchaseListItem } from './purchase/PurchaseListItem';
+export { default as PurchaseList } from './purchase/PurchasesList';
+
 export { default as RequestList } from './request/RequestList';
 export { default as NewRequestForm } from './request/NewRequestForm';
 export { default as RequestListItem } from './request/RequestListItem';

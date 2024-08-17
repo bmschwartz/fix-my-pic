@@ -1,16 +1,77 @@
-import { Box, Divider } from '@mui/material';
+import { Box, Divider, ImageList, ImageListItem, useMediaQuery, useTheme } from '@mui/material';
+import { useEffect, useState } from 'react';
 
-import { FMPTypography } from '@/components';
+import { FMPTypography, PurchaseListItem } from '@/components';
+import { useImageStore } from '@/hooks/useImageStore';
 import { SubmissionPurchase } from '@/types/purchase';
 
 interface PurchasesListProps {
   purchases: SubmissionPurchase[];
 }
 
-const PurchasesList: React.FC<PurchasesListProps> = ({ purchases }) => {
-  console.log('DEBUG PurchasesList', purchases);
+const EmptyState: React.FC = () => {
   return (
-    <Box sx={{ maxWidth: '800px', mx: 'auto', p: 3 }}>
+    <Box sx={{ textAlign: 'center', py: 10 }}>
+      <FMPTypography variant="h6" gutterBottom fontWeight={600}>
+        No Purchases Yet
+      </FMPTypography>
+      <FMPTypography variant="body1" color="textSecondary">
+        Explore the submissions and make your first purchase!
+      </FMPTypography>
+    </Box>
+  );
+};
+
+const PurchasesList: React.FC<PurchasesListProps> = ({ purchases }) => {
+  const theme = useTheme();
+  const { getDecryptedImageUrl } = useImageStore();
+
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
+
+  const [loadedImages, setLoadedImages] = useState<boolean>(false);
+  const [imageUrlsToShow, setImageUrlsToShow] = useState<Record<string, string>>({});
+
+  const getCols = () => {
+    if (isSmallScreen) return 1;
+    if (isMediumScreen) return 2;
+    if (isLargeScreen) return 3;
+    return 1;
+  };
+
+  useEffect(() => {
+    if (loadedImages) {
+      return;
+    }
+
+    const fetchImageUrls = async () => {
+      const urls = await Promise.all(
+        purchases.map(async (purchase) => {
+          const imageUrl = await getDecryptedImageUrl(
+            purchase.submissionAddress,
+            purchase.encryptedPictureId as string
+          );
+          return { id: purchase.id, imageUrl };
+        })
+      );
+
+      const newImageUrlsToShow: Record<string, string> = {};
+      urls.forEach(({ id, imageUrl }) => {
+        newImageUrlsToShow[id] = imageUrl;
+      });
+
+      setImageUrlsToShow(newImageUrlsToShow);
+      setLoadedImages(true);
+    };
+
+    if (purchases.length > 0) {
+      fetchImageUrls();
+    }
+  }, [purchases, loadedImages, getDecryptedImageUrl]);
+
+  return (
+    <Box sx={{ mx: 'auto', p: 3 }}>
       <FMPTypography
         variant="h6"
         gutterBottom
@@ -37,6 +98,27 @@ const PurchasesList: React.FC<PurchasesListProps> = ({ purchases }) => {
         Your Purchases
       </FMPTypography>
       <Divider sx={{ my: 3 }} />
+      {purchases.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <ImageList
+          variant="masonry"
+          cols={getCols()}
+          gap={24}
+          sx={{
+            padding: '16px',
+            overflow: 'hidden',
+          }}
+        >
+          {purchases.map((purchase) => (
+            <ImageListItem key={purchase.id}>
+              {imageUrlsToShow[purchase.id] && (
+                <PurchaseListItem purchase={purchase} imageUrlToShow={imageUrlsToShow[purchase.id]} />
+              )}
+            </ImageListItem>
+          ))}
+        </ImageList>
+      )}
     </Box>
   );
 };
