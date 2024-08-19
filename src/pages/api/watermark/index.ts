@@ -56,7 +56,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const watermarkedImage = await addImageWatermark(imageFileBuffer, watermarkFileBuffer, {
       dpi: 600,
-      ratio: 1,
+      ratio: 0.5,
       opacity: 0.2,
     });
 
