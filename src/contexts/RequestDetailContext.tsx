@@ -73,6 +73,7 @@ export const RequestDetailProvider = ({ children, requestId }: RequestDetailProv
     };
 
     fetchAllRequestDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
   const createSubmission = async (params: CreateRequestSubmissionParams): Promise<RequestSubmission> => {

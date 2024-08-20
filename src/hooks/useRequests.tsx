@@ -108,11 +108,9 @@ export const useRequests = () => {
         description,
       };
 
-      console.log('DEBUG: Optimistic request:', optimisticRequest);
       setRequests((prevRequests) => [...prevRequests, optimisticRequest as Request]);
 
       pollForNewRequest(pictureRequestAddress, (polledRequest) => {
-        console.log('DEBUG: Polled request:', polledRequest);
         setRequests((prevRequests) =>
           prevRequests.map((prevRequest) => (prevRequest.id === polledRequest.id ? polledRequest : prevRequest))
         );
@@ -124,7 +122,9 @@ export const useRequests = () => {
   };
 
   useEffect(() => {
-    fetchAllRequests();
+    if (!requests.length) {
+      fetchAllRequests();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
