@@ -12,7 +12,7 @@ const nextConfig = {
   },
   experimental: {
     outputFileTracingIncludes: {
-      '/api/watermark': ['./public/watermark.png', './public/watermark-landscape.png'],
+      '/api/watermark': ['./public/watermark.png'],
     },
   },
   webpack: (config, { isServer }) => {
