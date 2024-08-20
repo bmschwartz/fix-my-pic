@@ -43,8 +43,6 @@ if (!chains[nodeEnv]) {
   throw new Error(`Chain not found for node env: ${nodeEnv}`);
 }
 
-console.log('DEBUG nodeEnv and chain:', nodeEnv, chains[nodeEnv]);
-
 const metadata = {
   name: 'Fix My Pic',
   description: 'Request and pay for photo editing services',
