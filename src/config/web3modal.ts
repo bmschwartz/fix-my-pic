@@ -60,6 +60,7 @@ const Web3ModalConfig = {
   ethersConfig,
   enableAnalytics: true,
   chains: [chains[nodeEnv]],
+  allowUnsupportedChain: false,
   defaultChain: chains[nodeEnv],
 };
 
