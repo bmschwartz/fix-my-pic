@@ -39,6 +39,8 @@ const chains = {
   production: zkSyncSepoliaTestnet,
 };
 
+export const defaultChain = chains[nodeEnv];
+
 if (!chains[nodeEnv]) {
   throw new Error(`Chain not found for node env: ${nodeEnv}`);
 }
@@ -58,10 +60,10 @@ const Web3ModalConfig = {
   projectId,
   siweConfig,
   ethersConfig,
+  defaultChain,
   enableAnalytics: true,
-  chains: [chains[nodeEnv]],
+  chains: [defaultChain],
   allowUnsupportedChain: false,
-  defaultChain: chains[nodeEnv],
 };
 
 export default Web3ModalConfig;
