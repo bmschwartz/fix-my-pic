@@ -1,10 +1,17 @@
 import { createDecipheriv, createHash } from 'crypto';
-import axios, { AxiosError } from 'axios';
+import { ethers } from 'ethers';
+import { getServerSession } from 'next-auth';
+
+import RequestSubmissionSchema from '@/public/artifacts/RequestSubmission.json';
+import { getLogger } from '@/utils/logging';
+import { authOptions } from '../auth/[...nextauth]';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 const algorithm = 'aes-256-ctr';
 const secretKey = process.env.ENCRYPT_SECRET_KEY;
+
+const logger = getLogger('api/decrypt');
 
 const decrypt = (encryptedText: string) => {
   const key = createHash('sha256').update(String(secretKey)).digest('base64').substr(0, 32);
@@ -18,14 +25,13 @@ const decrypt = (encryptedText: string) => {
 
 const verifyPurchase = async (userAddress: string, submissionAddress: string): Promise<boolean> => {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/verifyPurchase`, {
-      userAddress,
-      submissionAddress,
-    });
-    return response.data.purchased;
+    const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+    const contract = new ethers.Contract(submissionAddress, RequestSubmissionSchema.abi, provider);
+
+    const hasPurchased = await contract.hasPurchased(userAddress);
+    return hasPurchased;
   } catch (error) {
-    const err = error as AxiosError;
-    console.error('Error verifying purchase:', err.response ? err.response.data : err.message);
+    logger.error('Error verifying purchase:', error);
     return false;
   }
 };
@@ -36,17 +42,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const { encryptedPictureId, userAddress, submissionAddress } = req.body;
+  const session = await getServerSession(req, res, authOptions);
 
-  if (!encryptedPictureId || !userAddress || !submissionAddress) {
-    res.status(400).json({ message: 'Encrypted Picture ID, User Address, and Submission Address are required' });
+  if (!session || !session.address) {
+    res.status(401).json({ message: 'Not authenticated' });
+    return;
+  }
+
+  const { encryptedPictureId, submissionAddress } = req.body;
+
+  if (!encryptedPictureId || !submissionAddress) {
+    res.status(400).json({ message: 'Encrypted Picture ID and Submission Address are required' });
     return;
   }
 
   try {
+    const userAddress = session.address;
+
     const purchased = await verifyPurchase(userAddress, submissionAddress);
 
     if (!purchased) {
+      logger.error('User has not purchased this submission', userAddress, submissionAddress);
       res.status(403).json({ message: 'User has not purchased this submission' });
       return;
     }
@@ -54,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const decryptedImageId = decrypt(encryptedPictureId);
     res.status(200).json({ decryptedImageId });
   } catch (error) {
-    const err = error as AxiosError;
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    logger.error('Error decrypting image ID:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }

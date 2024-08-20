@@ -15,6 +15,7 @@ const main = async () => {
     const contractName = process.env.CONTRACT as string;
     const contractInitializer = process.env.INITIALIZER as string;
     const priceOracle = process.env.PRICE_ORACLE as string;
+    const fixMyPicNFT = process.env.FIXMYPIC_NFT as string;
 
     if (!factoryProxyAddress) {
       throw new Error('Missing proxy address for the FixMyPicFactory contract');
@@ -28,8 +29,11 @@ const main = async () => {
     if (!priceOracle) {
       throw new Error(`Missing address for the PriceOracle contract!`);
     }
+    if (!fixMyPicNFT) {
+      throw new Error(`Missing address for the FixMyPicNFT contract!`);
+    }
 
-    const upgradedContract = await deployContract(contractName, [priceOracle], {
+    const upgradedContract = await deployContract(contractName, [priceOracle, fixMyPicNFT], {
       wallet,
       proxyAddress: factoryProxyAddress,
     });

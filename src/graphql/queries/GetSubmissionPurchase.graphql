@@ -1,0 +1,5 @@
+query GetSubmissionPurchase($submission: String!, $purchaser: Bytes!) {
+  submissionPurchases(where: {submission: $submission, purchaser: $purchaser}) {
+    id
+  }
+}

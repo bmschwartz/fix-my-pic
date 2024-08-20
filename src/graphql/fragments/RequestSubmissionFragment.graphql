@@ -4,4 +4,5 @@ fragment RequestSubmissionFragment on RequestSubmission {
   ipfsHash
   submitter
   createdAt
+  ...SubmissionPurchaseFragment
 }

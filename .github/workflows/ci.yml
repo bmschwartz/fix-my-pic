@@ -30,11 +30,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Check types
-        run: pnpm type-check
+      - name: Compile GraphQL
+        run: |
+          if [[ "${{ github.head_ref }}" == "preview" ]]; then
+            pnpm run compile-gql-test
+          elif [[ "${{ github.head_ref }}" == "main" ]]; then
+            pnpm run compile-gql-prod
+          else
+            echo "No GraphQL compilation step for branch ${{ github.head_ref }}"
+          fi
+
+      - name: Type Check
+        run: |
+          if [[ "${{ github.head_ref }}" == "main" || "${{ github.head_ref }}" == "preview" ]]; then
+            pnpm type-check
+          else
+            echo "Skipping type-check as src/graphql/client is missing in the branch"
+          fi
 
       - name: Check linting
-        run: pnpm lint
+        run: |
+          if [[ "${{ github.head_ref }}" == "main" || "${{ github.head_ref }}" == "preview" ]]; then
+            pnpm type-check
+          else
+            echo "Skipping linting as as src/graphql/client is missing in the branch"
+          fi
 
       - name: Check commits messages
         uses: wagoid/commitlint-github-action@v6

@@ -1,7 +1,8 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 
-import { ConnectWalletDialog, FMPButton, FMPTypography } from '@/components';
+import { ConnectWalletButton, FMPTypography } from '@/components';
+import { defaultChain } from '@/config/web3modal';
 import { useWallet } from '@/hooks/useWallet';
 
 interface RequireWalletProps {
@@ -11,17 +12,10 @@ interface RequireWalletProps {
 
 const RequireWallet: React.FC<RequireWalletProps> = ({ children, message }) => {
   const { selectedWallet, selectedAccount } = useWallet();
-  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleOpenDialog = () => {
-    setDialogOpen(true);
-  };
+  const connectedToCorrectNetwork = selectedWallet.chainId === defaultChain.chainId;
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
-  if (selectedAccount && selectedWallet) {
+  if (selectedAccount && selectedWallet && connectedToCorrectNetwork) {
     return <>{children}</>;
   }
 
@@ -40,11 +34,13 @@ const RequireWallet: React.FC<RequireWalletProps> = ({ children, message }) => {
         <FMPTypography variant="h6" gutterBottom>
           {message || 'You need to connect your Web3 wallet to access this content.'}
         </FMPTypography>
-        <FMPButton onClick={handleOpenDialog} sx={{ marginTop: '16px' }}>
-          Connect Wallet
-        </FMPButton>
+        {!connectedToCorrectNetwork && (
+          <FMPTypography variant="body1" color="error">
+            Please connect to the correct network. {defaultChain.name} is required.
+          </FMPTypography>
+        )}
+        <ConnectWalletButton />
       </Box>
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
     </Box>
   );
 };

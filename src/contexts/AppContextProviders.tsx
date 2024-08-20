@@ -29,9 +29,9 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   }
 
   return (
-    <ContractServiceProvider contractService={contractService}>
-      <WalletProvider>{children}</WalletProvider>
-    </ContractServiceProvider>
+    <WalletProvider>
+      <ContractServiceProvider contractService={contractService}>{children}</ContractServiceProvider>
+    </WalletProvider>
   );
 };
 

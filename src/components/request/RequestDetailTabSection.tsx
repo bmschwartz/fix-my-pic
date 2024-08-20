@@ -2,6 +2,7 @@ import { Box, Divider } from '@mui/material';
 import React, { useState } from 'react';
 
 import { RequestDetailCommentTab, RequestDetailSubmissionTab, TabButton } from '@/components';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { Request } from '@/types/request';
 
 interface RequestDetailTabSectionProps {
@@ -14,6 +15,8 @@ enum RequestDetailTab {
 }
 
 const RequestDetailTabSection: React.FC<RequestDetailTabSectionProps> = ({ request }) => {
+  const { comments, submissions } = useRequestDetail();
+
   const [selectedTab, setSelectedTab] = useState<RequestDetailTab>(RequestDetailTab.Submissions);
 
   const handleTabChange = (tab: RequestDetailTab) => {
@@ -27,18 +30,20 @@ const RequestDetailTabSection: React.FC<RequestDetailTabSectionProps> = ({ reque
           text="Submissions"
           selected={selectedTab === RequestDetailTab.Submissions}
           onClick={() => handleTabChange(RequestDetailTab.Submissions)}
-          badgeContent={String(request.submissions.length)}
+          badgeContent={String(submissions.length)}
         />
         <TabButton
           text="Comments"
           selected={selectedTab === RequestDetailTab.Comments}
           onClick={() => handleTabChange(RequestDetailTab.Comments)}
-          badgeContent={String(request.comments.length)}
+          badgeContent={String(comments.length)}
         />
       </Box>
       <Divider sx={{ my: 3 }} />
-      {selectedTab === RequestDetailTab.Submissions && <RequestDetailSubmissionTab request={request} />}
-      {selectedTab === RequestDetailTab.Comments && <RequestDetailCommentTab request={request} />}
+      {selectedTab === RequestDetailTab.Submissions && <RequestDetailSubmissionTab submissions={submissions} />}
+      {selectedTab === RequestDetailTab.Comments && (
+        <RequestDetailCommentTab requestId={request.id} comments={comments} />
+      )}
     </Box>
   );
 };

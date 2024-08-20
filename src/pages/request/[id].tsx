@@ -1,21 +1,33 @@
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import { useRequests } from '@/hooks/useRequests';
+import { FullScreenLoader } from '@/components';
+import { RequestDetailProvider } from '@/contexts/RequestDetailContext';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import RequestDetailView from '@/views/request/RequestDetailView';
+import NewSubmissionView from '@/views/submission/NewSubmissionView';
 
-const RequestDetailsPage: React.FC = () => {
-  const router = useRouter();
-  const { getRequest } = useRequests();
-
-  const requestId = router.query.id as string;
-  const request = getRequest(requestId);
+const RequestDetailPageContainer: React.FC = () => {
+  const { loading, request, isCreatingNewSubmission } = useRequestDetail();
+  if (loading) {
+    return <FullScreenLoader />;
+  }
 
   if (!request) {
     return <div>Request not found</div>;
   }
 
-  return <RequestDetailView request={request} />;
+  return isCreatingNewSubmission ? <NewSubmissionView request={request} /> : <RequestDetailView request={request} />;
 };
 
-export default RequestDetailsPage;
+const RequestDetailPage: React.FC = () => {
+  const router = useRouter();
+
+  return (
+    <RequestDetailProvider requestId={router.query.id as string}>
+      <RequestDetailPageContainer />
+    </RequestDetailProvider>
+  );
+};
+
+export default RequestDetailPage;

@@ -12,6 +12,8 @@ import type { ReactElement, ReactNode } from 'react';
 
 import '@/styles/globals.css';
 
+import { AppKit } from '@/contexts/web3modal';
+
 export type NextPageWithLayout<P = NonNullable<unknown>, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
@@ -28,10 +30,12 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       <AppProviders>
         <CssBaseline />
         <WalletProvider>
-          <Head>
-            <meta name="viewport" content="initial-scale=1, width=device-width" />
-          </Head>
-          <main>{getLayout(<Component {...pageProps} />)}</main>
+          <AppKit>
+            <Head>
+              <meta name="viewport" content="initial-scale=1, width=device-width" />
+            </Head>
+            <main>{getLayout(<Component {...pageProps} />)}</main>
+          </AppKit>
         </WalletProvider>
       </AppProviders>
     </ThemeProvider>

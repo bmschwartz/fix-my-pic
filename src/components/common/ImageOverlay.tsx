@@ -15,10 +15,8 @@ interface ImageOverlayProps {
 }
 
 const ImageOverlay: React.FC<ImageOverlayProps> = ({ imageUrl, onClose, onDownload, description, price }) => {
-  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).dataset.overlay) {
-      onClose();
-    }
+  const handleOverlayClick = () => {
+    onClose();
   };
 
   return (
@@ -62,14 +60,14 @@ const ImageOverlay: React.FC<ImageOverlayProps> = ({ imageUrl, onClose, onDownlo
             zIndex: 20,
           }}
         >
-          <Image src={imageUrl} alt="Overlay Image" layout="fill" objectFit="contain" style={{ borderRadius: '8px' }} />
+          <Image src={imageUrl} alt="Overlay Image" fill style={{ objectFit: 'contain', borderRadius: '8px' }} />
         </Box>
         {description && (
-          <FMPTypography variant="h6" sx={{ mt: 1, color: 'white', textAlign: 'center' }}>
+          <FMPTypography variant="h6" sx={{ mt: 1, mx: 2, maxWidth: 500, color: 'white', textAlign: 'center' }}>
             {description}
           </FMPTypography>
         )}
-        <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
+        <Box sx={{ mt: 1, mb: 3, display: 'flex', gap: 2 }}>
           <FMPButton variant="contained" color="primary" onClick={onDownload}>
             {price === undefined || price === 0 ? 'Download' : `Buy for $${price}`}
           </FMPButton>

@@ -13,13 +13,12 @@ import {
   Typography,
 } from '@mui/material';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 import { FMPButton, FMPTypography, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
 import { useImageStore } from '@/hooks/useImageStore';
 import { useIpfs } from '@/hooks/useIpfs';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
 
 enum WatermarkOptions {
@@ -32,27 +31,39 @@ interface NewSubmissionFormProps {
 }
 
 const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
-  const router = useRouter();
-  const [description, setDescription] = useState<string>('');
-  const [price, setPrice] = useState<string>('');
-  const [originalPictureFile, setOriginalPictureFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [watermarkOption, setWatermarkOption] = useState<WatermarkOptions>(WatermarkOptions.AUTOMATIC);
-  const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null);
-  const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null);
+  const [price, setPrice] = useState<string>('');
   const [isFree, setIsFree] = useState<boolean>(false);
-
   const [loadingLabel, setLoadingLabel] = useState('');
+  const [description, setDescription] = useState<string>('');
+  const [preview, setPreview] = useState<string | null>(null);
+  const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null);
+  const [originalPictureFile, setOriginalPictureFile] = useState<File | null>(null);
+  const [watermarkPictureFile, setWatermarkPictureFile] = useState<File | null>(null);
+  const [watermarkOption, setWatermarkOption] = useState<WatermarkOptions>(WatermarkOptions.AUTOMATIC);
 
-  const { uploadImage, uploadRequestSubmission } = useIpfs();
+  const { uploadImage } = useIpfs();
+  const { createSubmission } = useRequestDetail();
+  const { setIsCreatingNewSubmission } = useRequestDetail();
   const { createWatermarkedImage, encryptPictureId } = useImageStore();
-  const { contractService } = useContractService();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 
   if (!account || !wallet) {
     return null;
   }
+
+  const resetState = () => {
+    setPrice('');
+    setIsFree(false);
+    setPreview(null);
+    setLoading(false);
+    setDescription('');
+    setLoadingLabel('');
+    setWatermarkPreview(null);
+    setOriginalPictureFile(null);
+    setWatermarkPictureFile(null);
+    setWatermarkOption(WatermarkOptions.AUTOMATIC);
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isWatermarked: boolean = false) => {
     const file = event.target.files?.[0] || null;
@@ -104,38 +115,25 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         }
       }
 
-      const ipfsHash = await uploadRequestSubmission({
+      await createSubmission({
         description,
-        freeImageId,
-        encryptedImageId,
-        watermarkedImageId,
-      });
-
-      setLoadingLabel('Creating smart contract...');
-
-      await contractService.createSubmission({
         wallet,
         account,
-        ipfsHash,
-        requestAddress: requestId,
+        requestId,
+        setStatus: setLoadingLabel,
+        freeImageId: freeImageId || '',
+        encryptedImageId: encryptedImageId || '',
+        watermarkedImageId: watermarkedImageId || '',
         price: isFree ? 0 : parseFloat(price || '0'),
       });
 
-      router.push(`/request/${requestId}`);
+      setIsCreatingNewSubmission(false);
       return;
     } catch (e) {
       console.error(e);
       return;
     } finally {
-      setPrice('');
-      setDescription('');
-      setOriginalPictureFile(null);
-      setPreview(null);
-      setWatermarkOption(WatermarkOptions.AUTOMATIC);
-      setWatermarkPictureFile(null);
-      setWatermarkPreview(null);
-      setIsFree(false);
-      setLoadingLabel('');
+      resetState();
     }
   };
 
@@ -176,6 +174,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
         disabled={loading}
         onChange={(e) => setDescription(e.target.value)}
         required
+        inputProps={{ maxLength: 100 }}
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 1,
@@ -260,7 +259,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
               position: 'relative',
             }}
           >
-            <Image src={preview} alt="Image preview" layout="fill" objectFit="contain" />
+            <Image src={preview} alt="Image preview" fill style={{ objectFit: 'contain' }} />
           </Box>
         ) : (
           <Box
@@ -297,7 +296,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
             <FormControlLabel
               value={WatermarkOptions.AUTOMATIC}
               control={<Radio />}
-              label="Automatically Add Watermark"
+              label='Use "Fix My Pic" Watermark'
             />
             <FormControlLabel value={WatermarkOptions.UPLOAD} control={<Radio />} label="Upload Watermarked Picture" />
           </RadioGroup>
@@ -325,7 +324,7 @@ const NewSubmissionForm: React.FC<NewSubmissionFormProps> = ({ requestId }) => {
                 position: 'relative',
               }}
             >
-              <Image src={watermarkPreview} alt="Watermarked image preview" layout="fill" objectFit="contain" />
+              <Image src={watermarkPreview} alt="Watermarked image preview" fill style={{ objectFit: 'contain' }} />
             </Box>
           ) : (
             <Box

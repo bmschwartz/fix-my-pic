@@ -1,13 +1,14 @@
-import { Box, CircularProgress, Grid, Typography } from '@mui/material';
-import isEqual from 'lodash/isEqual';
+import { Box, ImageList, ImageListItem, Typography, useMediaQuery, useTheme } from '@mui/material';
 import React, { useEffect } from 'react';
 
-import { LinkButton, SubmissionListItem } from '@/components';
+import { FMPButton, SubmissionListItem } from '@/components';
 import { useImageStore } from '@/hooks/useImageStore';
-import { Request } from '@/types/request';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
+import { useWallet } from '@/hooks/useWallet';
+import { RequestSubmission } from '@/types/submission';
 
 interface RequestDetailSubmissionTabProps {
-  request: Request;
+  submissions: RequestSubmission[];
 }
 
 const EmptyState: React.FC = () => {
@@ -23,23 +24,32 @@ const EmptyState: React.FC = () => {
   );
 };
 
-function useDeepCompareMemoize<T>(value: T): T {
-  const ref = React.useRef<T>(value);
+const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ submissions }) => {
+  const theme = useTheme();
+  const { selectedAccount, isConnected, connectWallet } = useWallet();
+  const { getImageUrlToShow } = useImageStore();
+  const { setIsCreatingNewSubmission } = useRequestDetail();
 
-  if (!isEqual(value, ref.current)) {
-    ref.current = value;
-  }
-
-  return ref.current;
-}
-
-const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({ request }) => {
-  const [loadingImageUrls, setLoadingImageUrls] = React.useState(true);
   const [loadedImages, setLoadedImages] = React.useState<boolean>(false);
   const [imageUrlsToShow, setImageUrlsToShow] = React.useState<Record<string, string>>({});
-  const { getImageUrlToShow } = useImageStore();
 
-  const submissions = useDeepCompareMemoize(request.submissions);
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
+
+  const hasPurchased = (submission: RequestSubmission) => {
+    return submission.purchases.some((purchase) => purchase.buyer.toLowerCase() === selectedAccount?.toLowerCase());
+  };
+
+  const submissionsWithPurchasedFirst = submissions.sort((a, b) => {
+    if (hasPurchased(a) && !hasPurchased(b)) {
+      return -1;
+    }
+    if (!hasPurchased(a) && hasPurchased(b)) {
+      return 1;
+    }
+    return 0;
+  });
 
   useEffect(() => {
     if (loadedImages) {
@@ -47,8 +57,6 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
     }
 
     const fetchImageUrls = async () => {
-      setLoadingImageUrls(true);
-
       const urls = await Promise.all(
         submissions.map(async (submission) => {
           const imageUrl = await getImageUrlToShow(submission);
@@ -62,52 +70,59 @@ const RequestDetailSubmissionTab: React.FC<RequestDetailSubmissionTabProps> = ({
       });
 
       setImageUrlsToShow(newImageUrlsToShow);
-      setLoadingImageUrls(false);
       setLoadedImages(true);
     };
 
     if (submissions.length > 0) {
       fetchImageUrls();
-    } else {
-      setLoadingImageUrls(false);
     }
-  }, [submissions, loadedImages, setLoadingImageUrls, getImageUrlToShow]);
+  }, [submissions, loadedImages, getImageUrlToShow]);
+
+  const getCols = () => {
+    if (isSmallScreen) return 1;
+    if (isMediumScreen) return 2;
+    if (isLargeScreen) return 3;
+    return 1;
+  };
 
   return (
     <Box sx={{ mt: 3, position: 'relative' }}>
-      {loadingImageUrls && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            zIndex: 999,
+      <Box sx={{ textAlign: 'right', mb: 3 }}>
+        <FMPButton
+          type="button"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            if (!isConnected) {
+              connectWallet();
+              return;
+            }
+            setIsCreatingNewSubmission(true);
           }}
         >
-          <CircularProgress />
-        </Box>
-      )}
-      <Box sx={{ textAlign: 'right', mb: 3 }}>
-        <LinkButton text="New Submission" href={`/submission/new?request=${request.id}`} />
+          New Submission
+        </FMPButton>
       </Box>
-      {request.submissions.length === 0 ? (
+      {submissionsWithPurchasedFirst.length === 0 ? (
         <EmptyState />
       ) : (
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          {request.submissions.map((submission) => (
-            <Grid item xs={12} sm={6} md={4} key={submission.id}>
+        <ImageList
+          variant="masonry"
+          cols={getCols()}
+          gap={24}
+          sx={{
+            padding: '16px',
+            overflow: 'hidden',
+          }}
+        >
+          {submissionsWithPurchasedFirst.map((submission) => (
+            <ImageListItem key={submission.id}>
               {imageUrlsToShow[submission.id] && (
                 <SubmissionListItem submission={submission} imageUrlToShow={imageUrlsToShow[submission.id]} />
               )}
-            </Grid>
+            </ImageListItem>
           ))}
-        </Grid>
+        </ImageList>
       )}
     </Box>
   );

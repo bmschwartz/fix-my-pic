@@ -6,21 +6,25 @@ dotenv.config();
 
 const main = async () => {
   const priceOracle = process.env.PRICE_ORACLE;
+  const fixMyPicNFT = process.env.FIXMYPIC_NFT;
 
   if (!priceOracle) {
     throw new Error('PRICE_ORACLE environment variable is not set');
+  }
+  if (!fixMyPicNFT) {
+    throw new Error('FIXMYPIC_NFT environment variable is not set');
   }
 
   try {
     const wallet = getWallet();
     const contractName = 'FixMyPicFactory';
 
-    console.log(`Deploying ${contractName} with priceOracle: ${priceOracle}`);
+    console.log(`Deploying ${contractName} with priceOracle: ${priceOracle} and fixMyPicNFT: ${fixMyPicNFT}`);
 
     await deployContract(contractName, [], {
       wallet,
       asProxy: true,
-      proxyConstructorArgs: [priceOracle],
+      proxyConstructorArgs: [priceOracle, fixMyPicNFT],
     });
 
     console.log(`Successfully deployed ${contractName}`);

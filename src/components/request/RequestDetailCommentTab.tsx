@@ -1,36 +1,26 @@
 import { Box, TextField, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { ConnectWalletDialog, FMPButton, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
-import { useIpfs } from '@/hooks/useIpfs';
+import { FMPButton, LoadingOverlay } from '@/components';
+import { useRequestDetail } from '@/hooks/useRequestDetail';
 import { useWallet } from '@/hooks/useWallet';
-import { Request } from '@/types/request';
+import { RequestComment } from '@/types/comment';
+import { getTimeSince } from '@/utils/datetime';
 
 interface RequestDetailCommentTabProps {
-  request: Request;
+  requestId: string;
+  comments: RequestComment[];
 }
 
-const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ request }) => {
-  const router = useRouter();
-  const { selectedAccount: account, selectedWallet } = useWallet();
-  const { uploadRequestComment } = useIpfs();
-  const { contractService } = useContractService();
+const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ requestId }) => {
+  const { selectedAccount: account, selectedWallet, connectWallet } = useWallet();
+  const { createComment, comments } = useRequestDetail();
   const [commentText, setCommentText] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState('');
 
   const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCommentText(event.target.value);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
-  const connectWallet = () => {
-    setDialogOpen(true);
   };
 
   const submitComment = async () => {
@@ -41,17 +31,17 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
     if (!commentText.trim()) {
       return;
     }
+
     setSubmitting(true);
     try {
-      const ipfsHash = await uploadRequestComment({ text: commentText });
-      await contractService.createRequestComment({
+      await createComment({
         account,
+        text: commentText,
+        requestId: requestId,
         wallet: selectedWallet,
-        ipfsHash,
-        requestAddress: request.id,
+        setStatus: setLoadingLabel,
       });
       setCommentText('');
-      router.reload();
     } catch (error) {
       console.error('Failed to submit comment:', error);
     } finally {
@@ -61,14 +51,27 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
 
   return (
     <Box sx={{ mt: 3 }}>
-      {request.comments.map((comment) => (
-        <Box key={comment.id} sx={{ mb: 2 }}>
-          <Typography variant="body2" fontWeight="bold">
-            {comment.commenter} - {new Date(comment.createdAt).toLocaleString()}
+      {comments.map((comment) => (
+        <Box
+          key={comment.id}
+          sx={{
+            mb: 2,
+            padding: 2,
+            borderRadius: 2,
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            transition: 'background-color 0.3s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+            {comment.commenter.slice(0, 8)}... - {getTimeSince(comment.createdAt)}
           </Typography>
-          <Typography variant="body2">{comment.text}</Typography>
+          <Typography variant="body1">{comment.text}</Typography>
         </Box>
       ))}
+
       <TextField
         fullWidth
         multiline
@@ -82,8 +85,7 @@ const RequestDetailCommentTab: React.FC<RequestDetailCommentTabProps> = ({ reque
       <FMPButton variant="contained" color="primary" onClick={account ? submitComment : connectWallet}>
         {account ? 'Submit' : 'Connect Wallet'}
       </FMPButton>
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
-      <LoadingOverlay loading={submitting} label={`Submitting comment`} />
+      <LoadingOverlay loading={submitting} label={loadingLabel} />
     </Box>
   );
 };

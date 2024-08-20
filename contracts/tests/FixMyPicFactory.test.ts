@@ -3,7 +3,13 @@ import { Contract, ContractTransactionReceipt } from 'ethers';
 
 import { convertUsdCentsToWei } from '../../src/utils/currency';
 import { getLogger } from '../../src/utils/logging';
-import { _createPictureRequest, _createRequestSubmission, deployFixMyPicFactory, deployPriceOracle } from './utils';
+import {
+  _createPictureRequest,
+  _createRequestSubmission,
+  deployFixMyPicFactory,
+  deployFixMyPicNFT,
+  deployPriceOracle,
+} from './utils';
 
 // Set a longer timeout for this test file
 jest.setTimeout(300000); // 300 seconds or 5 minutes
@@ -36,6 +42,7 @@ const ACCOUNTS: { [key: string]: Account } = {
 
 describe('FixMyPicFactory', function () {
   let priceOracle: Contract;
+  let fixMyPicNFT: Contract;
   let fixMyPicFactory: Contract;
   let pictureRequest: Contract;
   let requestSubmission: Contract;
@@ -46,12 +53,19 @@ describe('FixMyPicFactory', function () {
     priceOracle = await deployPriceOracle(ACCOUNTS.DEPLOYER);
     ethToUsd = await priceOracle.getLatestETHPrice();
 
-    fixMyPicFactory = await deployFixMyPicFactory(ACCOUNTS.DEPLOYER, await priceOracle.getAddress());
+    fixMyPicNFT = await deployFixMyPicNFT(ACCOUNTS.DEPLOYER);
+
+    fixMyPicFactory = await deployFixMyPicFactory(
+      ACCOUNTS.DEPLOYER,
+      await priceOracle.getAddress(),
+      await fixMyPicNFT.getAddress()
+    );
     fixMyPicFactoryAddress = await fixMyPicFactory.getAddress();
   });
 
-  it('should initialize the price oracle and factory contract', async function () {
+  it('should initialize upfront contracts', async function () {
     expect(await priceOracle.getAddress()).to.not.be.undefined;
+    expect(await fixMyPicNFT.getAddress()).to.not.be.undefined;
     expect(fixMyPicFactoryAddress).to.not.be.undefined;
   });
 

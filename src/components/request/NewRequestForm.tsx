@@ -5,12 +5,10 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 import { FMPButton, FMPTypography, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
-import { useIpfs } from '@/hooks/useIpfs';
+import { useRequests } from '@/hooks/useRequests';
 import { useWallet } from '@/hooks/useWallet';
 
 const NewRequestForm: React.FC = () => {
-  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [budget, setBudget] = useState('');
@@ -19,8 +17,8 @@ const NewRequestForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
 
-  const { uploadImage, uploadPictureRequest } = useIpfs();
-  const { contractService } = useContractService();
+  const router = useRouter();
+  const { createPictureRequest } = useRequests();
   const { selectedAccount: account, selectedWallet: wallet } = useWallet();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,14 +42,14 @@ const NewRequestForm: React.FC = () => {
 
     try {
       setLoadingLabel('Uploading image...');
-      const imageId = await uploadImage({ file: image });
-      const ipfsHash = await uploadPictureRequest({ title, description, imageId });
 
-      setLoadingLabel('Creating smart contract...');
-      await contractService.createPictureRequest({
+      await createPictureRequest({
+        image,
+        title,
         wallet,
         account,
-        ipfsHash,
+        description,
+        setStatus: setLoadingLabel,
         budget: parseFloat(budget),
       });
       router.push('/');
@@ -105,6 +103,7 @@ const NewRequestForm: React.FC = () => {
         disabled={loading}
         onChange={(e) => setTitle(e.target.value)}
         required
+        inputProps={{ maxLength: 100 }}
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 1,
@@ -130,6 +129,7 @@ const NewRequestForm: React.FC = () => {
         disabled={loading}
         onChange={(e) => setDescription(e.target.value)}
         required
+        inputProps={{ maxLength: 350 }}
         sx={{
           backgroundColor: '#f9f9f9',
           borderRadius: 1,
@@ -197,7 +197,7 @@ const NewRequestForm: React.FC = () => {
               position: 'relative',
             }}
           >
-            <Image src={preview} alt="Image preview" layout="fill" objectFit="contain" />
+            <Image src={preview} alt="Image preview" fill style={{ objectFit: 'contain' }} />
           </Box>
         ) : (
           <Box

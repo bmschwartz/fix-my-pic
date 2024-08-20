@@ -1,10 +1,12 @@
-import { Box } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import { Box, Chip } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
-import { ConnectWalletDialog, FMPTypography, ImageOverlay, LoadingOverlay } from '@/components';
-import { useContractService } from '@/hooks/useContractService';
+import { ImageOverlay, LoadingOverlay } from '@/components';
+import { usePurchases } from '@/hooks/usePurchases';
 import { useWallet } from '@/hooks/useWallet';
 import { RequestSubmission } from '@/types/submission';
 
@@ -15,16 +17,52 @@ interface SubmissionListItemProps {
 
 const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, imageUrlToShow }) => {
   const router = useRouter();
+  const { purchaseSubmission } = usePurchases();
+  const { selectedWallet, selectedAccount, connectWallet } = useWallet();
 
-  const { contractService } = useContractService();
-  const { selectedWallet, selectedAccount } = useWallet();
-
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState('');
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+
   const isFree = submission.price === 0;
-  const purchasedSubmission = submission.purchases.find((purchase) => purchase.buyer === selectedAccount);
+  const purchasedSubmission = submission.purchases.find(
+    (purchase) => purchase.buyer.toLowerCase() === selectedAccount?.toLowerCase()
+  );
+
+  const generateChip = () => {
+    let label: string;
+    let icon: React.ReactElement = <></>;
+    let backgroundColor = 'black';
+
+    if (purchasedSubmission) {
+      label = 'Purchased';
+      icon = <CheckCircleIcon />;
+      backgroundColor = 'success';
+    } else if (isFree) {
+      label = 'Free';
+    } else {
+      label = `$${submission.price}`;
+      icon = <MonetizationOnIcon color="inherit" />;
+    }
+
+    return (
+      <Chip
+        icon={icon}
+        label={label}
+        color={purchasedSubmission ? 'success' : 'default'}
+        size="medium"
+        sx={{
+          fontWeight: 600,
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          zIndex: 10,
+          color: 'white',
+          backgroundColor: backgroundColor || 'inherit',
+        }}
+      />
+    );
+  };
 
   const handleImageClick = () => {
     setIsOverlayOpen(true);
@@ -34,30 +72,34 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
     setIsOverlayOpen(false);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
   return (
     <>
-      <Box sx={{ cursor: 'pointer' }}>
+      <Box
+        sx={{
+          position: 'relative',
+          cursor: 'pointer',
+          overflow: 'hidden',
+          transition: 'transform 0.3s ease',
+          borderRadius: 4,
+          '&:hover': {
+            transform: 'scale(1.05)',
+            transformOrigin: 'center',
+            zIndex: 1,
+          },
+          '&:hover .overlay': {
+            opacity: 1,
+          },
+        }}
+      >
         <Image
           src={imageUrlToShow}
           alt="Submission"
-          layout="responsive"
           width={150}
           height={150}
-          objectFit="cover"
+          style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
           onClick={handleImageClick}
         />
-      </Box>
-      <Box sx={{ padding: 0 }}>
-        <FMPTypography variant="body1">{!isFree ? `$${submission.price}` : 'Free'}</FMPTypography>
-        {!isFree && (
-          <FMPTypography variant="body1">
-            {submission.purchases.length} purchase{submission.purchases.length !== 1 && 's'}
-          </FMPTypography>
-        )}
+        {generateChip()}
       </Box>
       {isOverlayOpen && (
         <ImageOverlay
@@ -72,21 +114,21 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
             }
 
             if (!selectedWallet || !selectedAccount) {
-              setDialogOpen(true);
+              handleOverlayClose();
+              connectWallet();
               return;
             }
 
             setLoading(true);
             setIsOverlayOpen(false);
-            setLoadingLabel('Purchasing image...');
 
             try {
-              await contractService.purchaseSubmission({
-                account: selectedAccount,
+              await purchaseSubmission({
                 wallet: selectedWallet,
-                address: submission.id,
+                account: selectedAccount,
+                submission,
+                setStatus: setLoadingLabel,
               });
-
               router.reload();
             } catch (error) {
               console.error('Error purchasing image:', error);
@@ -99,7 +141,6 @@ const SubmissionListItem: React.FC<SubmissionListItemProps> = ({ submission, ima
         />
       )}
       <LoadingOverlay loading={loading} label={loadingLabel} />
-      <ConnectWalletDialog open={dialogOpen} onClose={handleCloseDialog} />
     </>
   );
 };

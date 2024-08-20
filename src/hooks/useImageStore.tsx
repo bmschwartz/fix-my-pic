@@ -5,7 +5,7 @@ import { useWallet } from './useWallet';
 
 const IMAGE_URL_ROOT = process.env.NEXT_PUBLIC_IPFS_ENDPOINT || '';
 if (!IMAGE_URL_ROOT) {
-  process.exit('No image url root provided');
+  process.exit(1);
 }
 
 export const useImageStore = () => {
@@ -44,9 +44,7 @@ export const useImageStore = () => {
     }
   };
 
-  const getDecryptedImageUrl = async (submission: RequestSubmission): Promise<string> => {
-    const { id: submissionAddress, encryptedPictureId } = submission;
-
+  const getDecryptedImageUrl = async (submissionAddress: string, encryptedPictureId: string): Promise<string> => {
     if (!account || !encryptedPictureId) {
       return '';
     }
@@ -55,7 +53,6 @@ export const useImageStore = () => {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/decrypt`, {
         submissionAddress,
         encryptedPictureId,
-        userAddress: account,
       });
       const { decryptedImageId } = response.data;
       return `${IMAGE_URL_ROOT}/${decryptedImageId}`;
@@ -65,14 +62,14 @@ export const useImageStore = () => {
   };
 
   const getImageUrlToShow = (submission: RequestSubmission): Promise<string> => {
-    const purchased = submission.purchases.some((purchase) => purchase.buyer === account);
+    const purchased = submission.purchases.some((purchase) => purchase.buyer.toLowerCase() === account?.toLowerCase());
 
     if (submission.price === 0 || !purchased) {
       const pictureId = submission.freePictureId || (submission.watermarkedPictureId as string);
       return Promise.resolve(`${IMAGE_URL_ROOT}/${pictureId}`);
     }
 
-    return getDecryptedImageUrl(submission);
+    return getDecryptedImageUrl(submission.id, submission.encryptedPictureId as string);
   };
 
   return { createWatermarkedImage, getImageUrlToShow, getDecryptedImageUrl, encryptPictureId };
