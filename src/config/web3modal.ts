@@ -9,13 +9,13 @@ if (!projectId) {
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
-const zkSyncEra = {
-  chainId: 324,
-  name: 'ZKsync Era Mainnet',
-  currency: 'ETH',
-  explorerUrl: 'https://explorer.zksync.io',
-  rpcUrl: 'https://mainnet.era.zksync.io',
-};
+// const zkSyncEra = {
+//   chainId: 324,
+//   name: 'ZKsync Era Mainnet',
+//   currency: 'ETH',
+//   explorerUrl: 'https://explorer.zksync.io',
+//   rpcUrl: 'https://mainnet.era.zksync.io',
+// };
 
 const zkSyncSepoliaTestnet = {
   chainId: 300,
@@ -36,18 +36,20 @@ const zkSyncLocal = {
 const chains = {
   development: zkSyncLocal,
   test: zkSyncSepoliaTestnet,
-  production: zkSyncEra,
+  production: zkSyncSepoliaTestnet,
 };
 
 if (!chains[nodeEnv]) {
   throw new Error(`Chain not found for node env: ${nodeEnv}`);
 }
 
+console.log('DEBUG nodeEnv and chain:', nodeEnv, chains[nodeEnv]);
+
 const metadata = {
   name: 'Fix My Pic',
   description: 'Request and pay for photo editing services',
-  url: 'https://preview.fixmypic.io',
-  icons: ['https://preview.fixmypic.io/favicon.ico'],
+  url: 'https://fixmypic.io',
+  icons: ['https://fixmypic.io/favicon.ico'],
 };
 
 const ethersConfig = defaultConfig({
@@ -60,6 +62,7 @@ const Web3ModalConfig = {
   ethersConfig,
   enableAnalytics: true,
   chains: [chains[nodeEnv]],
+  defaultChain: chains[nodeEnv],
 };
 
 export default Web3ModalConfig;
