@@ -9,6 +9,7 @@ import { ethers } from 'ethers';
 import { createContext, ReactNode } from 'react';
 
 export interface WalletDetail {
+  chainId?: number;
   provider?: ethers.Eip1193Provider;
   info?: { name?: string; icon?: string };
 }
@@ -32,16 +33,17 @@ export const WalletProviderContext = createContext<WalletProviderContextType | u
 export const WalletProvider = ({ children }: WalletProviderProps) => {
   const { open: connectWallet } = useWeb3Modal();
   const { disconnect } = useDisconnect();
-  const { isConnected, address } = useWeb3ModalAccount();
+  const { isConnected, address, chainId: selectedChainId } = useWeb3ModalAccount();
   const { walletProvider } = useWeb3ModalProvider();
   const { walletInfo } = useWalletInfo();
 
   const contextValue: WalletProviderContextType = {
     isConnected,
+    selectedAccount: address,
+    selectedWallet: { provider: walletProvider, info: walletInfo, chainId: selectedChainId },
+
     connectWallet,
     disconnectWallet: disconnect,
-    selectedAccount: address,
-    selectedWallet: { provider: walletProvider, info: walletInfo },
   };
 
   return <WalletProviderContext.Provider value={contextValue}>{children}</WalletProviderContext.Provider>;
